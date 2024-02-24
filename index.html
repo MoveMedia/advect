@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Include plugins after the script, -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="text/adv" src="layout/default-layout.html"></script>
+    <script type="text/adv" src="components/todo.html"></script>
+    <title>htmv</title>
+  </head>
+  <body>
+    <default-layout>
+      <slot name="header">
+        <header id="test">
+          <h1 class="text-4xl mb-5 text-center">Todo List App in HTMV</h1>
+        </header>
+      </slot>
+  
+      <slot name="content">
+        <todo-component>
+          <slot name="title">
+            <h2>My Todo List custom title</h2>
+          </slot>
+        </todo-component>
+      </slot>
+
+      <slot name="footer">
+        <footer>
+          <p class="text-center">Made with ❤️</p>
+        </footer>
+      </slot>
+    </default-layout>
+    <script type="module" src="/src/advect.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,138 @@
+<!-- These attributes will be watched for changes via $self.attrChanged  -->
+<!-- case-insensative todoname is the same as todoName -->
+<template id="todo-item" todoName="string" todoComplete="boolean" onFinish="callback" adv>
+  <script>
+    $self.onTransitionEnd = (e) => {
+      if(e.propertyName === 'data-deleting'){
+        $self.remove();
+      }
+    };
+    const finishTodo = () => {
+        $self.attr.todoComplete.value = true
+        $self.attr.onFinish?.value($self.attr.todoName.value);
+    };
+    const deleteTodo = () => {
+      $self.dataset.deleting = true;
+    };
+
+    return  {
+      finishTodo,
+      deleteTodo
+    }
+
+  </script>
+    <style>
+      todo-item{
+        transition: all 0.3s ease;
+        position: relative;
+        &[data-deleting]{
+          opacity: 0;
+          transform: scale(0.9);
+          pointer-events: none;
+        }
+      }
+      
+      /* thise is at the custom web component level*/
+      [todoComplete="true"] .title{
+       text-decoration: line-through;
+     }
+     ul{
+       list-style: none;
+       padding: 0;
+     }
+     li{
+       display: flex;
+       justify-content: space-between;
+       max-width: 320px;
+     }
+    </style>
+    <li>
+      <input id="title" class="title" 
+      onload="{
+        $ref.value = $self.attr.todoName.value ?? '';
+      }">
+      <button id="completeBtn" onclick="$scope.finishTodo()">Finish</button>
+      <button id="deleteBtn"   onclick="$scope.deleteTodo()">Delete</button>
+    </li>
+  </template>
+
+  <!-- template id matches the custom component name
+  this will help if htmx is used to grab the template and script
+  we can write something to call customElements.upgrade() on the template
+  -->
+  <template id="todo-component" data-shadow="closed" adv>
+    <style>
+      .todo-wrapper{
+       
+      }
+      form{
+        background-color: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--white);
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+    <script>
+        const onFinishCallback = $adv.cb(
+          (namedTodo) => {
+            console.log(`finished, my guy! - ${namedTodo}`);
+          }
+        );
+      // this is essentially onmount
+      // const Swiper = $$contexts.get("Swiper");
+      const { form, input, list} = $self.refs;
+      // testing refs
+      const onSubmit = (e) => {
+        console.log("submitting");  
+        e.preventDefault();
+        list.innerHTML += html`<todo-item todoName="${input.value}" todoComplete="false" onFinish="${onFinishCallback}"></todo-item>`;
+      // same as above but with a little more control
+       // const newTodo = document.createElement("todo-item");
+       // newTodo.setAttribute('todoName', input.value);
+     //   newTodo.setAttribute('todoComplete', 'false');
+
+        //list.appendChild(newTodo);
+
+        input.value = "";
+      };
+
+      // $self.attrChanged = (name, oldValue, newValue) => {
+        // warning can be changed between scripts in the same component
+      //   console.log(name, oldValue, newValue);
+      // };
+      // return values that will be available in the template as $scope
+      // this could be an Object, an (a)sync function 
+      // return async () => ({
+      //   onSubmit
+      // });
+      // return () =>({
+      //   onSubmit
+      // });
+      return{
+        onSubmit
+      }
+    </script>
+    <div class="todo-wrapper">
+      <form id="form" onsubmit="$scope.onSubmit($event)">
+        <!-- Wild wild west inside of slots -->
+        <slot name="title">
+          <h2 class="font-bold">Todos</h2>
+        </slot>
+        <!-- you can create refs by adding id's buut they are not garanteed -->
+        <div>
+          <input
+            id="input"
+            type="text"
+            name="todo-input"
+          />
+          <button>Submits</button>
+        </div>
+      </form>
+      <ul id="list">
+
+      </ul>
+    </div>
+  </template>

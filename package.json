@@ -1,0 +1,20 @@
+{
+  "name": "advect",
+  "private": false,
+  "version": "0.0.0",
+  "type": "module",
+  "author": {
+    "name": "PartyGodTroy",
+    "email": ""
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.1.4"
+  }
+}
