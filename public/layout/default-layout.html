@@ -1,18 +1,15 @@
-<template id="default-layout" htmv>
-
-<style>
-    .content{
+<html>
+  <script type="text/adv" src="components/todo-item.html"></script>
+  <template id="default-layout" htmv>
+    <style>
+      .content {
         min-height: 60vh;
-    }
-</style>
-    
-
-    <slot name="header">
-    </slot>
+      }
+    </style>
+    <slot name="header"> </slot>
     <div class="content">
-        <slot name="content">
-        </slot>
+      <slot name="content"> </slot>
     </div>
-        <slot name="footer">
-    </slot>
-</template>
+    <slot name="footer"> </slot>
+  </template>
+</html>

@@ -1,0 +1,50 @@
+
+<script type="text/adv" src="components/todo.html"></script>
+<template id="todo-component" data-shadow="closed" adv>
+
+  <style>
+    .todo-wrapper {
+    }
+    form {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--white);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+  <script>
+    const onFinishCallback = $adv.cb((namedTodo) => {
+      console.log(`finished, my guy! - ${namedTodo}`);
+    });
+    const { form, input, list } = $self.refs;
+    // testing refs
+    const onSubmit = (e) => {
+      console.log("submitting");
+      e.preventDefault();
+      list.innerHTML += html`<todo-item todoName="${input.value}" todoComplete="false" onFinish="${onFinishCallback}"
+      />`;
+      input.value = "";
+    };
+    return {
+      onSubmit,
+    };
+  </script>
+  <div class="todo-wrapper">
+    <form id="form" onsubmit="$scope.onSubmit($event)">
+      <slot name="title">
+        <h2 class="font-bold">Todos</h2>
+      </slot>
+      <div>
+        <label for="input">
+          <span>Add a todo</span>
+          <input id="input" type="text" name="todo-input" class="border-b-2 border-slate-500" required  />
+        </label>
+        <button class="">Submits</button>
+      </div>
+    </form>
+    <ul id="list"></ul>
+  </div>
+</template>

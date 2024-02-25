@@ -5,7 +5,16 @@
     <!-- Include plugins after the script, -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="text/adv" src="layout/default-layout.html"></script>
-    <script type="text/adv" src="components/todo.html"></script>
+    <script type="text/adv" src="components/todo-component.html"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+      }
+    </style>
     <title>htmv</title>
   </head>
   <body>

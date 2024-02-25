@@ -1,8 +1,15 @@
+/**
+ * @module advect
+ * @description A simple web component framework
+ * @version 0.0.1
+ * @license MIT
+ * 
+ * Element co
+ */
 
-// @ts-ignore
-const html = String.raw;
 
-export interface AdvectPlugin{
+export type TypeValidator<T> = (val:string) => TypValidationResult<T>;
+export interface AdvectPlugin {
   name: string;
   version: string;
   description: string;
@@ -15,24 +22,37 @@ export interface TypValidationResult<T> {
   parsedValue: T;
 }
 
-export type TypeValidator<T> = (val:string) => TypValidationResult<T>;
+/**
+ * Used to type the base class of a custom web component class
+ */
+type Constructor<T> = {
+  new (...args: any[]): T;
+}
 
+type $BaseClass = Constructor<HTMLElement>;
 
+// @ts-ignore
+const html = String.raw;
 const $window = (window as Window & any);
 // A spot for holding all the templates
 if (!$window.$adv_templates) {
-    document.body.innerHTML += `<div id="$adv_templates" style="display:none;"></div>`;
+  requestAnimationFrame(() => {
+  document.body.innerHTML += `<div id="$adv_templates" style="display:none;"></div>`;
+  });
 }
+
+
 const script_type = "";
-const template_attr = "";
+const attr_name = "";
 const ignored_attrs:string[] = [];
 const processed_events = Object.keys(HTMLElement.prototype).filter((name) =>name.startsWith("on"));
-
 const refs = new Map();
+const records = new Map();
 const types = new Map();
 const callbacks = new Map();
 const modules = new Map();
 const plugins = new Map();
+const loaded = new Map();
 
 const core_plugin:AdvectPlugin = {
   name: "core",
@@ -42,7 +62,8 @@ const core_plugin:AdvectPlugin = {
     adv.ignored_attrs.push("id", "adv", "data-shadow");
     adv.script_type = "text/adv";
     adv.attr_name = "adv";
-    adv.type("string", (val:string) => {
+
+    adv.type("string", (val:string|null) => {
       const isValid = typeof val === "string";
       return {
         isValid,
@@ -104,6 +125,22 @@ const core_plugin:AdvectPlugin = {
       };
     });
 
+    adv.type("record", (val:string) => {
+      let parsedValue;
+      try{
+        parsedValue = adv.records.get(val);
+      }
+      catch(e){
+        console.error(e);
+      }
+      const isValid = parsedValue instanceof Object;
+      return {
+        isValid,
+        hasValue: val ? true : false,
+        parsedValue,
+      };
+    });
+
     adv.type("json", (val:string) => {
       let parsedValue;
       try{
@@ -122,18 +159,13 @@ const core_plugin:AdvectPlugin = {
 
     
   },
-  
 }
 /**
- * Used to type the base class of a custom element
+ * Compiles a custom element from a template, and a base class
+ * @param $template template to compile
+ * @param $baseClass a base class to extend from if none is provide HTMLElement is used
  */
-type Constructor<T> = {
-  new (...args: any[]): T;
-}
-
-type $BaseClass = Constructor<HTMLElement>;
-
-const build = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) => {
+const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) => {
   // Define the custom Element
   const _class = class extends ($baseClass ?? HTMLElement) {
     static #ic = -1;
@@ -207,7 +239,17 @@ const build = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) => 
       this.#evalStyles();
       this.#validateAttrs();
     }
-
+    remove(): void {
+      super.remove();
+      try {
+        const parent = document.getElementById(this.id)?.parentElement
+        if (parent) {
+          parent.removeChild(this);
+          console.log("removed", this.id);
+        }
+      } catch (e) {
+      }
+    }
 
     disconnectedCallback() {
       // console.log("disconnected");
@@ -234,7 +276,7 @@ const build = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) => 
         });
         // Weakref these maybe
         // set global refsf
-        // $$refs[el.id] = el;
+          $adv.refs.set(el.id,el);
         // set local refs
         this.refs[og_id] = el;
       });
@@ -320,8 +362,17 @@ const build = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) => 
   }
   customElements.define($template.id,_class);
 }
+
+/**
+ * Async Loads a template from a url and compiles it
+ * @param url the url to fetch the template from
+ */
 const load = (url:string) => {
-  console.log("Fetching template", url);
+
+  if ($adv.loaded.has(url)) {
+    return;
+  }
+
   return fetch(url, {
     method: "GET",
     headers: {
@@ -333,8 +384,14 @@ const load = (url:string) => {
     .then((text) => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, "text/html");
-       [...document.querySelectorAll("template[id][adv]"),
-      ].map((template) => template.id);
+      const src_scripts = doc.querySelectorAll(`script[type='${$adv.script_type}']`);
+      src_scripts.forEach((script) => {
+        const src = script.getAttribute("src");
+        if (src) {
+          $adv.load(src);
+          $adv.loaded.set(src, true);
+        }
+      });
       [...doc.querySelectorAll("template[id][adv]")].forEach((template) => {
         // TODO maybe make upgrading components a thing
         const existingCustomElement = customElements.get(template.id);
@@ -343,8 +400,11 @@ const load = (url:string) => {
           return;
         }
         console.log("Adding template", template.id);
+
+       
+
         $window.$adv_templates.appendChild(template);
-        $window.$adv.build(
+        $window.$adv.compile(
           template,
           $window[template.getAttribute($window.$adv.template_attr) || "HTMLElement"]
         );
@@ -354,6 +414,15 @@ const load = (url:string) => {
       console.error(`Could not parse template from request`, e);
     });
 }
+
+/**
+ * Hooks up event listeners to a ref in a template
+ * @param $ref the ref html element inside the template
+ * @param $self the custom element instance
+ * @param $template the template the custom element was compiled from
+ * @param $scope The scope created by scripts in the custom element
+ * @param $modules Modules registered with the advect instance
+ */
 const hook = ($ref:HTMLElement, $self:HTMLElement, $template:HTMLTemplateElement, $scope:any, $modules:any) => {
   const event_attrs = $ref
     .getAttributeNames()
@@ -375,13 +444,20 @@ const hook = ($ref:HTMLElement, $self:HTMLElement, $template:HTMLTemplateElement
         $self,
         $event,
         $template,
-        $scope,
         $$modules: $modules,
+        ...$scope,
       });
     };
   });
   $ref.dispatchEvent(new Event("load", { bubbles: true }));
 }
+
+/**
+ * Builds a proxy for the attributes of an element so for the <custom element/>.'attr' property
+ * @param el  The element to build the proxy for
+ * @param propDesc a record of the attributes and their types
+ * @returns an object that can be used to access the attributes of the element
+ */
 const attr = (el:HTMLElement, propDesc:Record<string, string>) => {
   // maybe we dont need the proxy list
   const attrProxyRegistry:Record<string, Attr> = {};
@@ -439,16 +515,37 @@ const attr = (el:HTMLElement, propDesc:Record<string, string>) => {
   });
   return attrListProxy;
 }
-
+/**
+ * Registers a plugin with the advect instance
+ * @param object the plugin to register
+ * @returns void
+ */
 const plugin = (object:AdvectPlugin) => {
     $window.$adv.plugins.set(object.name, object);
 }
+
+/**
+ * Registers a callback with the advect instance
+ * @param callback the function to call back, can take any number of arguments, the call back will be called synchronously
+ * @returns a string that can be used to reference the callback
+ */
 const cb = (callback: (...args : any[]) => any )=>{
   const randomName = Math.random().toString(36).substring(7);
   $window.$adv.callbacks.set(randomName, callback);
   return randomName;
 }
 
+const record = (object:any) => {
+  const randomName = Math.random().toString(36).substring(7);
+  $window.$adv.record.set(randomName, object);
+  return randomName;
+}
+
+/**
+ * Registers a module with the advect instance
+ * @param object the module to register
+ * @param alias an alias to use to reference the module
+ */
 const mod = (object:any, alias:string) => {
   if (alias) {
     $window.$adv.modules.set(alias, object);
@@ -457,19 +554,36 @@ const mod = (object:any, alias:string) => {
   }
 }
 
+/**
+ * Registers a type with the advect instance
+ * @param name the name of the type, the same name will be used to reference the type in html
+ * @param validate a function that takes a string and returns a TypeValidationResult
+ */
 const type = (name:string, validate:TypeValidator<any>) =>{
   // TODO: add validation for validator
   $window.$adv.types.set(name, {validate});
 }
 
-const ref = (_el:HTMLElement) => {
 
+/**
+ * Registers a reference with the advect instance
+ * To avoid naming collisions its best to use window[{element.id}] to access the elmement in templates
+ * @param _el the element to reference
+ * @returns the id of the element, if the element does not have an id one will be generated
+ */
+const ref = (_el:HTMLElement) => {
+  const id = _el.id;
+  if (!id) {
+    _el.id = Math.random().toString(36).substring(7);
+  }
+  $window.$adv.refs.set(id, _el);
+  return _el.id
 }
 
 export type Advect = typeof $adv;
 const $adv = $window.$adv = {
       processed_events,
-      attr_name: template_attr,
+      attr_name,
       script_type,
       ignored_attrs,
       refs,
@@ -477,21 +591,24 @@ const $adv = $window.$adv = {
       callbacks,
       modules,
       plugins,
+      records,
+      loaded,
       mod,
       hook,
       load,
-      build,
+      compile,
       attr,
       plugin,
       type,
       cb,
       ref,
+      record,
   }
 
 $adv.plugin(core_plugin);
 
 
-// register all templates with vx attribute
+// register all templates with adv attribute
 document.addEventListener("DOMContentLoaded", () => {
   const plugins = [...$adv.plugins.values()];
   plugins.forEach((plugin) => {
@@ -506,8 +623,8 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn(`Custom element with id ${template.id} already exists`);
       return;
     }
-    $window.$adv.build(
-      template,
+    $adv.compile(
+      template as HTMLTemplateElement,
       $window[template.getAttribute($adv.attr_name) || "HTMLElement"]
     );
   });

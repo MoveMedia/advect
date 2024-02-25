@@ -1,0 +1,62 @@
+<template id="todo-item" todoName="string" todoComplete="boolean" onFinish="callback" adv>
+  <style>
+    todo-item {
+      transition: all 0.3s ease;
+      position: relative;
+      &[todoComplete="true"] {
+        & li{
+          background-color: color-mix(in srgb, green, transparent);
+        }
+
+        & .title {
+          text-decoration: line-through;
+        }
+      }
+    }
+  </style>
+  <script>
+    const { todoComplete, onFinish, todoName } = $self.attr;
+    const { completeBtn, deleteBtn } = $self.refs;
+
+    const finishTodo = () => {
+      todoComplete.value = true;
+      completeBtn.innerText = "Unfinish";
+      onFinish?.value(todoName.value);
+    };
+    const unfinishTodo = () => {
+      todoComplete.value = false;
+      completeBtn.innerText = "Finish";
+    };
+    const deleteTodo = () => {
+      $self.remove();
+    };
+
+    return {
+      todoName,
+      todoComplete,
+      finishTodo,
+      unfinishTodo,
+      deleteTodo,
+    };
+  </script>
+
+  <li>
+    <input id="title" class="title"
+      onload="{
+        $ref.value = $scope.todoName.value ?? '';
+      }"
+    />
+    <button id="completeBtn" 
+        onload="{
+            $ref.innerText = $scope.todoComplete.value ? '✖️ Unfinish' : '🔥 Finish';
+        }" 
+        onclick="{
+        if ($scope.todoComplete.value === true) {
+            $scope.unfinishTodo()
+        }else{
+            $scope.finishTodo()
+        }
+        }"></button>
+    <button id="deleteBtn" onclick="$scope.deleteTodo()">Delete</button>
+  </li>
+</template>
