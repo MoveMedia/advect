@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="text/adv" src="components/default-layout.html"></script>
     <script type="text/adv" src="components/todo-component.html"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <style type="text/tailwindcss">
       @layer utilities {
         .content-auto {
@@ -18,12 +17,12 @@
 
   </head>
   <body>
-    <default-layout>
+    <default-layout exportparts="content">
         <header id="test" slot="header">
           <h1 class="text-4xl mb-5 text-center">Todo List App in HTMV</h1>
         </header>
-  
-        <todo-component part="todo" slot="content">
+        
+        <todo-component slot="content">
             <h2 slot="title">My Todo List custom title</h2>
         </todo-component>
 
@@ -32,6 +31,5 @@
         </footer>
     </default-layout>
     <script type="module" src="/src/advect.ts"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
   </body>
 </html>
