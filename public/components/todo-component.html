@@ -1,6 +1,6 @@
 
-<script type="text/adv" src="components/todo.html"></script>
-<template id="todo-component" data-shadow="closed" adv>
+<script type="text/adv" src="components/todo-item.html"></script>
+<template id="todo-component" data-shadow="open" adv>
 
   <style>
     .todo-wrapper {
@@ -33,7 +33,7 @@
     };
   </script>
   <div class="todo-wrapper">
-    <form id="form" onsubmit="$scope.onSubmit($event)">
+    <form part="submit_form" id="form" onsubmit="$scope.onSubmit($event)">
       <slot name="title">
         <h2 class="font-bold">Todos</h2>
       </slot>

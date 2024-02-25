@@ -4,10 +4,9 @@
     <meta charset="UTF-8" />
     <!-- Include plugins after the script, -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="text/adv" src="layout/default-layout.html"></script>
+    <script type="text/adv" src="components/default-layout.html"></script>
     <script type="text/adv" src="components/todo-component.html"></script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <style type="text/tailwindcss">
       @layer utilities {
         .content-auto {
@@ -15,30 +14,24 @@
         }
       }
     </style>
-    <title>htmv</title>
+    <title>Advect</title>
+
   </head>
   <body>
     <default-layout>
-      <slot name="header">
-        <header id="test">
+        <header id="test" slot="header">
           <h1 class="text-4xl mb-5 text-center">Todo List App in HTMV</h1>
         </header>
-      </slot>
   
-      <slot name="content">
-        <todo-component>
-          <slot name="title">
-            <h2>My Todo List custom title</h2>
-          </slot>
+        <todo-component part="todo" slot="content">
+            <h2 slot="title">My Todo List custom title</h2>
         </todo-component>
-      </slot>
 
-      <slot name="footer">
-        <footer>
+        <footer slot="footer">
           <p class="text-center">Made with ❤️</p>
         </footer>
-      </slot>
     </default-layout>
     <script type="module" src="/src/advect.ts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
   </body>
 </html>

@@ -156,8 +156,6 @@ const core_plugin:AdvectPlugin = {
         parsedValue,
       };
     });
-
-    
   },
 }
 /**
@@ -187,7 +185,8 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
       }, {} as Record<string, string>);
 
     refs:Record<string, Node> = {};
-    #originalContent!:HTMLElement;
+
+    #originalContent!:HTMLElement;  
 
     get signature() {
       return `${$template.id}-${this.dataset["instance"]}`;
@@ -202,6 +201,10 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
     attributeChangedCallback(name:string, oldValue:string, newValue:string) {
       this?.attrChanged(name, oldValue, newValue);
       this.#validateAttrs();
+    }
+
+    get root ():ShadowRoot|HTMLElement {
+      return $template.dataset.shadow ? (this.shadowRoot as ShadowRoot) : this;
     }
 
     constructor() {
@@ -220,6 +223,7 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
     connectedCallback() {
       // cant be set until the element is connected
       this.#attr = $adv.attr(this,(this.constructor as typeof _class).#ATTR_DESC);
+
       this.#originalContent = this.cloneNode(true) as HTMLElement;
 
       if ($template.dataset.shadow && $template.dataset.shadow === "open") {
@@ -233,23 +237,25 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
       this.dataset["instance"] = this.ic.toString();
       this.id = `${$template.id}-${this.ic}`;
 
-      this.#evalSlots();
+     // this.#evalSlots();
+      // Refs need to come first so that $ref works in inline scripts
       this.#buildRefs();
       this.#evalScripts();
+
       this.#evalStyles();
       this.#validateAttrs();
     }
-    remove(): void {
-      super.remove();
-      try {
-        const parent = document.getElementById(this.id)?.parentElement
-        if (parent) {
-          parent.removeChild(this);
-          console.log("removed", this.id);
-        }
-      } catch (e) {
-      }
-    }
+    // remove(): void {
+    //   super.remove();
+    //   try {
+    //     const parent = document.getElementById(this.id)?.parentElement
+    //     if (parent) {
+    //       parent.removeChild(this);
+    //       console.log("removed", this.id);
+    //     }
+    //   } catch (e) {
+    //   }
+    // }
 
     disconnectedCallback() {
       // console.log("disconnected");
@@ -259,14 +265,13 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
 
     #buildRefs() {
       // these guys are special
-      const root = this.dataset.shadow ? (this.shadowRoot as ShadowRoot) : this
-
       const els = [
-        ...root.querySelectorAll(
+        ...this.root.querySelectorAll(
           "[id]"
         ),
       ];
 
+      console.log(els)
       els.forEach((el) => {
         // change the id so that it is unique across all instances
         const og_id = el.id;
@@ -283,8 +288,10 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
     }
     async #evalScripts() {
       // need at one list to hook up the events
-      const scripts = [...this.querySelectorAll("script")];
+      const scripts = [...this.root.querySelectorAll("script")];
       const $self = this;
+
+      console.log("Scripts", scripts);
       // all scripts out put are merged into one scope
       let $scope = {};
       for (let s of scripts) {
@@ -312,7 +319,8 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
           console.error(e);
         }
       }
-
+      console.log("Scope", $scope);
+      console.log("Refs", this.refs);
       Object.values(this.refs).forEach((refEl) => {
         $window.$adv.hook(refEl, $self, $template, $scope, $adv.modules);
       });
@@ -320,33 +328,6 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
 
     #evalStyles() {
       //const styles = [...this.querySelectorAll("style")];
-    }
-
-    #evalSlots() {
-      const renderedSlots = [...this.querySelectorAll("slot")];
-      let defautSlotUsed = false;
-      requestAnimationFrame(() => {
-        renderedSlots.forEach((slot) => {
-          const name = slot.getAttribute("name");
-          if (name) {
-            const slotContent = this.#originalContent?.querySelector(
-              `slot[name=${name}]`
-            );
-            if (slotContent) {
-              slot.outerHTML = slotContent.innerHTML;
-            }
-          } else {
-            if (!defautSlotUsed) {
-              const slotContent =
-                this.#originalContent.querySelector(`slot:not([name])`);
-              if (slotContent) {
-                slot.outerHTML = slotContent.innerHTML;
-                defautSlotUsed = true;
-              }
-            }
-          }
-        });
-      });
     }
     #validateAttrs() {
       Object.keys(this.attrDesc).forEach((prop) => {

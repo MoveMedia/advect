@@ -1,8 +1,19 @@
 <template id="todo-item" todoName="string" todoComplete="boolean" onFinish="callback" adv>
   <style>
     todo-item {
-      transition: all 0.3s ease;
-      position: relative;
+      li{
+        max-width: 300px;
+        padding: 0;
+          height: 0;
+          opacity: 0;
+          transition: all 0.3s ease;
+          &.ready{
+            height: auto;
+            opacity: 1;
+             padding: 20px 10px;
+
+          }
+      }
       &[todoComplete="true"] {
         & li{
           background-color: color-mix(in srgb, green, transparent);
@@ -16,19 +27,29 @@
   </style>
   <script>
     const { todoComplete, onFinish, todoName } = $self.attr;
-    const { completeBtn, deleteBtn } = $self.refs;
+    const { completeBtn, deleteBtn, item } = $self.refs;
+
+    const completedText = "✅ Finished";
+    const incompletedText = "🔥 Finish";
+    
+    completeBtn.innerText = todoComplete.value ? completedText : incompletedText;
 
     const finishTodo = () => {
       todoComplete.value = true;
-      completeBtn.innerText = "Unfinish";
+      completeBtn.innerText = completedText;
       onFinish?.value(todoName.value);
     };
     const unfinishTodo = () => {
       todoComplete.value = false;
-      completeBtn.innerText = "Finish";
+      completeBtn.innerText = incompletedText;
     };
     const deleteTodo = () => {
-      $self.remove();
+      const handle =() => {
+        item.removeEventListener('transitionend', handle);
+        $self.remove();
+      }
+      item.addEventListener('transitionend', handle);
+      item.classList.remove('ready');
     };
 
     return {
@@ -37,19 +58,19 @@
       finishTodo,
       unfinishTodo,
       deleteTodo,
+
     };
   </script>
 
-  <li>
+  <li id="item" onload="{
+        $ref.classList.add('ready');
+  }">
     <input id="title" class="title"
       onload="{
         $ref.value = $scope.todoName.value ?? '';
       }"
     />
-    <button id="completeBtn" 
-        onload="{
-            $ref.innerText = $scope.todoComplete.value ? '✖️ Unfinish' : '🔥 Finish';
-        }" 
+    <button id="completeBtn"
         onclick="{
         if ($scope.todoComplete.value === true) {
             $scope.unfinishTodo()
