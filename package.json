@@ -16,5 +16,9 @@
   "devDependencies": {
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
+  },
+  "dependencies": {
+    "htmlparser2": "^9.1.0",
+    "zustand": "^4.5.1"
   }
 }

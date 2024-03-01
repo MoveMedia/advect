@@ -185,7 +185,7 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
       }, {} as Record<string, string>);
 
     refs:Record<string, Node> = {};
-
+    // @ts-ignore
     #originalContent!:HTMLElement;  
 
     get signature() {
@@ -296,7 +296,7 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
       let $scope = {};
       for (let s of scripts) {
         try {
-          await async function () {
+          (await async function () {
             const _$scope = await eval(
               "(async function(){" + s.textContent + "})()"
             );
@@ -314,7 +314,7 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
             if (_$scope) {
               $scope = { ...$scope, ..._$scope };
             }
-          }.call({ $self, $template, $modules: $adv.modules });
+          }).call({ $self, $template, $modules: $adv.modules });
         } catch (e) {
           console.error(e);
         }
