@@ -185,7 +185,7 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
       }, {} as Record<string, string>);
 
     refs:Record<string, Node> = {};
-
+      // @ts-ignore
     #originalContent!:HTMLElement;  
 
     get signature() {

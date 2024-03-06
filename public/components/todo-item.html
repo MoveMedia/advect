@@ -1,24 +1,13 @@
 <template id="todo-item" todoName="string" todoComplete="boolean" onFinish="callback" adv>
   <style>
     todo-item {
-      li{
-        max-width: 300px;
-        padding: 0;
-          height: 0;
-          opacity: 0;
-          transition: all 0.3s ease;
-          &.ready{
-            height: auto;
-            opacity: 1;
-             padding: 20px 10px;
+      list-style: none;
 
-          }
+      li {
+        transition: all 0.1s;
       }
-      &[todoComplete="true"] {
-        & li{
-          background-color: color-mix(in srgb, green, transparent);
-        }
 
+      &[todoComplete="true"] {
         & .title {
           text-decoration: line-through;
         }
@@ -29,10 +18,34 @@
     const { todoComplete, onFinish, todoName } = $self.attr;
     const { completeBtn, deleteBtn, item } = $self.refs;
 
+    const introTodoAnim = [
+        { opacity: 0, height: 0 },
+        { opacity: 1, height: 'auto' },
+      ];
+
+      const introAnimTiming = {
+        duration: 200,
+        iterations: 1,
+        fill: "both",
+     };
+
+    const deleteTodoAnim = [
+        { opacity: 1, height: 'auto' },
+        { opacity: 0, height: 0 },
+      ];
+
+      const deleteAnimTiming = {
+        duration: 200,
+        iterations: 1,
+        fill: "both",
+     };
+
     const completedText = "✅ Finished";
     const incompletedText = "🔥 Finish";
-    
-    completeBtn.innerText = todoComplete.value ? completedText : incompletedText;
+
+    completeBtn.innerText = todoComplete.value
+      ? completedText
+      : incompletedText;
 
     const finishTodo = () => {
       todoComplete.value = true;
@@ -43,13 +56,15 @@
       todoComplete.value = false;
       completeBtn.innerText = incompletedText;
     };
+
+    const introTodo = () => {
+      $self.animate(introTodoAnim, introAnimTiming);
+    };
     const deleteTodo = () => {
-      const handle =() => {
-        item.removeEventListener('transitionend', handle);
+      $self.animate(deleteTodoAnim, deleteAnimTiming).onfinish = () => {
+        console.log('delete');
         $self.remove();
-      }
-      item.addEventListener('transitionend', handle);
-      item.classList.remove('ready');
+      };  
     };
 
     return {
@@ -58,20 +73,17 @@
       finishTodo,
       unfinishTodo,
       deleteTodo,
-
+      introTodo,
     };
   </script>
 
   <li id="item" onload="{
-        $ref.classList.add('ready');
+        $scope.introTodo();
   }">
-    <input id="title" class="title"
-      onload="{
+    <input id="title" class="title" onload="{
         $ref.value = $scope.todoName.value ?? '';
-      }"
-    />
-    <button id="completeBtn"
-        onclick="{
+      }" />
+    <button id="completeBtn" onclick="{
         if ($scope.todoComplete.value === true) {
             $scope.unfinishTodo()
         }else{

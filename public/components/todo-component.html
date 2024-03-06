@@ -14,6 +14,14 @@
       display: flex;
       flex-direction: column;
     }
+    label{
+      display: flex;
+      flex-direction: column;
+    }
+    input{
+      padding: 5px;
+      margin: 5px;
+    }
   </style>
   <script>
     const onFinishCallback = $adv.cb((namedTodo) => {
@@ -38,13 +46,17 @@
         <h2 class="font-bold">Todos</h2>
       </slot>
       <div>
-        <label for="input">
+        <label part for="input">
           <span>Add a todo</span>
           <input id="input" type="text" name="todo-input" class="border-b-2 border-slate-500" required  />
         </label>
         <button class="">Submits</button>
       </div>
     </form>
-    <ul id="list"></ul>
+    <ul id="list">
+      <for id="list_items" onload="{ $ref.render() }">
+        <todo-item :todoName="" ></todo-item>
+      </for>
+    </ul>
   </div>
 </template>
