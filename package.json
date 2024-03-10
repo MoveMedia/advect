@@ -16,5 +16,8 @@
   "devDependencies": {
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
+  },
+  "dependencies": {
+    "mustache": "^4.2.0"
   }
 }
