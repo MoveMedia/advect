@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/dds.js" defer></script>
+    <link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+/>
+</head>
+<body>
+   
+<header class="container">
+    <nav>
+        <ul>
+          <li><strong>Ventroy Rolle</strong></li>
+        </ul>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Projects</a></li>
+          <li><a href="#">Articles</a></li>
+        </ul>
+      </nav>
+</header>
+<main class="container grid">
+    <section class="flex">
+        <img src="https://picsum.photos/100/100" alt="Profile">
+    </section>
+    <!-- <section id="john" data-height="0" :height="number" data-name="Fred" :name="string"> -->
+    <section id="john">
+        <data name="height" type="number" value=""></data>
+        <data name="name" type="string" value="David"></data>    
+<!-- 
+    :text // innerText
+    :content // textContent
+    :html // innerHTML
+    :value // value this one is special the only 2 way binding
+    :style-[name] // any style property
+    :class // any class calculated
+
+ -->
+        <div>
+            <h2>
+                Name:
+                <span bind-text="name"></span>
+            </h2> 
+            <div>
+                <span>Height:</span> 
+                <span bind-text="height">30</span>
+                <span>cm</span>
+            </div> 
+        </div>
+    </section>
+    <section>
+        <form action="">
+            <label for="name">
+                <input
+                name="name" 
+                oninvalid="console.log('hello')"
+                oninput="
+                        const john_ref = $d(john);
+                        john_ref.name = this.value;
+                    "
+                    type="text"
+                    >
+                </label>
+                <label for="occupation">
+                    <select id="select" name="occupation" onshow="console.log('hello')">
+                        <option>Coder</option>
+                        <option>Marketer</option>
+                        <option>Designer</option>
+                    </select>
+                </label>
+            <label for="height">
+                <input 
+                    oninput="
+                        const john_ref = $d(john);
+                        john_ref.height = this.value;
+                    "
+                    type="range" min="0" max="100" value="30"
+                    >
+            </label>
+        </form>
+    </section>
+</main>
+    
+
+
+    <footer class="container">
+        <p>© 2020 Ventroy Rolle</p>
+    </footer>
+</body>
+</html>
