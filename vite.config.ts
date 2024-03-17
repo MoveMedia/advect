@@ -5,8 +5,9 @@ export default defineConfig({
     build: {
         rollupOptions: {
           input:{
-            advect: path.resolve(__dirname, 'src','advect.ts'),
-            dds: path.resolve(__dirname, 'src','dds.ts')
+            dds: path.resolve(__dirname, 'src','dds.ts'),
+            dds_test: path.resolve(__dirname,'dds.html')
+
           },
           output: {
             entryFileNames: `[name].js`,

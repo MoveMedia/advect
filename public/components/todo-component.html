@@ -1,10 +1,9 @@
 
 <script type="text/adv" src="components/todo-item.html"></script>
+<!-- data-input -->
 <template id="todo-component" data-shadow="open" adv>
-
   <style>
-    .todo-wrapper {
-    }
+
     form {
       background-color: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
@@ -24,15 +23,14 @@
     }
   </style>
   <script>
-    const onFinishCallback = $adv.cb((namedTodo) => {
-      console.log(`finished, my guy! - ${namedTodo}`);
-    });
+    // const onFinishCallback = $adv.cb((namedTodo) => {
+    //   console.log(`finished, my guy! - ${namedTodo}`);
+    // });
     const { form, input, list } = $self.refs;
     // testing refs
     const onSubmit = (e) => {
-      console.log("submitting");
       e.preventDefault();
-      list.innerHTML += html`<todo-item todoName="${input.value}" todoComplete="false" onFinish="${onFinishCallback}"
+      list.innerHTML += html`<todo-item part data-name="${input.value}" data-complete="false" 
       />`;
       input.value = "";
     };
@@ -54,9 +52,7 @@
       </div>
     </form>
     <ul id="list">
-      <for id="list_items" onload="{ $ref.render() }">
-        <todo-item :todoName="" ></todo-item>
-      </for>
+
     </ul>
   </div>
 </template>

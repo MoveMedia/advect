@@ -14,10 +14,16 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/mustache": "^4.2.5",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
   },
   "dependencies": {
-    "mustache": "^4.2.0"
+    "cash-dom": "^8.1.5",
+    "mustache": "^4.2.0",
+    "zustand": "^4.5.2"
+  },
+  "rules": {
+    "no-unused-vars": "off"
   }
 }
