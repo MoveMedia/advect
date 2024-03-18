@@ -1,4 +1,6 @@
 <template id="todo-item" data-shadow="open" adv>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+
   <data name="name" type="string" value=""></data>    
   <data name="complete" type="boolean" value="false"></data>
   <style>
@@ -11,14 +13,18 @@
   </style>
   <script>
    
-    const { completeBtn, deleteBtn, item } = $self.refs;
+    const { completeBtn, deleteBtn, item, title } = $self.refs;
+
+    title.oninput = () => {
+      $self.attrs.name.value = title.value;
+    };
 
     const introTodoAnim = [
         { opacity: 0, height: 0 },
         { opacity: 1, height: 'auto' },
       ];
 
-      const introAnimTiming = {
+    const introAnimTiming = {
         duration: 200,
         iterations: 1,
         fill: "both",
@@ -29,7 +35,7 @@
         { opacity: 0, height: 0 },
       ];
 
-      const deleteAnimTiming = {
+    const deleteAnimTiming = {
         duration: 200,
         iterations: 1,
         fill: "both",
@@ -69,10 +75,10 @@
     };
   </script>
 
-  <li id="item" onload="{
-        $scope.introTodo();
-        $self.refs.title.value = $self.attrs.name.value;
+  <li id="item" onload="{ $scope.introTodo(); 
+    $self.attrs.complete.value === true ? $self.classList.add('completed') : $self.classList.remove('completed')
   }">
+    <h2 id="bind-title" :text="name"></h2>
     <input part id="title" class="title" />
     <button id="completeBtn" onclick="{
         if ($self.attrs.complete.value === true) {

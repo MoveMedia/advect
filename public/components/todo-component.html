@@ -2,6 +2,8 @@
 <script type="text/adv" src="components/todo-item.html"></script>
 <!-- data-input -->
 <template id="todo-component" data-shadow="open" adv>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+  
   <style>
 
     form {
@@ -30,8 +32,10 @@
     // testing refs
     const onSubmit = (e) => {
       e.preventDefault();
-      list.innerHTML += html`<todo-item part data-name="${input.value}" data-complete="false" 
-      />`;
+      const newEl = document.createElement("todo-item");
+      newEl.setAttribute("data-name", input.value);
+      newEl.setAttribute("data-complete", "false");
+      list.appendChild(newEl);
       input.value = "";
     };
     return {

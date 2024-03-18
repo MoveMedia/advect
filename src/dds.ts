@@ -5,6 +5,7 @@ import mustache from "mustache";
 // @ts-ignore
 import { createStore } from "zustand/vanilla"
 
+import $ from "cash-dom"
 
 const $window = (window as Window & any);
 
@@ -12,18 +13,18 @@ const $window = (window as Window & any);
 const DBug = $window.dConsole = {
   enabled: true,
   mutations: [] as MutationRecord[],
-  log(...args: any[]){
-    if (this.enabled){
+  log(...args: any[]) {
+    if (this.enabled) {
       console.log(...args);
     }
   },
-  table(...args: any[]){
-    if (this.enabled){
+  table(...args: any[]) {
+    if (this.enabled) {
       console.table(...args);
     }
   },
-  dir(...args: any[]){
-    if (this.enabled){
+  dir(...args: any[]) {
+    if (this.enabled) {
       console.dir(...args);
     }
   }
@@ -90,6 +91,7 @@ const textBinding: DBinding = {
   name: "text",
   handle(_: HTMLElement, attr: Attr, receiver: HTMLElement) {
     return async () => {
+      console.log('text binding', {attr, receiver})
       receiver.innerHTML = attr.value;
     };
   }
@@ -134,14 +136,14 @@ interface IDDS {
   script_type: string;
   ignored_attrs: string[];
   proccessed_events: string[];
-  bindings: Map<string, DBinding>;
+  bindingHandles: Map<string, DBinding>;
   nodes: Map<string, DDataNode>;
-  $b: (name: string, binding: DBinding) => void;
+  bind: (name: string, binding: DBinding) => void;
   start: () => void;
   types: Map<string, DDataType<any | any>>;
-  $t: <T>(name: string, dt: DDataType<T>) => void;
+  type: <T>(name: string, dt: DDataType<T>) => void;
   loaded: Map<string, boolean>;
-  $l: (url: string) => Promise<void>;
+  load: (url: string) => Promise<void>;
   attrs: Map<string, Attr>;
   /**
    * 
@@ -149,14 +151,14 @@ interface IDDS {
    * @param scan check for new data elements
    * @returns 
    */
-  $d: (el: HTMLElement, scan?:boolean) => any;
+  data: (el: HTMLElement, scan?: boolean) => any;
   /**
    * "Compiles" a template into a custom element using
    * @param template the template Element to compile must have [adv] attribute
    * @param baseClass a base class to extend from
    * @returns a custom element class
    */
-  $c: (template: HTMLTemplateElement, baseClass: $BaseClass | null) => void;
+  compile: (template: HTMLTemplateElement, baseClass: $BaseClass | null) => void;
 }
 const DDSStore = createStore<IDDS>((set, get) => {
   return {
@@ -174,38 +176,18 @@ const DDSStore = createStore<IDDS>((set, get) => {
           DBug.mutations.push(...mutationList);
         }
         for (const mutation of mutationList) {
-          if (mutation.type === "attributes") {
-            //  const attr_name = mutation.attributeName ?? '';
-            const has_data = Object.values((mutation.target as HTMLElement).attributes).find
-              (
-                (attr) => attr.name.indexOf("data-") === 0
-              );
-            const frameFunc = (_: number, framesRemaining: number) => {
-              const rate = framesRemaining / 60;
-              console.log(rate);
-                /// create bindings              
-            };
-
-            if (has_data){
-              state.frames.unshift(frameFunc);
-              set({ frames: state.frames });
-            }
-           
-          }
           if (mutation.type === "childList") {
-            mutation.addedNodes.forEach((_) => {
-              // Check for new <Data/> elments
-              if (_.nodeType === 1) {
-                const el = _ as HTMLElement;
-                if (el.tagName.toLocaleLowerCase() === "data") {
-                  const provider = el.parentElement as HTMLElement;
-                  state.$d(provider, true);
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === 1) {
+                if (node.nodeName === "DATA") {
+                  state.data(node.parentElement as HTMLElement, true);
+                  return;
                 }
+                state.data(node as HTMLElement, true);
               }
-            })
+            });
             mutation.removedNodes.forEach((node) => {
-              // Check for removed <Data/> elments
-
+              // Check for removed <Data/> elments, or maby not there not use after they load any way
               if (node.nodeType === 1) {
                 const id = (node as HTMLElement).id;
                 if (state.ids.has(id)) {
@@ -216,11 +198,17 @@ const DDSStore = createStore<IDDS>((set, get) => {
                 );
               }
             });
+            // console.log('set before mutation') 
+            set({ ids: new Map(state.ids), attrs: new Map(state.attrs) })
           }
         }
       });
       const state = get();
-      newObserver.observe(root.shadowRoot ?? root, { childList: true, subtree: true, attributes: true });
+      if (root.shadowRoot) {
+        newObserver.observe(root.shadowRoot, { childList: true, subtree: true, attributes: true });
+      }
+      newObserver.observe(root, { childList: true, subtree: true, attributes: true });
+
       set({ mutObservers: new Map([...state.mutObservers, [root.id, newObserver]]) });
     },
     proccessed_events: Object.keys(HTMLElement.prototype).filter((name) => name.startsWith("on")),
@@ -231,63 +219,63 @@ const DDSStore = createStore<IDDS>((set, get) => {
       const state = get();
       if (!state.initiated) {
         state.addMutObserver(document.body);
+
         set({ initiated: true });
-        setInterval(() => {
-          const frameFunc = state.frames.shift();
-          if (frameFunc) {
-            requestAnimationFrame(() => {
-              frameFunc(++state.frame, state.frames.length);
-              set({ initiated: true, frames: state.frames, frame: state.frame, framesRemaining: state.frames.length });
-            });
-          } else {
-            // evaluate bindings
-            const state = get();
-            state.ids.forEach((dProxy) => {
-              Object.values(dProxy).forEach((_) => {
-                //const provider = dAttr.ownerElement as HTMLElement;
+        // setInterval(() => {
+        //   const frameFunc = state.frames.shift();
+        //   if (frameFunc) {
+        //     requestAnimationFrame(() => {
+        //       frameFunc(++state.frame, state.frames.length);
+        //       set({ initiated: true, frames: state.frames, frame: state.frame, framesRemaining: state.frames.length });
+        //     });
+        //   }
+        // }, 100);
 
-              });
-            });
-
-          }
-        }, 100);
         // kick off the first frame
         document.addEventListener("DOMContentLoaded", () => {
           const state = get();
           const scriptTemplates = [
             ...document.querySelectorAll(`script[type="${state.script_type}"]`),
           ];
-          console.log('scriptTemplates', scriptTemplates)
+
+          document.querySelectorAll("[id]").forEach((el) => {
+            if (el.nodeType !== 1) {
+              state.data(el as HTMLElement);
+            }
+          });
+
           scriptTemplates.forEach((script) => {
             const src = script.getAttribute("src");
             if (src) {
-              state.$l(src);
+              state.load(src);
             }
           });
         });
       }
     },
 
-    bindings: new Map<string, DBinding>([
+    bindingHandles: new Map<string, DBinding>([
       ["text", textBinding],
     ]),
-    $b(name: string, binding: DBinding) {
+    bind(name: string, binding: DBinding) {
       const state = get();
-      state.bindings.set(name, binding);
-      set({ bindings: new Map(state.bindings) });
+      state.bindingHandles.set(name, binding);
+      console.log('set before binding')
+      set({ bindingHandles: new Map(state.bindingHandles) });
     },
     types: new Map([
       ["string", stringDataType],
       ["number", numberDataType],
       ["boolean", booleanDataType],
     ] as any),
-    $t(name: string, dt: DDataType<any>) {
+    type(name: string, dt: DDataType<any>) {
       const state = get();
       state.types.set(name, dt);
+      console.log('set before type')
       set({ types: new Map(state.types) });
     },
     loaded: new Map(),
-    async $l(url: string) {
+    async load(url: string) {
       const state = get();
       if (state.loaded.has(url)) {
         return;
@@ -307,7 +295,7 @@ const DDSStore = createStore<IDDS>((set, get) => {
           src_scripts.forEach((script) => {
             const src = script.getAttribute("src");
             if (src) {
-              state.$l(src);
+              state.load(src);
               state.loaded.set(src, true);
             }
           });
@@ -319,15 +307,14 @@ const DDSStore = createStore<IDDS>((set, get) => {
               console.warn(`Template with id ${template.id} already exists`);
               return;
             }
-            console.log("Adding template", template.id);
 
             document.getElementById('#$adv_templates')?.appendChild(template);
-            state.$c(
+            state.compile(
               template as HTMLTemplateElement,
               $window[template.getAttribute(state.template_attr) || "HTMLElement"]
             );
           });
-
+          console.log('set before load')
           set({ loaded: new Map(state.loaded) });
 
         })
@@ -335,13 +322,13 @@ const DDSStore = createStore<IDDS>((set, get) => {
           console.error(`Could not parse template from request`, e);
         });
     },
-    attrs: new Map(), 
+    attrs: new Map(),
     nodes: new Map(),
-    $d(el: HTMLElement, scan: boolean = false) {
+    data(el: HTMLElement, scan: boolean = false) {
       const state = get()
-      
+
       if (el.id == null || el.id == '') {
-        throw new Error('Element must have an id');
+        return;
       }
 
       if (state.ids.has(el.id) && !scan) {
@@ -351,11 +338,11 @@ const DDSStore = createStore<IDDS>((set, get) => {
       const dNodes = new Map<string, DDataNode>();
       const dAttrs = new Map<string, DAttr>();
 
-      (el.shadowRoot ?? el).querySelectorAll('data').forEach((dEl: HTMLDataElement) => {
-        if (state.nodes.has(`${el.id}-${dEl.getAttribute('name')}`)){
+      const datas = [...(el.shadowRoot?.querySelectorAll('data') ?? []), ...el.querySelectorAll('data')];
+      datas.forEach((dEl: HTMLDataElement) => {
+        if (state.nodes.has(`${el.id}-${dEl.getAttribute('name')}`)) {
           return;
         }
-
         const name = dEl.getAttribute('name') ?? '';
         const type = dEl.getAttribute('type') ?? '';
         const initialValue = dEl.getAttribute('value') ?? '';
@@ -363,14 +350,15 @@ const DDSStore = createStore<IDDS>((set, get) => {
         if (name == '') {
           throw new Error('Data element must have a name attribute');
         }
+        const dataType = state.types.get(type) ?? state.types.get('string') as DDataType<any>;
         const dataAttrName = `data-${name}`;
         const id = `${el.id}-${name}`;
-
+        ;
         dNodes.set(`${el.id}-${name}`, {
           id,
           name,
           initialValue,
-          dataType: state.types.get(type) || state.types.get('string') as DDataType<any>,
+          dataType,
           dataAttrName,
           owner: el,
           dataElement: dEl
@@ -404,31 +392,49 @@ const DDSStore = createStore<IDDS>((set, get) => {
         node.attr = attrProxyAttr;
 
         dAttrs.set(node.id, attrProxyAttr);
-
+        attr.value = node.initialValue;
         if (isNewAttr) {
-          el.setAttributeNode(attr);
+          node.owner.setAttributeNode(attr);
+
         }
       });
 
-      if (scan){
+      if (scan) {
+        console.log('set before scan')
         set({ ids: new Map(state.ids), attrs: new Map([...state.attrs, ...dAttrs]), nodes: new Map([...state.nodes, ...dNodes]) });
-        return state.ids.get(el.id) 
+        return state.ids.get(el.id)
       }
 
-      const dataProxy: DDataProxy = new Proxy({}, {
+      const dataProxy: DDataProxy = new Proxy({
+      }, {
+        ownKeys: () => {
+          const state = get();
+          const keys = [...state.nodes.values()].filter((n) => n.owner.id === el.id).map((n) => n.name);
+          return keys
+        },
         get: (target, prop) => {
-          if (typeof prop == 'string' && dAttrs.has(`${el.id}-${prop}`)) {
-            return dAttrs.get(`${el.id}-${prop}`);
+          const state = get();
+          if (typeof prop == 'string' && state.attrs.has(`${el.id}-${prop}`)) {
+            return state.attrs.get(`${el.id}-${prop}`);
+          }
+
+          if (prop == 'id') {
+            return el.id;
           }
           return Reflect.get(target, prop);
         },
       });
+      console.log('set before new data proxy')
 
       state.ids.set(el.id, dataProxy);
       set({ ids: new Map(state.ids), attrs: new Map([...state.attrs, ...dAttrs]), nodes: new Map([...state.nodes, ...dNodes]) });
+
+      //  const attr_name = mutation.attributeName ?? '';
+      // will have data if attribute has been D-ed
+
       return dataProxy;
     },
-    $c($template: HTMLTemplateElement, $baseClass: $BaseClass | null) {
+    compile($template: HTMLTemplateElement, $baseClass: $BaseClass | null) {
       // Define the custom Element
       const _class = class extends ($baseClass ?? HTMLElement) {
         static #ic = -1;
@@ -447,7 +453,7 @@ const DDSStore = createStore<IDDS>((set, get) => {
         }
 
         get attrs() {
-          return get().$d(this);
+          return get().data(this);
         }
         attrChanged: (name: string, oldValue: string, newValue: string) =>
           void = (_name: string, _oldValue: string, _newValue: string) => { };
@@ -464,6 +470,7 @@ const DDSStore = createStore<IDDS>((set, get) => {
           super();
           this.$class.#ic++;
 
+
         }
         get $class() {
           return (this.constructor as typeof _class);
@@ -473,6 +480,8 @@ const DDSStore = createStore<IDDS>((set, get) => {
         }
 
         connectedCallback() {
+          this.id = `${$template.id}-${this.ic}`;
+
           const state = get();
           this.#originalContent = this.cloneNode(true) as HTMLElement;
 
@@ -489,15 +498,16 @@ const DDSStore = createStore<IDDS>((set, get) => {
             this.attachInternals();
           }
           this.dataset["instance"] = this.ic.toString();
-          this.id = `${$template.id}-${this.ic}`;
-          requestAnimationFrame(() => {
-            state.addMutObserver(this);
-          });
+
 
 
           this.#buildRefs();
           this.#evalScripts();
           this.#evalStyles();
+
+          requestAnimationFrame(() => {
+            state.addMutObserver(this);
+          });
           //  this.$$d()
 
         }
@@ -514,7 +524,6 @@ const DDSStore = createStore<IDDS>((set, get) => {
               "[id]"
             ),
           ];
-
           els.forEach((el) => {
             // change the id so that it is unique across all instances
             const og_id = el.id;
@@ -522,6 +531,7 @@ const DDSStore = createStore<IDDS>((set, get) => {
               el.id = `${this.signature}-${el.id}`;
               // DDS.$d(el as HTMLElement);
             });
+
             // Weakref these maybe
             // set global refsf
             //   $adv.refs.set(el.id,el);
@@ -611,8 +621,46 @@ const DDSStore = createStore<IDDS>((set, get) => {
 export const DDS = $window.DDS = DDSStore;
 
 DDS.getState().start();
-DDS.subscribe((state, _) => {
- // console.log('state', state)
+DDS.subscribe((state, prevState) => {
+  
+    console.log('main subscription')
+  for (const [id, el] of state.nodes) {
+    const shadow = el.owner.shadowRoot;
+    const all_bindings = [...state.bindingHandles.keys()].map((name) => `[\\:${name}]`).join(",");
+    const bindEls: Element[] = [];
+    if (shadow) {
+      bindEls.push(...shadow.querySelectorAll(all_bindings));
+    }
+    bindEls.push(...el.owner.querySelectorAll(all_bindings));
+    for (const bindEl of bindEls) {
+      const bindings = bindEl.getAttributeNames().filter((name) => name.startsWith(":"));
+      for (const binding of bindings) {
+        const bindType = binding.slice(1);
+        const bindName = bindEl.getAttribute(binding) ?? '';
+        const handle = state.bindingHandles.get(bindType);
+        const provider = ((bindEl as HTMLElement).closest(`[data-${bindName}]`) ?? 
+        ((bindEl.getRootNode() as HTMLElement).querySelector(`[data-${bindName}]`)) ??
+        document.querySelector(`[data-${bindName}]`)) as HTMLElement | null;
+        if (handle && provider) {
+          requestAnimationFrame(() => {
+            console.log({attrs: state.attrs, nodes: state.nodes})
+            const attr = state.attrs.get(`${provider.id}-${bindName}`);
+            console.log({attr,provider,el});
+            if (!attr) {
+              console.warn(`No attribute for ${el.name} on ${provider.id}`);
+              return;
+            }
+            handle.handle(provider, attr, bindEl as HTMLElement)();
+          });
+        }
+        else {
+          console.warn(`No binding handle for ${bindType}`,{name: bindType, handle,provider,bindEl});  
+        }
+      }
+    }
+  }
+
+
 });
 
 

@@ -36,18 +36,25 @@
                     <img loading="lazy" src="https://picsum.photos/100/100" alt="Profile">
                 </section>
                 <!-- <section id="john" data-height="0" :height="number" data-name="Fred" :name="string"> -->
+                    
+
+
                 <section id="john">
-                    <data name="height" type="number" value=""></data>
-                    <data name="name" type="string" value="David"></data>
+                    <data name="height" type="number" value="0.0"></data>
+                    <data name="name" type="string" value="Placeholder"></data>
                     <data name="occupation" type="string" value="Coder"></data>
                     <div>
                         <h2>
                             Name:
-                            <span :text="name"></span>
+                            <span id="name_display" :text="name"></span>
                         </h2>
                         <div>
+                            <span>Job:</span>
+                            <span id="occupation_display" :text="occupation"></span>
+                        </div>
+                        <div>
                             <span>Height:</span>
-                            <span :text="{{height}}">30</span>
+                            <span id="height_display" :text="height"></span>
                             <span>cm</span>
                         </div>
                     </div>
@@ -56,14 +63,18 @@
                     <form action="">
                         <label for="name">
                             <input name="name" oninvalid="console.log('hello')" oninput="
-                                const johnData = DDS.getState().$d(john);
+                                const johnData = DDS.getState().data(john);
                                 johnData.name.value = this.value;
                             " type="text">
                         </label>
                         <label for="occupation">
-                            <select id="select" name="occupation" onselect="
-                                    const johnData = DDS.getState().$d(john);
+                            <select id="select" name="occupation" onchange="
+                                    const johnData = DDS.getState().data(john);
                                     johnData.occupation.value = this.value;
+
+                                    console.log(Object.getOwnPropertyNames(johnData))
+                                    console.log(Object.keys(johnData))
+
                                 ">
                                 <option value="Coder">Coder</option>
                                 <option value="marketer">Marketer</option>
@@ -72,7 +83,7 @@
                         </label>
                         <label for="height">
                             <input oninput="
-                            const johnData = DDS.getState().$d(john);
+                            const johnData = DDS.getState().data(john);
                             johnData.height.value = this.value;
                             console.log(johnData.height.value);
                             " type="range" min="0" max="100" value="30">
