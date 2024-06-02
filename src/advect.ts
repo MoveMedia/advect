@@ -1,6 +1,6 @@
 /**
- * @module advect
- * @description A simple web component framework
+ * @module Advect
+ * @description A small library for creating custom elements from templates
  * @version 0.0.1
  * @license MIT
  * 
@@ -8,7 +8,9 @@
  */
 
 
-export type TypeValidator<T> = (val:string) => TypValidationResult<T>;
+export type TypeValidator<T> = (val:string) => TypeValidationResult<T>;
+
+
 export interface AdvectPlugin {
   name: string;
   version: string;
@@ -16,7 +18,7 @@ export interface AdvectPlugin {
   install: (adv: Advect) => void;
 }
 
-export interface TypValidationResult<T> {
+export interface TypeValidationResult<T> {
   isValid: boolean;
   hasValue: boolean;
   parsedValue: T;
@@ -37,7 +39,7 @@ const $window = (window as Window & any);
 // A spot for holding all the templates
 if (!$window.$adv_templates) {
   requestAnimationFrame(() => {
-  document.body.innerHTML += `<div id="$adv_templates" style="display:none;"></div>`;
+    document.body.innerHTML += `<div id="$adv_templates" style="display:none;"></div>`;
   });
 }
 
@@ -81,6 +83,7 @@ const core_plugin:AdvectPlugin = {
         parsedValue,
       };
     });
+
     adv.type("boolean", (val:any) => {
       const isValid =
         val === "true" ||
@@ -118,11 +121,13 @@ const core_plugin:AdvectPlugin = {
         console.error(e);
       }
       const isValid = parsedValue instanceof Function;
+
       return {
         isValid,
         hasValue: val ? true : false,
         parsedValue,
       };
+
     });
 
     adv.type("record", (val:string) => {
@@ -167,6 +172,7 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
   // Define the custom Element
   const _class = class extends ($baseClass ?? HTMLElement) {
     static #ic = -1;
+    // observe all attributes except the ignored ones
     static get observedAttributes() {
       return $template
         .getAttributeNames()
@@ -209,13 +215,20 @@ const compile = ($template:HTMLTemplateElement, $baseClass: $BaseClass | null) =
 
     constructor() {
       super();
+      // increment the instance count
       (this.constructor as typeof _class).#ic++;
     }
 
+    /**
+     * The instance count of the custom element
+     */
     get ic () {
       return (this.constructor as typeof _class).#ic;
     }
 
+    /**
+     * The attribute description of the custom element
+     */
     get attrDesc() {
       return (this.constructor as typeof _class).#ATTR_DESC;
     }

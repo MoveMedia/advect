@@ -1,10 +1,10 @@
-
+<!-- Chain load another -->
 <script type="text/adv" src="components/todo-item.html"></script>
 <template id="todo-component" data-shadow="open" adv>
 
   <style>
-    .todo-wrapper {
-    }
+    .todo-wrapper {}
+
     form {
       background-color: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
@@ -24,8 +24,7 @@
     const onSubmit = (e) => {
       console.log("submitting");
       e.preventDefault();
-      list.innerHTML += html`<todo-item todoName="${input.value}" todoComplete="false" onFinish="${onFinishCallback}"
-      />`;
+      list.innerHTML += html`<todo-item todoName="${input.value}" todoComplete="false" onFinish="${onFinishCallback}"/>`;
       input.value = "";
     };
     return {
@@ -40,7 +39,7 @@
       <div>
         <label for="input">
           <span>Add a todo</span>
-          <input id="input" type="text" name="todo-input" class="border-b-2 border-slate-500" required  />
+          <input id="input" type="text" name="todo-input" class="border-b-2 border-slate-500" required />
         </label>
         <button class="">Submits</button>
       </div>
