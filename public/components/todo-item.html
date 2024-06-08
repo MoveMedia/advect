@@ -1,21 +1,14 @@
-<template id="todo-item" todoName="string" todoComplete="boolean" onFinish="callback" adv>
+<template id="todo-item" adv>
   <style>
-    todo-item {
-      li{
+    :host {
+      li {
         max-width: 300px;
-        padding: 0;
-          height: 0;
-          opacity: 0;
-          transition: all 0.3s ease;
-          &.ready{
-            height: auto;
-            opacity: 1;
-             padding: 20px 10px;
-
-          }
+        width: 100%;
+        min-height: 60px;
       }
-      &[todoComplete="true"] {
-        & li{
+
+      &[data-complete="true"] {
+        & li {
           background-color: color-mix(in srgb, green, transparent);
         }
 
@@ -25,60 +18,35 @@
       }
     }
   </style>
-  <script>
-    const { todoComplete, onFinish, todoName } = $self.attr;
-    const { completeBtn, deleteBtn, item } = $self.refs;
 
-    const completedText = "✅ Finished";
-    const incompletedText = "🔥 Finish";
-    
-    completeBtn.innerText = todoComplete.value ? completedText : incompletedText;
-
-    const finishTodo = () => {
-      todoComplete.value = true;
-      completeBtn.innerText = completedText;
-      onFinish?.value(todoName.value);
-    };
-    const unfinishTodo = () => {
-      todoComplete.value = false;
-      completeBtn.innerText = incompletedText;
-    };
-    const deleteTodo = () => {
-      const handle =() => {
-        item.removeEventListener('transitionend', handle);
-        $self.remove();
-      }
-      item.addEventListener('transitionend', handle);
-      item.classList.remove('ready');
-    };
-
-
-    return {
-      todoName,
-      todoComplete,
-      finishTodo,
-      unfinishTodo,
-      deleteTodo,
-
-    };
-  </script>
-
-  <li id="item" onload="{
-        $ref.classList.add('ready');
-  }">
-    <input id="title" class="title"
-      onload="{
-        $ref.value = $scope.todoName.value ?? '';
-      }"
-    />
-    <button id="completeBtn"
-        onclick="{
-        if ($scope.todoComplete.value === true) {
-            $scope.unfinishTodo()
-        }else{
-            $scope.finishTodo()
+  <li id="item" onload="
+      self.data = {
+        toggleComplete: () => {
+          self.dataset.complete = self.dataset.complete == 'true' ? 'false' : 'true';
+          self.refs.completeBtn.innerText = self.dataset.complete == 'true' ? 'Undo' : 'Complete';
+        },
+        dispatchDelete() {
+          self.dispatchEvent(
+            new CustomEvent('delete:todo', {
+              composed: true,
+              bubbles: true,
+            detail: {
+              todo:self,
+            }
+          }));
         }
-        }"></button>
-    <button id="deleteBtn" onclick="$scope.deleteTodo()">Delete</button>
+      }
+  ">
+    <input id="title" class="title" type="text" aria-label="title" onload="{
+        el.value = self.dataset.title;
+      }" />
+    <button id="completeBtn" 
+      onload="{el.innerText = self.dataset.complete == 'true' ? 'Undo' : 'Complete'}"
+      onclick="self.data.toggleComplete()">
+
+    </button>
+    <button id="deleteBtn" onclick="self.data.dispatchDelete()">
+      Delete
+    </button>
   </li>
 </template>

@@ -6,12 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="text/adv" src="components/default-layout.html"></script>
     <script type="text/adv" src="components/todo-component.html"></script>
-    <style type="text/tailwindcss">
-      @layer utilities {
-        .content-auto {
-          content-visibility: auto;
-        }
-      }
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+     
+:defined{
+  transition: opacity 0.5s;
+  transition-delay: 0.5s;
+  @starting-style{
+    opacity: 1;
+  }
+}
+:not(:defined){
+  opacity: 0;
+}
     </style>
     <title>Advect</title>
 
@@ -19,7 +26,7 @@
   <body>
     <default-layout exportparts="content">
         <header id="test" slot="header">
-          <h1 class="text-4xl mb-5 text-center">Todo List App in HTMV</h1>
+          <h2 class="text-4xl mb-5 text-center">Todo List App in HTMV</h2>
         </header>
         
         <todo-component slot="content">
@@ -31,7 +38,6 @@
         </footer>
     </default-layout>
     <script type="module" src="/src/advect.ts"></script>
-    <script type="module" src="/src/compiler.ts"></script>
 
   </body>
 </html>

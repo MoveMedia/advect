@@ -1,7 +1,5 @@
-<!-- Chain load another -->
 <script type="text/adv" src="components/todo-item.html"></script>
-<template id="todo-component" data-shadow="open" adv>
-
+<template id="todo-component" adv>
   <style>
     .todo-wrapper {}
 
@@ -15,24 +13,31 @@
       flex-direction: column;
     }
   </style>
-  <script>
-    const onFinishCallback = $adv.cb((namedTodo) => {
-      console.log(`finished, my guy! - ${namedTodo}`);
-    });
-    const { form, input, list } = $self.refs;
-    // testing refs
-    const onSubmit = (e) => {
-      console.log("submitting");
-      e.preventDefault();
-      list.innerHTML += html`<todo-item todoName="${input.value}" todoComplete="false" onFinish="${onFinishCallback}"/>`;
-      input.value = "";
-    };
-    return {
-      onSubmit,
-    };
-  </script>
-  <div class="todo-wrapper">
-    <form part="submit_form" id="form" onsubmit="$scope.onSubmit($event)">
+  <div id="wrapper" class="todo-wrapper" onload="
+    let todos = [];
+      const submitTodo = (event) => {
+        event.preventDefault();
+        todos.push({
+          id: todos.length,
+          title: self.refs.input.value  
+        });
+        self.refs.input.value = '';
+        self.refs.view.render({ todos });
+      };
+
+      self.addEventListener('delete:todo', (event) => {
+        console.log('delete:todo', event.detail);
+        todos = todos.filter(todo => todo.id != event.detail.todo.dataset.id);
+        event.detail.todo.remove()
+        self.refs.view.render({ todos });
+      });
+
+      self.data = { 
+        todos,
+        submitTodo,
+       };
+  ">
+    <form part="submit_form" id="form" onsubmit="self.data.submitTodo(event)">
       <slot name="title">
         <h2 class="font-bold">Todos</h2>
       </slot>
@@ -44,6 +49,15 @@
         <button class="">Submits</button>
       </div>
     </form>
-    <ul id="list"></ul>
+    <ul id="list">
+      <adv-view id="view">
+        {{#todos}}
+          <todo-item data-title="{{title}}" id="{{id}}" data-id="{{id}}" data-complete="false"></todo-item>
+        {{/todos}}
+        {{^todos}}
+         <li>No todos yet</li>
+        {{/todos}}
+      </adv-view>
+    </ul>
   </div>
 </template>
