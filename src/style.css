@@ -10,4 +10,15 @@
   button {
     background-color: #f9f9f9;
   }
+
+  :defined{
+    transition: opacity 0.5s;
+    transition-delay: 0.5s;
+    @starting-style{
+      opacity: 1;
+    }
+  }
+  :not(:defined){
+    opacity: 0;
+  }
 }

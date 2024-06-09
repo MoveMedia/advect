@@ -1,10 +1,9 @@
-import { AsyncFunction, toModule } from './utils'
-const $window = window as any;
+import { toModule } from './utils'
 import settings from './settings';
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
 
-
+import './style.css'
 
 
 /**
