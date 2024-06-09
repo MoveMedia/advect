@@ -68,7 +68,13 @@ export async function build(template: HTMLTemplateElement, register = true) {
 }
 
 
-
+/**
+ * Load a template from a url and add creates custom elements from the templates
+ * @param url url to load
+ * @param method method to use
+ * @param headers additional headers to add
+ * @returns promise to that resolves when the template is built
+ */
 export async function load(
   url: string,
   method: 'GET' | 'POST' | 'PATCH' = 'GET',

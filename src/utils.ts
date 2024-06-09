@@ -16,6 +16,7 @@ export function toModule(script:string, inject:string[] = []) {
 
 /**
  * Creates a style element from a string of css and appends it to the head
+ * (NOT IN USE)
  * @param css css to append
  * @returns the style element
  */
@@ -25,7 +26,13 @@ export function toStyles(css:string) {
   //  document.head.appendChild(style);
     return style;
 }
+/**
+ * Reference to the window object without type checking
+ */
+export const $window = (window as (Record<string, any> & Window) ) ;
 
-export const $window = (window as any);
 
+/**
+ * Async function constructor
+ */
 export const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;

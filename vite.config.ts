@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import path from 'path'
-console.log('custom conf')
 export default defineConfig({
     build: {
         rollupOptions: {
