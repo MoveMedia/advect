@@ -1,26 +1,47 @@
 import { $window } from "./utils";
 import $m from 'mustache';
 
-
+/**
+ * A Untility element for rendering mustache templates
+ */
 export class AdvectView extends HTMLElement {
-    _mutationObserver: MutationObserver | null = null;
+  /**
+   * Mutation Observer for the element
+   */
+    #mutationObserver: MutationObserver | null = null;
+    /**
+     * getter for mutationObserver
+     */
     get mutationObserver() {
-      if (this._mutationObserver == null) {
-        this._mutationObserver = new MutationObserver(() => {
+      if (this.#mutationObserver == null) {
+        this.#mutationObserver = new MutationObserver(() => {
           this.render();
         });
-        this._mutationObserver.observe(this, { childList: true, subtree: true });
+        this.#mutationObserver.observe(this, { childList: true, subtree: true });
       }
-      return this._mutationObserver;
+      return this.#mutationObserver;
     }
-  
+    /**
+     * instance counter
+     */
     static ic = 0;
+    /**
+     * getter for *.constructor.ic
+     */
     // @ts-ignore instance counter
     get ic() { return this.constructor.ic; }
-  
+    /**
+     * data object for the element, used to store data on the element instance
+     * accessed via  'data' or 'self.data' in templates
+     */
     data: Record<string, any> = {};  
-  
+    /**
+     * signature for the element. This will be used to give refs unique ids
+     */
     #refs?: Record<string, HTMLElement>;
+    /**
+     * getter for refs
+     */
     get refs() {
       const _this = this;
       if (this.#refs === null) {
@@ -33,12 +54,20 @@ export class AdvectView extends HTMLElement {
       }
       return this.#refs;
     }
-  
+  /**
+   * inital content of the element
+   */
     initalContent?: Node;
-  
+    /**
+     * constructor for the element
+     */
     constructor() {
       super();
     }
+    /**
+     * connectedCallback for the element
+     * must call super.connectedCallback() if overriden
+     */
     connectedCallback() {
       // @ts-ignore instance counter
       this.constructor.ic++;
@@ -66,7 +95,9 @@ export class AdvectView extends HTMLElement {
       }
       return rendered
     }
-  
+    /**
+     * hookRefs function for the element
+     */
     hookRefs() {
       this
         .getAttributeNames()
@@ -85,7 +116,7 @@ export class AdvectView extends HTMLElement {
         event_attrs.forEach((name) => {
           const attr_val = ref.getAttribute(name) ?? "";
           // @ts-expect-error assigning event handlers by name nothing to see here
-          ref[name] = ($event) => new AsyncFunction("$self", "event", "el", attr_val)(this, $event, ref);
+          return new AsyncFunction("self", "event", "el", "refs","data", attr_val)(this, $event, ref, this.#refs, this.data);
         });
         ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false }));
       });

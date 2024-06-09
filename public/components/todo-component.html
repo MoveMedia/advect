@@ -2,7 +2,6 @@
 <template id="todo-component" adv>
   <style>
     .todo-wrapper {}
-
     form {
       background-color: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
@@ -15,16 +14,6 @@
   </style>
   <div id="wrapper" class="todo-wrapper" onload="
     let todos = [];
-      const submitTodo = (event) => {
-        event.preventDefault();
-        todos.push({
-          id: todos.length,
-          title: self.refs.input.value  
-        });
-        self.refs.input.value = '';
-        self.refs.view.render({ todos });
-      };
-
       self.addEventListener('delete:todo', (event) => {
         console.log('delete:todo', event.detail);
         todos = todos.filter(todo => todo.id != event.detail.todo.dataset.id);
@@ -37,7 +26,16 @@
         submitTodo,
        };
   ">
-    <form part="submit_form" id="form" onsubmit="self.data.submitTodo(event)">
+    <form part="submit_form" id="form" 
+      onsubmit="
+        event.preventDefault();
+          todos.push({
+            id: todos.length,
+            title: self.refs.input.value  
+          });
+        self.refs.input.value = '';
+        self.refs.view.render({ todos });
+       ">
       <slot name="title">
         <h2 class="font-bold">Todos</h2>
       </slot>
