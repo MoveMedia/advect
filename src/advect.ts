@@ -1,11 +1,11 @@
-import { toModule } from './utils'
+import { $window, toModule } from './utils'
 import settings from './settings';
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
 import './style.css'
 
 
-
+const parser = new DOMParser();
 
 /**
  * Given a template element build a custom element from it
@@ -13,11 +13,22 @@ import './style.css'
  * @param register whether to register the custom element
  * @returns the custom element
  */
-export async function build(template: HTMLTemplateElement, register = true) {
+export async function build(_template: HTMLTemplateElement | string, register = true) {
+  let template: HTMLTemplateElement | null = null;
+  let doc : Document;
+  if (typeof _template == "string") {
+    doc = parser.parseFromString(_template, "text/html");
+    template = doc.querySelector('template') as HTMLTemplateElement;
+  }
+  else {
+    template = _template;
+    doc = parser.parseFromString(template.outerHTML, "text/html");
+  }
+
   // shadow mode can be open or closed
-  const shadow_mode = template.getAttribute('shadow-mode') ?? "closed";
+  const shadow_mode = template.getAttribute('shadow-mode') ?? settings.default_shadow_mode;
   // use internals can be true or false
-  const use_internals = template.getAttribute('use-internals') == "false" || true;
+  const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
   // get all the attributes except core to add to observedAttributes
   const attrs = [...template.attributes].filter(
     attr => attr.name != 'adv' // no need to copy the adv attribute
@@ -35,28 +46,44 @@ export async function build(template: HTMLTemplateElement, register = true) {
   }
   // Other scripts to add to the context
   // e
-  const inlineScriptFunctions = [...template.content.querySelectorAll('script:not([main]):not([adv-skip])')]
-    .filter( s => s.textContent != '')
-    .map(script => new Function(script.textContent as string))
-    .;
+  const dataScripts = [...(doc.querySelector('template')?.content.querySelectorAll('script:not([main])') ?? [])]
+    .map(script => { 
+      return { id : script.id, script: script.textContent as string }
+    });
 
+
+    
 
   // const styles = [...template.content.querySelectorAll('style')]
   //const all_styles = [...styles.map(style => style.textContent)].join('\n');
   //const style_link = toStyles(all_styles);
   // styles.forEach(style => template.content.removeChild(style));
   const refs_ids = [...template.content.querySelectorAll('[id]')].map(el => el.id);
+  // NOT USED BUT COULD BE
   const slots_names = [...template.content.querySelectorAll('slot')].map(el => el.name);
-  const TemplateClass = (mainModule?.default ?? class extends AdvectElement { });
+
+  const TemplateClass = class extends (mainModule?.default ?? class extends AdvectElement { }){
+    $doc: Document = doc;
+    $ref_ids: string[] = refs_ids;
+    $slots_names: string[] = slots_names;
+    $template: HTMLTemplateElement = template as HTMLTemplateElement;
+    static $use_internals = use_internals;
+    static $shadow_mode = shadow_mode;
+    static $data_scripts = dataScripts;
+    static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
+
+  };
   //TemplateClass.prototype.inlineScriptFunctions = inlineScriptFunctions;
-  TemplateClass.prototype.$template = template;
-  TemplateClass.prototype.$ref_ids = refs_ids;
-  TemplateClass.prototype.$slots_names = slots_names;
-  TemplateClass.constructor.observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
-  TemplateClass.constructor.$shadow_mode = shadow_mode;
-  TemplateClass.constructor.$use_internals = use_internals;
+  // TemplateClass.prototype.$template = template;
+  // TemplateClass.prototype.$ref_ids = refs_ids;
+  // TemplateClass.prototype.$slots_names = slots_names;
+  // TemplateClass.constructor.$data_scripts = () => dataScripts;
+  // TemplateClass.constructor.observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
+  // TemplateClass.constructor.$shadow_mode = shadow_mode;
+  // TemplateClass.constructor.$use_internals = use_internals;
 
   if (register) {
+    // @ts-ignore valid custom element name
     customElements.define(template.id, TemplateClass);
   }
   return TemplateClass;
@@ -102,7 +129,7 @@ export async function load(
           console.error("Template tag must be a template tag");
           return;
         }
-        console.log("Adding template", template.id);
+     //   console.log("Adding template", template.id);
         build(template);
       });
     })
@@ -110,6 +137,7 @@ export async function load(
       console.error(`Could not parse template from request`, e);
     });
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   // register all templates with adv attribute

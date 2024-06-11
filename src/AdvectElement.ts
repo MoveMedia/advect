@@ -34,7 +34,7 @@ export class AdvectElement extends HTMLElement {
   /**
    * internals object, if use-internals is true
    */
-  internals?: ElementInternals;
+  #internals?: ElementInternals;
   /**
    * shadow mode can be open or closed
    */
@@ -66,7 +66,7 @@ export class AdvectElement extends HTMLElement {
    * refs object, a proxy that returns elements by their id
    */
   #refs?: Record<string, HTMLElement>;
-  
+
   /**
    * getter for refs
    */
@@ -74,17 +74,12 @@ export class AdvectElement extends HTMLElement {
     return this.#refs;
   }
 
-  #$refs?: Record<string, Cash>;
-  
-  /**
-   * getter for refs
-   */
-  get $refs() {
-    return this.#$refs;
+  get $data_scripts() :{ id: string, script: string }[] {
+    // @ts-ignore data scripts
+    return this.constructor.$data_scripts ?? [];
   }
 
 
-  
   #slots?: Record<string, HTMLElement>;
 
   get slots() {
@@ -101,6 +96,22 @@ export class AdvectElement extends HTMLElement {
    * accessed via  'data' or 'self.data' in templates
    */
   data: Record<string, any> = {};
+
+  // where scope is stored
+  #scope: Map<string, any> = new Map();
+  // where scope is access
+  scope = new Proxy({}, {
+    get: (_, name: string) => {
+      return this.#scope.get(name);
+    },
+    set: (_, name: string, value: any) => {
+      this.#scope.set(name, value);
+      return true;
+    }
+  });
+  // where scope is used
+ 
+
   /**
    * constructor for the element
    * sets the instance counter
@@ -109,9 +120,9 @@ export class AdvectElement extends HTMLElement {
   constructor() {
     super();
     this.dataset["instance"] = this.ic.toString();
-
+    this.generateScope = this.generateScope.bind(this);
     if (this.use_internals) {
-      this.internals = this.attachInternals();
+      this.#internals = this.attachInternals();
     }
   }
   /**
@@ -140,11 +151,11 @@ export class AdvectElement extends HTMLElement {
     this.constructor.ic++;
     /// TODO validate use shadow at somepoint
 
-   const root = this.attachShadow({ mode: this.shadow_mode });
+    const root = this.attachShadow({ mode: this.shadow_mode });
     this.initalContent = this.cloneNode(true);
     // @ts-ignore template defined in build
     root.innerHTML = this.$template.innerHTML;
-    const loadRefs = [...this.root.querySelectorAll('[id]')].map((ref) => {
+    const loadRefs = [...this.root.querySelectorAll('[id]:not(script)')].map((ref) => {
       const new_id = `${this.signature}-${ref.id}`;
       try {
         (ref as HTMLElement).dataset.ogid = ref.id;
@@ -160,17 +171,21 @@ export class AdvectElement extends HTMLElement {
         const attr_val = ref.getAttribute(name) ?? "";
         // @ts-expect-error assigning event handlers by name nothing to see here
         ref[name] = (_event) => {
-          console.log("event", _event);
+       //   console.log("event", _event);
           // @ts-ignore Internals.states DOES exist
           return new AsyncFunction
-            ("self", "$self", "event", "el", "$el", "refs","$refs", "data", "states", "$", attr_val)
-            (this, $(self), _event, ref, $(ref), this.#refs, this.#$refs, this.data, this.internals?.states, $);
+            ("self", "$self", "event", "el", "$el", "refs", "data", "states", "scope", "$", attr_val) // @ts-ignore Internals.states DOES exist
+            (this, $(self), _event, ref, $(ref), this.#refs, this.data, this.#internals?.states, this.scope, $);
         }
       });
       return ref;
     });
 
     const _this = this;
+    /**
+     * refs
+     * a proxy that returns elements by their id
+     **/
 
     this.#refs = new Proxy({}, {
       get: (_, id: string) => {
@@ -181,18 +196,7 @@ export class AdvectElement extends HTMLElement {
         return [..._this.root.querySelectorAll('[data-ogid]')].map(el => el.id);
       }
     });
-
-    this.#$refs = new Proxy({}, {
-      get: (_, id: string) => {
-        const query = `[data-ogid="${id}"]`;
-        return $(_this.root.querySelector(query));
-      },
-      ownKeys: () => {
-        return [..._this.root.querySelectorAll('[data-ogid]')].map(el => el.id);
-      }
-    });
-
-
+   
 
     this.#slots = new Proxy({}, {
       get: (_, name: string) => {
@@ -207,7 +211,48 @@ export class AdvectElement extends HTMLElement {
       }
     });
 
-    loadRefs.forEach((ref) => { ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false })); });
+    this.generateScope().then(() => {
+
+      loadRefs.forEach((ref) => { ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false })); });
+    });
+
+  }
+
+  generateScope(){
+    const pushScope = (scope: Record<string, any>)  =>{
+      for (let key in scope) {
+        this.scope[key] = scope[key];
+      }
+    }
+    type ScopeResolution = Record<string, any> | Function | typeof AsyncFunction;
+
+    const scopeFunctions: Promise<ScopeResolution>[] = this.$data_scripts
+      .map( ({script , id}) => {
+        return new AsyncFunction
+            ("self", "$self", "refs", "data", "states", "$", script) // @ts-ignore Internals.states DOES exist
+            (this, $(self), this.#refs, this.data, this.#internals?.states, $);
+      }); 
+    return Promise.all(scopeFunctions).then(scopes => {
+      scopes.forEach((scope) => {
+        // I want this but cant have it right now, await should still work in the script
+        // if (scope && scope.constructor.name === "AsyncFunction") {
+        //   pushScope(await (scope as typeof AsyncFunction)());
+        // }
+        if (
+          scope instanceof Function &&
+          !(scope instanceof Promise)
+        ) {
+          pushScope(scope());
+        }else{
+          pushScope(scope);
+        }
+        
+      });
+    });
+
+    // TODO Add addtionals to scope
+
   }
 }
+
 $window.AdvectElement = AdvectElement;

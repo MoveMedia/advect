@@ -8,4 +8,7 @@ export default {
 
     load_event: "adv:load" as const,
 
+    default_shadow_mode: "open" as const,
+    default_use_internals: true as const,
+
 } as const

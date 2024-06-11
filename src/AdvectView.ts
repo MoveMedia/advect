@@ -85,7 +85,7 @@ export class AdvectView extends HTMLElement {
       this.render();
     }
     render(data?: Record<string, any>) {
-      console.log("rendering", data);
+    //  console.log("rendering", data);
       const rendered = $m.render(this.innerHTML, { ...this.dataset, ...(data ?? {}) });
       if (this.dataset["autorender"] != "false") {
         const wrapper = document.createElement("div");

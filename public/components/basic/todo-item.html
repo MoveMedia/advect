@@ -1,52 +1,46 @@
 <template id="todo-item" adv>
-  <li id="item" onload="
-      self.data = {
-        toggleComplete: () => {
-          self.dataset.complete = self.dataset.complete == 'true' ? 'false' : 'true';
-          self.refs.completeBtn.innerText = self.dataset.complete == 'true' ? 'Undo' : 'Complete';
-        },
-        dispatchDelete() {
-          self.dispatchEvent(
-            new CustomEvent('delete:todo', {
-              composed: true,
-              bubbles: true,
-            detail: {
-              todo:self,
-            }
-          }));
-        }
+  <script>
+    const { completeBtn } = refs;
+    const getDeleteEvent = ( todo ) => new CustomEvent('delete:todo', {
+      composed: true,
+      bubbles: true,
+      detail: {
+        todo,
       }
-  ">
-    <input id="title" class="title" type="text" aria-label="Todo Title" onload="{
-        el.value = self.dataset.title;
-      }" />
-    <button id="completeBtn" 
-      aria-label="Complete Button"
-      onload="{el.innerText = self.dataset.complete == 'true' ? 'Undo' : 'Complete'}"
-      onclick="self.data.toggleComplete()">
+    }); 
+    // Cash-dom helper not required
+      const updateCompleteTxt = () => {
+        console.log('updateCompleteTxt');
+        $(completeBtn).text($self.data('complete') == 'true' ? 'Undo' : 'Complete');
+      };
+      const toggleComplete = () => {
+        $self.data('complete', $self.data('complete') == 'true' ? 'false' : 'true');
+        this.updateCompleteTxt(); //this is scope in this case
+      };
+      
+      $self.trigger(getDeleteEvent($self));
+
+    // this is for your lsp and sanity
+    const scope = {
+      updateCompleteTxt,
+      toggleComplete,
+      }
+    return scope;
+  </script>
+
+
+  <li id="item">
+    <input id="title" class="title" type="text" aria-label="title" onload="{$el.val(self.dataset.title)}" />
+    <button id="completeBtn" onclick="scope.toggleComplete()">
+    <!-- title set onload -->
     </button>
-    <button 
-        aria-label="Delete Button" 
-        id="deleteBtn" 
-        onclick="data.dispatchDelete()">
+    <button id="deleteBtn" onclick="scope.dispatchDelete()">
       Delete
     </button>
-    <button 
-      id="statusBtn" 
-      hx-get="/components/done.html" 
-      aria-label="Get Status" 
-      hx-target="[name='status']" 
-      hx-swap="innerHTML">
-      Get Status
-    </button>
-    <span name="status">
-
-    </span>
   </li>
   <style>
-    :current
-    :host  {
-      & li {
+    :host {
+      li {
         max-width: 300px;
         width: 100%;
         min-height: 60px;
@@ -57,7 +51,7 @@
           background-color: color-mix(in srgb, green, transparent);
         }
 
-        .title {
+        & .title {
           text-decoration: line-through;
         }
       }

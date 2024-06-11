@@ -1,43 +1,14 @@
 <script type="text/adv" src="components/basic/todo-item.html"></script>
 <template id="todo-component" adv>
-  <style>
-    .todo-wrapper {}
-    form {
-      background-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--white);
-      border-radius: 10px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-  </style>
-  <div id="wrapper" class="todo-wrapper" onload="
-      data.todos = [];  
-      self.addEventListener('delete:todo', (event) => {
-        data.todos = data.todos.filter(todo => todo.id != event.detail.todo.dataset.id );
-        event.detail.todo.remove();
-        self.refs.view.render({ todos:data.todos });
-      });
-      
-  ">
-    <form part="submit_form" id="form" 
-      onsubmit="
-        event.preventDefault();
-          data.todos.push({
-            id: data.todos.length,
-            title: self.refs.input.value  
-          });
-        self.refs.input.value = '';
-        self.refs.view.render({ todos:data.todos });
-       ">
+  <div id="wrapper" class="todo-wrapper">
+    <form part="submit_form" id="form" onload="console.log('scope is',scope)" onsubmit="scope.onSubmit(event)">
       <slot name="title">
         <h2 class="font-bold">Todos</h2>
       </slot>
       <div>
         <label for="input">
           <span>Add a todo</span>
-          <input id="input" type="text" name="todo-input" class="border-b-2 border-slate-500" required />
+          <input id="input_name" type="text" name="todo name input" class="border-b-2 border-slate-500" required />
         </label>
         <button class="">Submits</button>
       </div>
@@ -58,4 +29,46 @@
       </adv-view>
     </ul>
   </div>
+    <!--  -->
+  <script>
+      let todos = []; 
+      const { input_name, view } = self.refs; // this is more efficient because refs reuns a querySelector
+
+      const onSubmit = (event) => {
+        event.preventDefault();
+        const todo = {
+          id: Date.now(),
+          title: input_name.value,
+          complete: false
+        };
+        todos.push(todo);
+        input_name.value = '';
+        view.render({ todos });
+      }
+      $self.on('delete:todo', (event) => {
+        todos = todos.filter(todo => todo.id != event.detail.todo.dataset.id );
+        event.detail.todo.remove();
+        self.refs.view.render({ todos });
+      });
+
+
+      const scope =
+       {
+        todos,
+        onSubmit,
+      }
+      return scope;
+  </script>
+<style>
+  .todo-wrapper {}
+  form {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--white);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+</style>
 </template>
