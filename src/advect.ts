@@ -35,16 +35,10 @@ export async function build(template: HTMLTemplateElement, register = true) {
   }
   // Other scripts to add to the context
   // e
-  // const inlineScriptFunctions = [...template.content.querySelectorAll('script:not([main]):not([adv-skip])')]
-  //   .map(script => {
-  //     const src = script.textContent;
-  //     if (script && script.textContent) {
-  //       return  ($self: any)  => new AsyncFunction("$self", src)($self)
-  //     }
-  //     // remove the script from the template, so they wont render
-  //     template.content.removeChild(script);
-  //     return null
-  //   }).filter(module => module !== null);
+  const inlineScriptFunctions = [...template.content.querySelectorAll('script:not([main]):not([adv-skip])')]
+    .filter( s => s.textContent != '')
+    .map(script => new Function(script.textContent as string))
+    .;
 
 
   // const styles = [...template.content.querySelectorAll('style')]
