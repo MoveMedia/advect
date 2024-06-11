@@ -2,8 +2,9 @@ import { toModule } from './utils'
 import settings from './settings';
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
-
 import './style.css'
+
+
 
 
 /**
@@ -14,9 +15,9 @@ import './style.css'
  */
 export async function build(template: HTMLTemplateElement, register = true) {
   // shadow mode can be open or closed
-  const shadow_mode = template.getAttribute('shadow-mode') ?? "open";
+  const shadow_mode = template.getAttribute('shadow-mode') ?? "closed";
   // use internals can be true or false
-  const use_internals = template.getAttribute('use-internals') == "true" || false;
+  const use_internals = template.getAttribute('use-internals') == "false" || true;
   // get all the attributes except core to add to observedAttributes
   const attrs = [...template.attributes].filter(
     attr => attr.name != 'adv' // no need to copy the adv attribute

@@ -1,6 +1,7 @@
 import { $window } from "./utils";
 import $m from 'mustache';
 
+$m.tags = [ '[[', ']]' ];
 /**
  * A Untility element for rendering mustache templates
  */
@@ -21,6 +22,9 @@ export class AdvectView extends HTMLElement {
       }
       return this.#mutationObserver;
     }
+
+    internals?: ElementInternals;
+
     /**
      * instance counter
      */
@@ -73,8 +77,10 @@ export class AdvectView extends HTMLElement {
       this.constructor.ic++;
       this.initalContent = this.cloneNode(true);
       this.attachShadow({ mode: "open" });
+      this.internals = this.attachInternals();
       this.shadowRoot?.addEventListener("advect:render", () => {
         this.render();
+      
       });
       this.render();
     }
@@ -87,9 +93,7 @@ export class AdvectView extends HTMLElement {
         while (this.shadowRoot?.firstChild) {
           this.shadowRoot.removeChild(this.shadowRoot.firstChild);
         }
-        if ($window.htmx) {
-          $window.htmx.process(wrapper);
-        }
+        
         this.shadowRoot?.appendChild(wrapper);
         this.hookRefs();
       }

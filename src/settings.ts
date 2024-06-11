@@ -6,4 +6,6 @@ export default {
 
     adv_skip: "adv-skip" as const,
 
+    load_event: "adv:load" as const,
+
 } as const

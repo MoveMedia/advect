@@ -1,24 +1,4 @@
 <template id="todo-item" adv>
-  <style>
-    :host {
-      li {
-        max-width: 300px;
-        width: 100%;
-        min-height: 60px;
-      }
-
-      &[data-complete="true"] {
-        & li {
-          background-color: color-mix(in srgb, green, transparent);
-        }
-
-        & .title {
-          text-decoration: line-through;
-        }
-      }
-    }
-  </style>
-
   <li id="item" onload="
       self.data = {
         toggleComplete: () => {
@@ -37,16 +17,50 @@
         }
       }
   ">
-    <input id="title" class="title" type="text" aria-label="title" onload="{
+    <input id="title" class="title" type="text" aria-label="Todo Title" onload="{
         el.value = self.dataset.title;
       }" />
     <button id="completeBtn" 
+      aria-label="Complete Button"
       onload="{el.innerText = self.dataset.complete == 'true' ? 'Undo' : 'Complete'}"
       onclick="self.data.toggleComplete()">
-
     </button>
-    <button id="deleteBtn" onclick="self.data.dispatchDelete()">
+    <button 
+        aria-label="Delete Button" 
+        id="deleteBtn" 
+        onclick="data.dispatchDelete()">
       Delete
     </button>
+    <button 
+      id="statusBtn" 
+      hx-get="/components/done.html" 
+      aria-label="Get Status" 
+      hx-target="[name='status']" 
+      hx-swap="innerHTML">
+      Get Status
+    </button>
+    <span name="status">
+
+    </span>
   </li>
+  <style>
+    :current
+    :host  {
+      & li {
+        max-width: 300px;
+        width: 100%;
+        min-height: 60px;
+      }
+
+      &[data-complete="true"] {
+        & li {
+          background-color: color-mix(in srgb, green, transparent);
+        }
+
+        .title {
+          text-decoration: line-through;
+        }
+      }
+    }
+  </style>
 </template>
