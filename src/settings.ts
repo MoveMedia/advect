@@ -11,4 +11,9 @@ export default {
     default_shadow_mode: "open" as const,
     default_use_internals: true as const,
 
+    /**
+     * list of tags that should not be send and onload event when referenced
+     */
+    refs_no_inital_load: ["frame", "iframe", "img", "input[type='image']", "link", "script", "style"] as const,
+
 } as const

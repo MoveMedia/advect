@@ -1,6 +1,5 @@
 import { $window, AsyncFunction } from "./utils";
-
-import $, { Cash } from 'cash-dom'
+import settings from "./settings";
 
 
 /**
@@ -152,6 +151,8 @@ export class AdvectElement extends HTMLElement {
     /// TODO validate use shadow at somepoint
 
     const root = this.attachShadow({ mode: this.shadow_mode });
+    root.adoptedStyleSheets = [this.$style];
+
     this.initalContent = this.cloneNode(true);
     // @ts-ignore template defined in build
     root.innerHTML = this.$template.innerHTML;
@@ -174,8 +175,8 @@ export class AdvectElement extends HTMLElement {
        //   console.log("event", _event);
           // @ts-ignore Internals.states DOES exist
           return new AsyncFunction
-            ("self", "$self", "event", "el", "$el", "refs", "data", "states", "scope", "$", attr_val) // @ts-ignore Internals.states DOES exist
-            (this, $(self), _event, ref, $(ref), this.#refs, this.data, this.#internals?.states, this.scope, $);
+            ("self", "event", "el", "refs", "data", "states", "scope", attr_val) // @ts-ignore Internals.states DOES exist
+            (this, _event, ref, this.#refs, this.data, this.#internals?.states, this.scope);
         }
       });
       return ref;
@@ -212,8 +213,10 @@ export class AdvectElement extends HTMLElement {
     });
 
     this.generateScope().then(() => {
-
-      loadRefs.forEach((ref) => { ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false })); });
+      loadRefs
+        .filter((ref) => !ref.matches(settings.refs_no_inital_load.join(",")))
+        .forEach((ref) => { ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false })); 
+      });
     });
 
   }
@@ -221,16 +224,17 @@ export class AdvectElement extends HTMLElement {
   generateScope(){
     const pushScope = (scope: Record<string, any>)  =>{
       for (let key in scope) {
+        // @ts-ignore
         this.scope[key] = scope[key];
       }
     }
     type ScopeResolution = Record<string, any> | Function | typeof AsyncFunction;
 
     const scopeFunctions: Promise<ScopeResolution>[] = this.$data_scripts
-      .map( ({script , id}) => {
+      .map( ({script}) => {
         return new AsyncFunction
-            ("self", "$self", "refs", "data", "states", "$", script) // @ts-ignore Internals.states DOES exist
-            (this, $(self), this.#refs, this.data, this.#internals?.states, $);
+            ("self", "refs", "data", "states", script) // @ts-ignore Internals.states DOES exist
+            (this, this.#refs, this.data, this.#internals?.states);
       }); 
     return Promise.all(scopeFunctions).then(scopes => {
       scopes.forEach((scope) => {

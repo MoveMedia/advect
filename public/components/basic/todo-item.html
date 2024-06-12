@@ -1,60 +1,79 @@
 <template id="todo-item" adv>
   <script>
-    const { completeBtn } = refs;
-    const getDeleteEvent = ( todo ) => new CustomEvent('delete:todo', {
-      composed: true,
-      bubbles: true,
-      detail: {
-        todo,
-      }
-    }); 
-    // Cash-dom helper not required
-      const updateCompleteTxt = () => {
-        console.log('updateCompleteTxt');
-        $(completeBtn).text($self.data('complete') == 'true' ? 'Undo' : 'Complete');
-      };
-      const toggleComplete = () => {
-        $self.data('complete', $self.data('complete') == 'true' ? 'false' : 'true');
-        this.updateCompleteTxt(); //this is scope in this case
-      };
-      
-      $self.trigger(getDeleteEvent($self));
+    const { completeBtn, title } = refs;
 
+    const deleteTodo = () => {
+      const deleteEvent = new CustomEvent('delete:todo', {
+        composed: true,
+        bubbles: true,
+        detail: { todo: self }
+      });
+      // this will trigger the transition
+      // when the transition ends, the event will be dispatched
+      
+      self.dataset.deleting = true;
+
+      self.addEventListener('transitionend', () => {
+        self.dispatchEvent(deleteEvent);
+      }, { once: true });
+    };
+
+    const dispatchComplete = () => {
+      const e = new CustomEvent('complete:todo', {
+        composed: true,
+        bubbles: true,
+        detail: { todo: self }
+      });
+      self.dispatchEvent(e);
+    };
+
+
+    const updateCompleteTxt = () => {
+      completeBtn.textContent = self.dataset.complete == 'true' ? 'Undo' : 'Complete';
+    };
+    const toggleComplete = () => {
+      self.dataset.complete = self.dataset.complete == 'true'
+        ? 'false'
+        : 'true'
+
+      updateCompleteTxt(); //this is scope in this case
+    };
+
+    title.value = self.dataset.title;
+
+    updateCompleteTxt(); //this is scope in this case
     // this is for your lsp and sanity
-    const scope = {
-      updateCompleteTxt,
-      toggleComplete,
-      }
+    const scope = { updateCompleteTxt, toggleComplete, deleteTodo }
+
     return scope;
   </script>
 
 
   <li id="item">
-    <input id="title" class="title" type="text" aria-label="title" onload="{$el.val(self.dataset.title)}" />
+    <input id="title" class="title" type="text" aria-label="title" onload="scope.updateCompleteTxt()" />
     <button id="completeBtn" onclick="scope.toggleComplete()">
-    <!-- title set onload -->
+      <!-- title set onload -->
     </button>
-    <button id="deleteBtn" onclick="scope.dispatchDelete()">
+    <button id="deleteBtn" onclick="scope.deleteTodo()">s
       Delete
     </button>
   </li>
   <style>
-    :host {
-      li {
-        max-width: 300px;
-        width: 100%;
-        min-height: 60px;
+    :host{
+      transition: all 0.3s;
+    }
+    :host([data-complete="true"]) {
+      input{
+        text-decoration: line-through;
+        color: white;
+        background-color: lightgreen;
+        pointer-events: none;
       }
-
-      &[data-complete="true"] {
-        & li {
-          background-color: color-mix(in srgb, green, transparent);
-        }
-
-        & .title {
-          text-decoration: line-through;
-        }
-      }
+    }
+    :host([data-deleting])  {
+      opacity : 0;
+      transition-timing-function : ease-in;
+      pointer-events: none;
     }
   </style>
 </template>

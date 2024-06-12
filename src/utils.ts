@@ -20,11 +20,10 @@ export function toModule(script:string, inject:string[] = []) {
  * @param css css to append
  * @returns the style element
  */
-export function toStyles(css:string) {
-    const style = document.createElement('style');
-    style.textContent = css;
-  //  document.head.appendChild(style);
-    return style;
+export function toStyle(cssStr:string) {
+    const css = new CSSStyleSheet();
+    css.replaceSync(cssStr);
+    return css;
 }
 /**
  * Reference to the window object without type checking
@@ -36,3 +35,5 @@ export const $window = (window as (Record<string, any> & Window) ) ;
  * Async function constructor
  */
 export const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
+

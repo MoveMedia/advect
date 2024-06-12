@@ -1,4 +1,4 @@
-import { $window, toModule } from './utils'
+import { toModule, toStyle } from './utils'
 import settings from './settings';
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
@@ -51,13 +51,10 @@ export async function build(_template: HTMLTemplateElement | string, register = 
       return { id : script.id, script: script.textContent as string }
     });
 
-
-    
-
-  // const styles = [...template.content.querySelectorAll('style')]
-  //const all_styles = [...styles.map(style => style.textContent)].join('\n');
-  //const style_link = toStyles(all_styles);
-  // styles.forEach(style => template.content.removeChild(style));
+  const style_els = [...(doc.querySelector('template')?.content.querySelectorAll('style') ?? [])]
+  const all_css = style_els.map(style => style.textContent).join('\n');
+  const style_sheet = toStyle(all_css);
+ // styles.forEach(style => template.content.removeChild(style));
   const refs_ids = [...template.content.querySelectorAll('[id]')].map(el => el.id);
   // NOT USED BUT COULD BE
   const slots_names = [...template.content.querySelectorAll('slot')].map(el => el.name);
@@ -67,20 +64,13 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     $ref_ids: string[] = refs_ids;
     $slots_names: string[] = slots_names;
     $template: HTMLTemplateElement = template as HTMLTemplateElement;
+    $style = style_sheet;
     static $use_internals = use_internals;
     static $shadow_mode = shadow_mode;
     static $data_scripts = dataScripts;
     static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
 
   };
-  //TemplateClass.prototype.inlineScriptFunctions = inlineScriptFunctions;
-  // TemplateClass.prototype.$template = template;
-  // TemplateClass.prototype.$ref_ids = refs_ids;
-  // TemplateClass.prototype.$slots_names = slots_names;
-  // TemplateClass.constructor.$data_scripts = () => dataScripts;
-  // TemplateClass.constructor.observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
-  // TemplateClass.constructor.$shadow_mode = shadow_mode;
-  // TemplateClass.constructor.$use_internals = use_internals;
 
   if (register) {
     // @ts-ignore valid custom element name
