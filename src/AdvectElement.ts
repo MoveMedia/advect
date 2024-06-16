@@ -110,6 +110,7 @@ export class AdvectElement extends HTMLElement {
   });
   // where scope is used
  
+    $style! : CSSStyleSheet ;
 
   /**
    * constructor for the element
@@ -218,7 +219,6 @@ export class AdvectElement extends HTMLElement {
         .forEach((ref) => { ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false })); 
       });
     });
-
   }
 
   generateScope(){

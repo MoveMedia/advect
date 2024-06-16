@@ -1,40 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <!-- Include plugins after the script, -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="text/adv" src="components/basic/default-layout.html"></script>
-    <script type="text/adv" src="components/basic/todo-component.html"></script>
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-     
 
-    </style>
-    <title>Advect</title>
+<head>
+  <meta charset="UTF-8" />
+  <!-- Include plugins after the script, -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script type="text/adv" src="components/basic-refresh/todo-component.html"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
 
-  </head>
-  <body>
-    <default-layout exportparts="content">
-        <header id="test" slot="header">
-          <h2 class="text-4xl mb-5 text-center">Todo List App in Advect</h2>
-          
-        </header>
-        
-        <todo-component slot="content">
-            <h2 slot="title">My Todo List custom title
 
-            </h2>
-          
-        </todo-component>
+  </style>
+  <title>Advect</title>
 
-        <footer slot="footer">
-          <p class="text-center">Made with ❤️</p>
-        </footer>
+</head>
 
-      
-    </default-layout>
-    <script type="module" src="/src/advect.ts"></script>
+<body>
+  <header id="test" slot="header">
+    <h2 class="text-4xl mb-5 text-center">Todo List App in Advect</h2>
+  </header>
 
-  </body>
+  <todo-component slot="content">
+    <h2 slot="title">My Todo List custom title
+    </h2>
+  </todo-component>
+
+  <footer slot="footer">
+    <p class="text-center">Made with ❤️</p>
+  </footer>
+
+  <script type="module" src="/src/advect.ts"></script>
+
+</body>
+
 </html>

@@ -19,7 +19,6 @@
     "vite": "^5.1.4"
   },
   "dependencies": {
-    "mustache": "^4.2.0",
-    "twind": "^0.16.19"
+    "mustache": "^4.2.0"
   }
 }

@@ -7,13 +7,13 @@
     const onSubmit = (event) => {
       event.preventDefault();
       const todo = {
-        id: Date.now(),
+        id: `todo_${todos.length}`,
         title: input_name.value,
-        complete: false
+        complete: 'false'
       };
       todos.push(todo);
       input_name.value = '';
-      view.render({ todos });
+      view.render({ todos, scope });
     }
     const handleDelete = (event) => {
       event.stopPropagation();
@@ -21,6 +21,13 @@
       view.render({ todos });
     };
     self.addEventListener('delete:todo', handleDelete);
+
+    const handleComplete = (event) => {
+      event.stopPropagation();
+      const todo = todos.find(todo => todo.id == event.detail.todo.dataset.id);
+      todo.complete = todo.complete == 'true' ? 'false' : 'true';
+      view.render({ todos });
+    };
 
     const scope = { todos, onSubmit }
     return scope;
@@ -41,7 +48,7 @@
     <ul id="list">
       <adv-view id="view">
         [[#todos]]
-        <todo-item data-title="[[title]]" id="[[id]]" data-id="[[id]]" data-complete="false"></todo-item>
+          <todo-item data-title="[[title]]" id="[[id]]" data-id="[[id]]" data-complete="[[complete]]"></todo-item>
         [[/todos]]
         [[^todos]]
         <li>No todos yet</li>
@@ -51,11 +58,9 @@
   </div>
 
   <style>
-    .todo-wrapper {}
     :host {
       form {
-        background-color: blue;
-        backdrop-filter: blur(10px);
+      transition:all 0.2s;
         border: 1px solid var(--white);
         border-radius: 10px;
         padding: 10px;

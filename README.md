@@ -13,6 +13,7 @@ On the web we have 3 types of html content
 
 
 ## Installation
+
 npm
 ```bash
 npx jsr add @advect/advect

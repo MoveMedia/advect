@@ -10,9 +10,8 @@
       });
       // this will trigger the transition
       // when the transition ends, the event will be dispatched
-      
-      self.dataset.deleting = true;
 
+      self.dataset.deleting = true;
       self.addEventListener('transitionend', () => {
         self.dispatchEvent(deleteEvent);
       }, { once: true });
@@ -59,20 +58,24 @@
     </button>
   </li>
   <style>
-    :host{
-      transition: all 0.3s;
+  
+    :host {
+        transition: all 0.3s;
+        transition-delay: 0.2s;
+        animation: intro 0.3s;
+        position:relative;
     }
+
+
     :host([data-complete="true"]) {
-      input{
+      input {
         text-decoration: line-through;
         color: white;
         background-color: lightgreen;
-        pointer-events: none;
       }
     }
-    :host([data-deleting])  {
-      opacity : 0;
-      transition-timing-function : ease-in;
+
+    :host([data-deleting]) {
       pointer-events: none;
     }
   </style>

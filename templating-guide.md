@@ -1,84 +1,23 @@
 # Templating Guide
- Templates can be placed inside of a inline templating tag
-## Recipes
-### Metaframeworks 
-#### Astro
-#### Next
-#### Nuxt
-#### Svelte
-#### Solid
-### Traditional backends
-#### Twig
-If your backend renders using Twig their may be a collision between the Mustache template in your ```<advect-view>``` and your twig template. There are 2 solutions
-1. wrap your ```<advect-view>```  inside a ```{% verbatum %}``` like
+## Defining a template
+### Adding markup
+### Adding styles
+### Rendering Views
+When you need to do complex rendering the ```<advect-view>``` 
+#### Twig / Blade / Liquid / JSX
+If youre rendering your html with another engine their may be a collision between the Mustache template in your ```<advect-view>``` and your templating engine. to avoid this we use ```"[["  "]]"``` as tags in our mustache template There are you may need to wrap the section in your engines "raw" features this example is in twig
+
+wrap your ```<advect-view>```  inside a ```{% verbatum %}``` like
 ```twig
 <!--
     ... Other content 
 -->
 {% verbatum %}
     <advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
-        Hey {{name}},
-        your height is {{height}} and your weight is {{weight}}
+        Hey [[name]],
+        your height is [[height]] and your weight is [[weight]]
     </advect-view>
 {% endverbatum %}
-   ```
-2. Embrace replace "{{" and "}}" in your ```<advect-view>```  with "\[\[" and "]]" like
-```twig
-<!--
-    ... Other content 
--->
-<advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
-    Hey [[name]],
-    your height is {{height}} and your weight is [[weight]]
-</advect-view>
-```
-#### Liquid
-If your backend renders using Liquid their may be a collision between the Mustache template in your ```<advect-view>``` and your liquid template. There are 2 solutions
-1. wrap your ```<advect-view>```  inside a ```{% raw %}``` like
-```liquid
-<!--
-    ... Other content 
--->
-{% raw %}
-<advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
-    Hey {{name}},
-    your height is {{height}} and your weight is {{weight}}
-</advect-view>
-{% endraw %}
-```
-2. Embrace replace "{{" and "}}" in your ```<advect-view>```  with "\[\[" and "]]" like
-```twig
-<!--
-    ... Other twig content 
--->
-<advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
-    Hey [[name]],
-    your height is {{height}} and your weight is [[weight]]
-</advect-view>
-```
-#### Blade
-If your backend renders using Blade their may be a collision between the Mustache template in your ```<advect-view>``` and your liquid template. There are 2 solutions
-1. wrap your ```<advect-view>```  inside a ```{% raw %}``` like
-```blade
-<!--
-    ... Other twig content 
--->
-@verbatim
-    <advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
-        Hey {{name}},
-        your height is {{height}} and your weight is {{weight}}
-    </advect-view>
-@endverbatim
-```
-2. Embrace replace "{{" and "}}" in your ```<advect-view>```  with "\[\[" and "]]" like
-```twig
-<!--
-... Other twig content 
--->
-<advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
-    Hey [[name]],
-    your height is {{height}} and your weight is [[weight]]
-</advect-view>
 ```
    
 
