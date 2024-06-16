@@ -4,24 +4,29 @@ import { AsyncFunction } from "./utils";
 export default class AdvectBase extends HTMLElement {
     #internals: ElementInternals;
 
+    get internals() {
+        return this.#internals;
+    }
+    data_scripts: { id: string, script: string }[] = [];
+
     /**
      * getter for the shadowRoot or the element itself
      */
-    get root(): ShadowRoot | this { return (this.shadowRoot ?? this) }
-    #refs?: Record<string, HTMLElement>;
 
-    /**
-     * getter for refs
-     */
-    get refs() {
-        return this.#refs;
+    get refs(): Record<string, Element> {
+        return this.allRefs.reduce((p, c) => {
+            const id = c.dataset.ogid as string;
+            return { ...p, [id]: c }
+        }, {});
     }
 
 
-    get $data_scripts(): { id: string, script: string }[] {
-        // @ts-ignore data scripts
-        return this.constructor.$data_scripts ?? [];
+
+    get allRefs() {
+        return [...(this.shadowRoot?.querySelectorAll(`[id]`) ?? [])] as HTMLElement[];
     }
+
+
     /**
    * inital content of the element
    */
@@ -39,6 +44,13 @@ export default class AdvectBase extends HTMLElement {
             return true;
         }
     });
+
+    mergeScope(scope: Record<string, any>) {
+        for (let key in scope) {
+            // @ts-ignore
+            this.scope[key] = scope[key];
+        }
+    }
 
     data: Record<string, any> = {};
     /**
@@ -67,14 +79,15 @@ export default class AdvectBase extends HTMLElement {
                 this[name] = (_event) => new AsyncFunction("self", "event", "scope", attr_val)
                     (this, _event, this.scope);
             });
-
         this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
             const event_attrs = ref
                 .getAttributeNames()
                 .filter((name) => name.startsWith("on"));
 
+
             event_attrs.forEach((name) => {
                 const attr_val = ref.getAttribute(name) ?? "";
+                console.log(ref);
                 // @ts-expect-error assigning event handlers by name nothing to see here
                 ref[name] = (_event) => {
                     new AsyncFunction("self", "event", "el", "refs", "data", "scope", attr_val)
@@ -86,22 +99,18 @@ export default class AdvectBase extends HTMLElement {
                 ref.dispatchEvent(new Event("load", { bubbles: false, cancelable: false }));
             }
         });
+
+
     }
 
     generateScope() {
-        const pushScope = (scope: Record<string, any>) => {
-            for (let key in scope) {
-                // @ts-ignore
-                this.scope[key] = scope[key];
-            }
-        }
         type ScopeResolution = Record<string, any> | Function | typeof AsyncFunction;
 
-        const scopeFunctions: Promise<ScopeResolution>[] = this.$data_scripts
+        const scopeFunctions: Promise<ScopeResolution>[] = this.data_scripts
             .map(({ script }) => {
                 return new AsyncFunction
                     ("self", "refs", "data", "states", script) // @ts-ignore Internals.states DOES exist
-                    (this, this.#refs, this.data, this.#internals?.states);
+                    (this, this.refs, this.data, this.internals?.states);
             });
         return Promise.all(scopeFunctions).then(scopes => {
             scopes.forEach((scope) => {
@@ -113,9 +122,9 @@ export default class AdvectBase extends HTMLElement {
                     scope instanceof Function &&
                     !(scope instanceof Promise)
                 ) {
-                    pushScope(scope());
+                    this.mergeScope(scope());
                 } else {
-                    pushScope(scope);
+                    this.mergeScope(scope);
                 }
 
             });
@@ -124,9 +133,27 @@ export default class AdvectBase extends HTMLElement {
         // TODO Add addtionals to scope
 
     }
+
+
     constructor() {
         super();
         this.#internals = this.attachInternals();
+        this.generateScope = this.generateScope.bind(this);
+    }
+    connectedCallback() {
+        this.initalContent = this.cloneNode(true);
+        this.attachShadow({ mode: "open" });
+
+    }
+
+    setupRefs() {
+        this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
+            const new_id = `${this.nodeName.toLowerCase()}-${ref.id}`;
+            try {
+                (ref as HTMLElement).dataset.ogid = ref.id;
+            } catch (e) { console.warn("Could not set ogid", e); }
+            ref.id = new_id;
+        });
     }
 
 }

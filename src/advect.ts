@@ -28,7 +28,7 @@ export async function build(_template: HTMLTemplateElement | string, register = 
   // shadow mode can be open or closed
   const shadow_mode = template.getAttribute('shadow-mode') ?? settings.default_shadow_mode;
   // use internals can be true or false
-  const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
+  //const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
   // get all the attributes except core to add to observedAttributes
   const attrs = [...template.attributes].filter(
     attr => attr.name != 'adv' // no need to copy the adv attribute
@@ -65,9 +65,9 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     $slots_names: string[] = slots_names;
     $template: HTMLTemplateElement = template as HTMLTemplateElement;
     $style = style_sheet;
-    static $use_internals = use_internals;
+   // static $use_internals = use_internals;
     static $shadow_mode = shadow_mode;
-    static $data_scripts = dataScripts;
+    data_scripts = dataScripts;
     static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
 
   };

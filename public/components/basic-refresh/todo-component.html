@@ -1,7 +1,6 @@
 <template id="todo-component" adv>
     <script>
-        const { new_todo_diag, todo_list, todo_view, form } = self.refs;
-
+        
         const scope = {
             log: () => {
                 console.log('log');
@@ -10,10 +9,9 @@
                 todo.remove();
             },
         }
+        self.refs.todo_view.mergeScope(scope);
 
-        todo_view.mergeScope(scope);
-
-        todo_view.render({
+        self.refs.todo_view.render({
             todos: [
                 { id: `todo_1`, title: 'Todo 1', complete: false },
                 { id: `todo_2`, title: 'Todo 2', complete: true },
@@ -28,7 +26,7 @@
 
     </style>
     <div>
-        <button id="add_btn" onclick="refs.new_todo_diag.showModal()">Add Todo</button>
+        <button id="add_btn" onclick="self.shadowRoot.querySelector('dialog').showModal()">Add Todo</button>
     </div>
     <ul>
         <adv-view id="todo_view">
