@@ -1,5 +1,6 @@
 import { $window } from "./utils";
 import AdvectBase from "./AdvectBase";
+import { AdvectView } from "./AdvectView";
 
 
 /**
@@ -97,8 +98,15 @@ export class AdvectElement extends AdvectBase{
     this.setupRefs();
     this.generateScope().then(() => {
       this.hookRefs()
+      this.shadowRoot?.querySelectorAll('adv-view').forEach(v => {
+        const view = v as AdvectView;
+        view.mergeScope(this._scope);
+        view.mergeStyles(this.shadowRoot?.adoptedStyleSheets ?? [])
+        console.log(view);
+      });
+      
     });
-
+    
 
   }
 

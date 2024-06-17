@@ -1,10 +1,7 @@
-import { $window, AsyncFunction } from "./utils";
+import { $window } from "./utils";
 import $m from 'mustache';
 import AdvectBase from "./AdvectBase";
 
-const css = String.raw;
-
-//$m.tags = ['<;', ';>'];
 /**
  * A Untility element for rendering mustache templates
  */
@@ -38,6 +35,7 @@ export class AdvectView extends AdvectBase {
   get ic() { return this.constructor.ic; }
 
 
+  static observedAttributes = ['data', 'main-script', 'open-tag', 'close-tag'];
 
   main_script?: string;
 
@@ -55,16 +53,16 @@ export class AdvectView extends AdvectBase {
     // @ts-ignore instance counter
     this.constructor.ic++;
 
-    const defaultcss = new CSSStyleSheet();
-    defaultcss.replaceSync(css`
-        :host{
-          display: block;
-          contain: content;
-          width: 100%;
-          height: 100%;
-        }
-    `);
-    this.shadowRoot?.adoptedStyleSheets.push(defaultcss);
+    // const defaultcss = new CSSStyleSheet();
+    // defaultcss.replaceSync(`
+    //     :host{
+    //       display: block;
+    //       contain: content;
+    //       width: 100%;
+    //       height: 100%;
+    //     }
+    // `);
+    //this.shadowRoot?.adoptedStyleSheets.push(defaultcss);
     this.render = this.render.bind(this);
     this.shadowRoot?.addEventListener("advect:render", () => {
       this.render();
@@ -77,8 +75,11 @@ export class AdvectView extends AdvectBase {
       ...(additionalData ?? {}),
       ...this.dataset
     }
-    const rendered = $m.render(this.innerHTML, view);
+    const open_tag = this.getAttribute('open-tag')?.valueOf() ?? '{{';
+    const close_tag = this.getAttribute('close-tag')?.valueOf() ?? '}}';
+    const rendered = $m.render(this.innerHTML, view, {}, [open_tag, close_tag]);
     const wrapper = document.createElement("div");
+    wrapper.setAttribute("part", "content");
     wrapper.innerHTML = rendered;
     while (this.shadowRoot?.firstChild) {
       this.shadowRoot.removeChild(this.shadowRoot.firstChild);

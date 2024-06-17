@@ -33,15 +33,18 @@ export default class AdvectBase extends HTMLElement {
     initalContent?: Node;
 
     // where scope is stored
-    #scope: Map<string, any> = new Map();
+    _scope: Record<string, any> = new Map();
     // where scope is access
     scope = new Proxy({}, {
         get: (_, name: string) => {
-            return this.#scope.get(name);
+            return this._scope[name];
         },
         set: (_, name: string, value: any) => {
-            this.#scope.set(name, value);
+            this._scope[name]=  value;
             return true;
+        },
+        ownKeys: () => {
+            return [...this._scope.keys()];
         }
     });
 
