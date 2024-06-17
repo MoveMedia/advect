@@ -1,8 +1,15 @@
+import { create, cssomSheet } from "twind";
 import settings from "./settings";
 import { AsyncFunction } from "./utils";
 
+
 export default class AdvectBase extends HTMLElement {
+
+    defaultStyleSheet: CSSStyleSheet = new CSSStyleSheet();
+
     #internals: ElementInternals;
+    tw_sheet: any;
+    tw: any;
 
     get internals() {
         return this.#internals;
@@ -145,7 +152,10 @@ export default class AdvectBase extends HTMLElement {
     connectedCallback() {
         this.initalContent = this.cloneNode(true);
         this.attachShadow({ mode: "open" });
-
+        this.shadowRoot?.adoptedStyleSheets.push(this.defaultStyleSheet);
+        this.tw_sheet = cssomSheet({ target: this.defaultStyleSheet })
+        const { tw } = create({ sheet:this.tw_sheet })
+        this.tw = tw; 
     }
 
     setupRefs() {

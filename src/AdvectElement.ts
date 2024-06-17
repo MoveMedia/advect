@@ -98,6 +98,10 @@ export class AdvectElement extends AdvectBase{
     this.setupRefs();
     this.generateScope().then(() => {
       this.hookRefs()
+      this.shadowRoot?.querySelectorAll('[class]').forEach(el => {
+          this.tw(el.className)
+      })
+
       this.shadowRoot?.querySelectorAll('adv-view').forEach(v => {
         const view = v as AdvectView;
         view.mergeScope(this._scope);

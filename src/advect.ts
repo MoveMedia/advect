@@ -98,6 +98,13 @@ export async function load(
     method,
     headers
   })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`Could not fetch template from ${url}`);
+      }
+      return res
+    
+    })
     .then((res) => res.text())
     .then((text) => {
       const parser = new DOMParser();

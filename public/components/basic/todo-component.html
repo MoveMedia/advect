@@ -6,7 +6,8 @@
         // Reference the elements in the component (any element with an id attributz
         const { todo_view, todo_dialog, new_todo_form, todo_name_input } = refs
         // Define data for the compnent, 
-        let todos = []
+        let todos = []// this could also be place on data.todos
+        data.todos = todos
         // Define the "scope" of functionality for the component
         const scope = {
             // Function to toggle the complete status of a todo
@@ -48,7 +49,7 @@
                 todo_view.render({ todos });
             }
         }
-        
+
         // update the view
         scope.update();
         //  we return the scope to make it accessible in to the event handlers of the refs
@@ -58,6 +59,7 @@
         input{
             font-size: var(--scale-fluid-2);
         }
+        
         .todo-item {
             display: flex;
             justify-content: space-between;
@@ -65,7 +67,7 @@
             padding: 10px;
             border: 1px solid #ccc;
 
-            &[data-complete="true"] header {
+            &[data-complete="true"] input {
                 text-decoration: line-through;
             }
         }
@@ -79,14 +81,14 @@
     <section>
 
     <div>
-        <button id="add_btn" class="button" onclick="refs.todo_dialog.showModal()">Add Todo</button>
+        <button id="add_btn" onclick="refs.todo_dialog.showModal()">Add Todo</button>
     </div>
     <adv-view id="todo_view">
-        <ul>
+        <ul class="max-w-[500px]">
             {{#todos}}
             <li data-title="{{title}}" id="{{id}}" data-id="{{id}}" data-complete="{{complete}}" class="todo-item">
                 <input type="text" id="title_{{id}}" name="title {{id}}" value="{{title}}"
-                    oninput="scope.renameTodo(el.closest('li'), el.value)">
+                    onchange="scope.renameTodo(el.closest('li'), el.value)">
                 <div>
                     <button id="complete_{{id}}" class="button" data-id="{{id}}"
                         onclick="scope.toggleComplete(el.closest('li'))">
@@ -101,7 +103,7 @@
                         </span>
                         {{/complete}}
                     </button>
-                    <button id="delete_{{id}}" class="button" onclick="scope.removeTodo(el.closest('li'))">
+                    <button id="delete_{{id}}"  onclick="scope.removeTodo(el.closest('li'))">
                         Delete
                     </button>
                 </div>

@@ -1,7 +1,6 @@
 import { $window } from "./utils";
 import $m from 'mustache';
 import AdvectBase from "./AdvectBase";
-
 /**
  * A Untility element for rendering mustache templates
  */
@@ -89,10 +88,15 @@ export class AdvectView extends AdvectBase {
     await this.generateScope()
       .then(() => {
         this.hookRefs();
+        this.shadowRoot?.querySelectorAll('[class]').forEach(el => {
+          this.tw(el.className)
+      }); 
+  
       })
       .catch((err) => {
         console.error('advect-view',err);
       });;
+
 
     return rendered
   }
