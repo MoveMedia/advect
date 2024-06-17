@@ -4,7 +4,7 @@ import AdvectBase from "./AdvectBase";
 
 const css = String.raw;
 
-$m.tags = ['[[', ']]'];
+//$m.tags = ['<;', ';>'];
 /**
  * A Untility element for rendering mustache templates
  */
@@ -84,6 +84,7 @@ export class AdvectView extends AdvectBase {
       this.shadowRoot.removeChild(this.shadowRoot.firstChild);
     }
     this.shadowRoot?.appendChild(wrapper);
+    this.setupRefs();
     await this.generateScope()
       .then(() => {
         this.hookRefs();

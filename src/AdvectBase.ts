@@ -87,7 +87,6 @@ export default class AdvectBase extends HTMLElement {
 
             event_attrs.forEach((name) => {
                 const attr_val = ref.getAttribute(name) ?? "";
-                console.log(ref);
                 // @ts-expect-error assigning event handlers by name nothing to see here
                 ref[name] = (_event) => {
                     new AsyncFunction("self", "event", "el", "refs", "data", "scope", attr_val)
@@ -155,5 +154,11 @@ export default class AdvectBase extends HTMLElement {
             ref.id = new_id;
         });
     }
-
+      /**
+   * Adds a cssStyleSheet to the element
+   * @param styles 
+   */
+  mergeStyles(styles: CSSStyleSheet[]) {
+    this.shadowRoot?.adoptedStyleSheets.push(...styles);
+  }
 }
