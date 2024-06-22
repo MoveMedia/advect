@@ -1,13 +1,10 @@
 import { defineConfig } from 'vite'
 import path from 'path'
-console.log('custom conf')
 export default defineConfig({
     build: {
         rollupOptions: {
           input:{
-            dds: path.resolve(__dirname, 'src','dds.ts'),
-            dds_test: path.resolve(__dirname,'dds.html')
-
+            advect: path.resolve(__dirname, 'src','advect.ts'),
           },
           output: {
             entryFileNames: `[name].js`,
