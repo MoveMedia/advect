@@ -1,0 +1,55 @@
+:not(:defined) {
+  opacity: 0;
+}
+:defined {
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :defined {
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :defined {
+    transition: opacity 0.2s ease-in-out;
+  }
+}
+:root {
+  font-size: 16px;
+}
+h1,
+h2,
+h3 {
+  font-family: "Roboto", sans-serif;
+  font-weight: 900;
+}
+ul {
+  list-style: disc;
+  & li {
+    margin-left: 1rem;
+  }
+}
+a {
+  color: black;
+}
+
+.hero {
+  background-image: linear-gradient(227deg, #7d0000ee, #010020cc),
+    url("/img/abstract.jpg");
+  color: white;
+  & .content {
+    padding: 2rem;
+    backdrop-filter: blur(2px);
+    animation: panIn 0.5s ease-in-out;
+  }
+  @keyframes panIn {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}

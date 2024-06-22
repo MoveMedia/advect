@@ -9,7 +9,7 @@ export function toModule(script:string, inject:string[] = []) {
     const encoded_uri = 'data:text/javascript;charset=utf-8,' +
         inject.join('\n')
         + encodeURIComponent(`${script}`);
-    return import(encoded_uri)
+    return import( /* @vite-ignore */ encoded_uri)
         .then(module => module)
         .catch(err => { console.error(err); return null });
 }

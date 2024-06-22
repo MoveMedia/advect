@@ -1,14 +1,10 @@
 import { $window } from "./utils";
 import AdvectBase from "./AdvectBase";
-import { AdvectView } from "./AdvectView";
-
 
 /**
- * TODO turn on internals by defaults to access :host(:state(loading))::before { content: '[ loading ]' }
  * TODO weakrefs for refs
  * Im thinking we can use this css and add a 'state' property that can be set on the element
  */
-
 
 /**
  * Base class for all Advect Elements
@@ -25,7 +21,8 @@ export class AdvectElement extends AdvectBase{
   /**
    * shadow mode can be open or closed
    */
-  static $shadow_mode?: string;
+  // @ts-ignore shadow mode
+  static $shadow_mode?: "open" | "close";
   /**
    * getter for *.constructor.shadow_mode
    */
@@ -66,9 +63,7 @@ export class AdvectElement extends AdvectBase{
   get slots() {
     return this.#slots;
   }
-  // where scope is used
-    $style! : CSSStyleSheet ;
-
+  
   /**
    * constructor for the element
    * sets the instance counter
@@ -76,7 +71,6 @@ export class AdvectElement extends AdvectBase{
    */
   constructor() {
     super();
-    this.dataset["instance"] = this.ic.toString();
  
   }
 
@@ -88,31 +82,23 @@ export class AdvectElement extends AdvectBase{
   connectedCallback() {
     super.connectedCallback();
     // @ts-ignore instance counter
-    this.constructor.ic++;
     /// TODO validate use shadow at somepoint
     if (!this.shadowRoot)  return;
 
     // @ts-ignore template defined in build
     this.shadowRoot.innerHTML = this.$template.innerHTML;
-    this.shadowRoot.adoptedStyleSheets = [this.$style];
+
     this.setupRefs();
     this.generateScope().then(() => {
       this.hookRefs()
-      this.shadowRoot?.querySelectorAll('[class]').forEach(el => {
-          this.tw(el.className)
-      })
-
-      this.shadowRoot?.querySelectorAll('adv-view').forEach(v => {
-        const view = v as AdvectView;
-        view.mergeScope(this._scope);
-        view.mergeStyles(this.shadowRoot?.adoptedStyleSheets ?? [])
-        console.log(view);
-      });
+      this.renderStyles();
+      this.hookViews();
       
     });
     
 
   }
+
 
 }
 

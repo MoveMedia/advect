@@ -55,24 +55,8 @@
         //  we return the scope to make it accessible in to the event handlers of the refs
         return scope;
     </script>
-    <style>
-        input{
-            font-size: var(--scale-fluid-2);
-        }
-        
-        .todo-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
 
-            &[data-complete="true"] input {
-                text-decoration: line-through;
-            }
-        }
-    </style>
-    <dialog id="todo_dialog">
+    <dialog id="todo_dialog" class="w-[min(100vw,500px)] h-[min(100vh,500px)]">
         <form id="new_todo_form" method="dialog" onsubmit="scope.addTodo(event)">
             <input type="text" name="todo" id="todo_name_input" placeholder="Add a todo">
             <input type="submit" value="Submit">
@@ -80,40 +64,56 @@
     </dialog>
     <section>
 
-    <div>
-        <button id="add_btn" onclick="refs.todo_dialog.showModal()">Add Todo</button>
-    </div>
-    <adv-view id="todo_view">
-        <ul class="max-w-[500px]">
-            {{#todos}}
-            <li data-title="{{title}}" id="{{id}}" data-id="{{id}}" data-complete="{{complete}}" class="todo-item">
-                <input type="text" id="title_{{id}}" name="title {{id}}" value="{{title}}"
-                    onchange="scope.renameTodo(el.closest('li'), el.value)">
-                <div>
-                    <button id="complete_{{id}}" class="button" data-id="{{id}}"
-                        onclick="scope.toggleComplete(el.closest('li'))">
-                        {{#complete}}
-                        <span>
-                            Mark incomplete
-                        </span>
-                        {{/complete}}
-                        {{^complete}}
-                        <span>
-                            Mark complete
-                        </span>
-                        {{/complete}}
-                    </button>
-                    <button id="delete_{{id}}"  onclick="scope.removeTodo(el.closest('li'))">
-                        Delete
-                    </button>
-                </div>
-            </li>
-            {{/todos}}
-            {{^todos}}
-            <li>No todos yet</li>
-            {{/todos}}
-        </ul>
-    </adv-view>
-</section>
+        <div>
+            <button id="add_btn" onclick="refs.todo_dialog.showModal()">Add Todo</button>
+        </div>
+        <adv-view id="todo_view">
+            <ul class="max-w-[500px]">
+                {{#todos}}
+                <li id="{{id}}" data-title="{{title}}" data-id="{{id}}" data-complete="{{complete}}"
+                    class="flex justify-between mx-5 p-5">
 
+                    <input id="title_{{id}}" data-id="{{id}}" name=" title {{id}}" value="{{title}}" type="text"
+                        class="text-black" onchange="scope.renameTodo(el.closest('li'), el.value)">
+                    <style>
+                        @scope {
+
+                            :scope {
+                                border: 2px solid var(--text-color, black);
+                                &[data-complete="true"] {
+                                    color: var(--reverse, black);
+                                    & input {
+                                        text-decoration: line-through;
+                                        pointer-events: none;
+                                    }
+                                }
+                            }
+                        }
+                    </style>
+                    <div>
+                        <button id="complete_{{id}}" class="button" data-id="{{id}}"
+                            onclick="scope.toggleComplete(el.closest('li'))">
+                            {{#complete}}
+                            <span>
+                                Mark incomplete
+                            </span>
+                            {{/complete}}
+                            {{^complete}}
+                            <span>
+                                Mark complete
+                            </span>
+                            {{/complete}}
+                        </button>
+                        <button id="delete_{{id}}" onclick="scope.removeTodo(el.closest('li'))">
+                            Delete
+                        </button>
+                    </div>
+                </li>
+                {{/todos}}
+                {{^todos}}
+                <li>No todos yet</li>
+                {{/todos}}
+            </ul>
+        </adv-view>
+    </section>
 </template>

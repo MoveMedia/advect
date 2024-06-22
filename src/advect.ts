@@ -1,4 +1,4 @@
-import { toModule, toStyle } from './utils'
+import { $window, toModule} from './utils'
 import settings from './settings';
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
@@ -6,7 +6,6 @@ import './style.css'
 
 
 const parser = new DOMParser();
-
 /**
  * Given a template element build a custom element from it
  * @param template the template to build the custom element from
@@ -51,10 +50,9 @@ export async function build(_template: HTMLTemplateElement | string, register = 
       return { id : script.id, script: script.textContent as string }
     });
 
-  const style_els = [...(doc.querySelector('template')?.content.querySelectorAll('style') ?? [])]
-  const all_css = style_els.map(style => style.textContent).join('\n');
-  const style_sheet = toStyle(all_css);
- // styles.forEach(style => template.content.removeChild(style));
+ // const style_els = [...(doc.querySelector('template')?.content.querySelectorAll('style') ?? [])]
+  // const all_css = style_els.map(style => style.textContent).join('\n');
+  // const style_sheet = toStyle(all_css);
   const refs_ids = [...template.content.querySelectorAll('[id]')].map(el => el.id);
   // NOT USED BUT COULD BE
   const slots_names = [...template.content.querySelectorAll('slot')].map(el => el.name);
@@ -64,12 +62,11 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     $ref_ids: string[] = refs_ids;
     $slots_names: string[] = slots_names;
     $template: HTMLTemplateElement = template as HTMLTemplateElement;
-    $style = style_sheet;
+    //$style = style_sheet;
    // static $use_internals = use_internals;
     static $shadow_mode = shadow_mode;
     data_scripts = dataScripts;
     static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
-
   };
 
   if (register) {
@@ -136,7 +133,31 @@ export async function load(
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
+export class MutationSingleton extends MutationObserver {
+  static instance?: MutationSingleton;
+  static get() {
+      if (!this.instance) {
+          this.instance = new MutationSingleton();
+      }
+      return this.instance;
+  }
+  constructor() {
+      super((mutations) => {
+          mutations.forEach((mutation) => {
+            const advect_target = mutation.target as any;
+              if ( advect_target.$is_advect_element){
+                  advect_target.mutate(mutation)
+              }
+          });
+      });
+  }
+
+}
+
+$window.MutationSingleton = MutationSingleton;
+
+MutationSingleton.instance // access for the first time
+
   // register all templates with adv attribute
   document.querySelectorAll(`template[id][${settings.load_tag_type}]`).forEach((template) => {
     build(template as HTMLTemplateElement);
@@ -146,7 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (src) { load(src); }
   });
 
-});
 
 
 customElements.define("adv-view", AdvectView);

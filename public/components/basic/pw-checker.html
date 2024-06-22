@@ -1,0 +1,86 @@
+<!-- 
+    This shows ways to update compoents we recoommend using css variables over <adv-view> for better performance
+    
+-->
+
+<template id="pw-checker" adv>
+    <script>
+        const {pw} =  refs
+
+        const reqs = [
+            { msg :'Password must at least be 8 characters long', test: pw_txt => pw_txt.length >= 8 },
+            { msg :'Password must contain at least one uppercase letter', test: pw_txt => pw_txt.match(/[A-Z]/) },
+            { msg :'Password must contain at least one lowercase letter', test: pw_txt => pw_txt.match(/[a-z]/) },
+            { msg :'Password must contain at least one number', test: pw_txt => pw_txt.match(/[0-9]/) },
+            { msg :'Password must contain at least one special character', test: pw_txt => pw_txt.match(/[!@#$%^&*()_+]/)}
+        ]
+
+        const checkPw = () =>
+        {
+                    let score = 0;
+                    let msg = '';
+                    const { ratings, validation } = refs;
+                   
+                    reqs.forEach(req => {
+                        if (req.test(pw.value)) {
+                            score++;
+                        } else {
+                            msg += req.msg + '\n';
+                        }   
+                    });
+
+                    if (score < reqs.length){
+                        pw.style.setProperty('--border-color', 'red');
+                    } else {
+                        pw.style.setProperty('--border-color', 'green');
+                    }
+
+
+                    ([...ratings.children]).forEach((child, index) => {
+                        if (index <= score - 1) {
+                            child.style.setProperty('--opacity', 1);
+                        } else {
+                            child.style.setProperty('--opacity', 0);
+                        }
+                    });
+
+                    validation.innerText = score < reqs.length
+                        ?  msg 
+                        : 'Password is strong';
+                    
+            }
+        const scope = {
+            checkPw
+        };
+        return scope;
+    </script>
+    <div class="min-w-[200px] max-w-[400px] ">
+        <label for="password">Enter Password</label>
+        <!--  -->
+        <input 
+            id="pw" 
+            name="password" 
+            type="password" 
+            placeholder="Enter password"
+            class="border border-[var(--border-color)] p-2 rounded-md w-full" 
+            oninput="scope.checkPw()" 
+        />
+        <div id="ratings" 
+            class="flex gap-2 h-2 bg-gray-200 my-2"
+            onload="([...el.children]).forEach((child, index) => {
+                child.style.setProperty('--opacity', 0);
+            })"
+        >
+            <div class="w-1/4 transition-all delay-75 bg-red-700 opacity-[var(--opacity)]"></div>
+            <div class="w-1/4 transition-all delay-100 bg-red-500  opacity-[var(--opacity)]"></div>
+            <div class="w-1/4 transition-all delay-150 bg-yellow-700  opacity-[var(--opacity)]"></div>
+            <div class="w-1/4 transition-all delay-200 bg-yellow-500  opacity-[var(--opacity)]"></div>
+            <div class="w-1/4 transition-all delay-300 bg-green-500  opacity-[var(--opacity)]"></div>
+         
+        </div>
+        <div id="validation" class="text-red w-full">
+
+        </div>
+    </div>
+
+</template>

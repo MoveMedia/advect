@@ -1,7 +1,7 @@
 {
   "name": "advect",
   "private": false,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "author": {
     "name": "PartyGodTroy",
@@ -15,11 +15,10 @@
   },
   "devDependencies": {
     "@types/mustache": "^4.2.5",
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.5",
     "vite": "^5.1.4"
   },
   "dependencies": {
-    "goober": "^2.1.14",
     "mustache": "^4.2.0",
     "twind": "^0.16.19"
   }

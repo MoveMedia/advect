@@ -5,24 +5,8 @@ import AdvectBase from "./AdvectBase";
  * A Untility element for rendering mustache templates
  */
 export class AdvectView extends AdvectBase {
-  /**
-   * Mutation Observer for the element
-   */
-  #mutationObserver: MutationObserver | null = null;
-  /**
-   * getter for mutationObserver
-   */
-  get mutationObserver() {
-    if (this.#mutationObserver == null) {
-      this.#mutationObserver = new MutationObserver(() => {
-        this.render();
-      });
-      this.#mutationObserver.observe(this, { childList: true, subtree: true });
-    }
-    return this.#mutationObserver;
-  }
 
-
+  $style =new CSSStyleSheet();
   /**
    * instance counter
    */
@@ -52,31 +36,27 @@ export class AdvectView extends AdvectBase {
     // @ts-ignore instance counter
     this.constructor.ic++;
 
-    // const defaultcss = new CSSStyleSheet();
-    // defaultcss.replaceSync(`
-    //     :host{
-    //       display: block;
-    //       contain: content;
-    //       width: 100%;
-    //       height: 100%;
-    //     }
-    // `);
-    //this.shadowRoot?.adoptedStyleSheets.push(defaultcss);
+ 
     this.render = this.render.bind(this);
-    this.shadowRoot?.addEventListener("advect:render", () => {
+
+    this.shadowRoot?.addEventListener("advect:render", ( _ ) => {
       this.render();
     });
     this.render();
 
   }
-  async render(additionalData?: Record<string, any>) {
-    const view = {
-      ...(additionalData ?? {}),
+  #view:Record<string,any> = {};
+  get view(){
+    return this.#view;
+  }
+  async render(newData?: Record<string, any>) {
+    this.#view = {
+      ...(newData ?? this.#view),
       ...this.dataset
     }
     const open_tag = this.getAttribute('open-tag')?.valueOf() ?? '{{';
     const close_tag = this.getAttribute('close-tag')?.valueOf() ?? '}}';
-    const rendered = $m.render(this.innerHTML, view, {}, [open_tag, close_tag]);
+    const rendered = $m.render(this.innerHTML, this.#view, {}, [open_tag, close_tag]);
     const wrapper = document.createElement("div");
     wrapper.setAttribute("part", "content");
     wrapper.innerHTML = rendered;
@@ -88,9 +68,7 @@ export class AdvectView extends AdvectBase {
     await this.generateScope()
       .then(() => {
         this.hookRefs();
-        this.shadowRoot?.querySelectorAll('[class]').forEach(el => {
-          this.tw(el.className)
-      }); 
+        this.renderStyles();
   
       })
       .catch((err) => {
@@ -99,6 +77,9 @@ export class AdvectView extends AdvectBase {
 
 
     return rendered
+  }
+  mutate(mutation: MutationRecord): void {
+      super.mutate(mutation);
   }
 
 }
