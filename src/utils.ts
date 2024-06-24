@@ -1,9 +1,18 @@
 
+
+
+/**
+ * Reference to the window object without type checking
+ */
+export const $window = (window as (Record<string, any> & Window) ) ;
+
 /**
  * Creates a module from a string and imports it as a module returing the module
  * @param script script to convert to a module
  * @param inject lines to add to the script before parseing
  * @returns promise the module
+ * @warning this function is NOT safe as it allows arbitrary code to be executed with module scope
+ * please for the love of which ever creator you believe in set a CSP policy!
  */
 export function toModule(script:string, inject:string[] = []) {
     const encoded_uri = 'data:text/javascript;charset=utf-8,' +
@@ -13,6 +22,16 @@ export function toModule(script:string, inject:string[] = []) {
         .then(module => module)
         .catch(err => { console.error(err); return null });
 }
+
+export function scriptFromUrl(url:string, type:string = "text/javascript", add = true, onLoad?: (event:Event) =>void) {
+    const script = document.createElement('script');
+    script.src = url;
+    script.type = type;
+    if (add) document.head.appendChild(script);
+    if (onLoad) script.onload = onLoad;
+    return script;
+}
+$window.scriptFromUrl = scriptFromUrl;
 
 /**
  * Creates a style element from a string of css and appends it to the head
@@ -25,15 +44,10 @@ export function toStyle(cssStr:string) {
     css.replaceSync(cssStr);
     return css;
 }
-/**
- * Reference to the window object without type checking
- */
-export const $window = (window as (Record<string, any> & Window) ) ;
+
 
 
 /**
  * Async function constructor
  */
 export const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
-
-

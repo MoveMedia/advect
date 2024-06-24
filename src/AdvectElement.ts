@@ -22,12 +22,12 @@ export class AdvectElement extends AdvectBase{
    * shadow mode can be open or closed
    */
   // @ts-ignore shadow mode
-  static $shadow_mode?: "open" | "close";
+  static $shadow_mode: "open" | "close";
   /**
    * getter for *.constructor.shadow_mode
    */
   // @ts-ignore shadow mode
-  get shadow_mode() { return this.constructor.$shadow_mode ?? "open"; }
+  get shadow_mode() { return this.constructor.$shadow_mode }
   /**
    * instance counter
    */
@@ -84,22 +84,19 @@ export class AdvectElement extends AdvectBase{
     // @ts-ignore instance counter
     /// TODO validate use shadow at somepoint
     if (!this.shadowRoot)  return;
-
     // @ts-ignore template defined in build
     this.shadowRoot.innerHTML = this.$template.innerHTML;
-
     this.setupRefs();
     this.generateScope().then(() => {
       this.hookRefs()
-      this.renderStyles();
       this.hookViews();
-      
+      if (this.onConnect) {
+        this.onConnect();
+    }
+    this.renderStyles();
+
     });
-    
-
   }
-
-
 }
 
 $window.AdvectElement = AdvectElement;
