@@ -98,16 +98,16 @@ export async function load(
       return res
     
     })
-    .then((res) => res.text())
-    .then((text) => {
+    .then(async (res) => 
+      ({ 
+        text: await res.text(),
+        res
+      }))
+    .then(({text, res}) => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, "text/html");
       // chain load other advect components
-      const src_scripts = doc.querySelectorAll(`script[type='${settings.script_tag_type}']`);
-      src_scripts.forEach((script) => {
-        const src = script.getAttribute("src");
-        if (src) { load(src); }
-      });
+    
       [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
         const template = _template as HTMLTemplateElement;
         // TODO maybe make upgrading components a thing
@@ -122,6 +122,12 @@ export async function load(
         }
      //   console.log("Adding template", template.id);
         build(template);
+      });
+
+      const src_scripts = doc.querySelectorAll(`script[type='${settings.script_tag_type}']`);
+      src_scripts.forEach((script) => {
+        const src = script.getAttribute("src");
+        if (src) { load(src); }
       });
     })
     .catch((e) => {
@@ -140,7 +146,6 @@ export class AdvMutationEvent extends CustomEvent<MutationRecord>{
       cancelable: false,
       detail: mutation
     });
-    console.log("AdvMutationEvent", mutation);
   }
 }
 
@@ -159,3 +164,5 @@ export class AdvMutationEvent extends CustomEvent<MutationRecord>{
 
 
 customElements.define("adv-view", AdvectView);
+customElements.define("adv-el", AdvectElement);
+

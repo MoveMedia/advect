@@ -8,22 +8,35 @@
   <script type="text/adv" src="components/basic/tw-button.html"></script>
   <script type="text/adv" src="components/basic/pw-checker.html"></script>
   <script type="text/adv" src="components/basic/scene-3d.html"></script>
+  <script type="text/adv" src="components/complex/page-editor.html"></script>
+
   <link rel="stylesheet" href="styles.css" />
   
   <title>Advect</title>
 </head>
-<body class="relative grid grid-cols-6">
+<body class="">
   <header class="sticky w-full flex justify-between col-span-6 bg-white top-0 border-b-2">
     <div>
       <img src="logo.svg" alt="Advect Logo" width="40" height="40" />
     </div>
-    <nav>
-      <ul class="flex justify-end gap-4 p-2 text-white">
+    <nav id="main-nav">
+      <ul id="main-nav" class="flex justify-end gap-4 p-2 text-white">
         <li>
           <a href="#">Home</a>
         </li>
         <li>
           <a href="#">About</a>
+        </li>
+        <li>
+          <a href="#">Contact</a>
+          <ul>
+            <li>
+              <a href="#">Email</a>
+            </li>
+            <li>
+              <a href="#">Phone</a>
+            </li>
+          </ul>
         </li>
       </ul>
     </nav>
@@ -41,7 +54,12 @@
         </h2>
       </div>
     </section>
+
       <section>
+        <article>
+          <h3>Wow</h3>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas quam aspernatur veniam mollitia illum nulla, quae cumque tenetur doloribus repellendus suscipit deleniti aut natus, itaque nobis reiciendis omnis obcaecati beatae?
+        </article>
         <todo-component></todo-component>
       </section>
       <section>
@@ -52,6 +70,9 @@
       </section>
       <section>
         <scene-3d src="/3d/boombox/BoomBox.glb" exportparts="loader"></scene-3d>
+      </section>
+      <section>
+        <page-editor></page-editor>
       </section>
   </main>
   <footer class="col-span-6 border-2 min-h-[200px]">

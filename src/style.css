@@ -19,6 +19,21 @@
 :root {
   font-size: 16px;
 }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f4f4f4;
+}
+body {
+ width:100vw;
+}
+
 h1,
 h2,
 h3 {
@@ -51,5 +66,32 @@ a {
     to {
       transform: translateY(0);
     }
+  }
+}
+
+@scope (nav#main-nav) {
+  /* Defaults */
+
+  /*** Desktop ***/
+  @media (min-width: 768px) {
+    :scope {
+    }
+  }
+  /*** Mobile ***/
+    @media (max-width: 768px) {
+      :scope {
+        display: flex;
+      }
+    }
+}
+
+section {
+  margin-block: 2rem;
+  & article {
+    margin-inline: auto;
+    max-width: 800px;
+  }
+  & > section {
+    width: 100%;
   }
 }

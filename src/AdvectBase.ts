@@ -97,13 +97,25 @@ export default class AdvectBase extends HTMLElement {
     mergeStyles(styles: CSSStyleSheet[]) {
         this.shadowRoot?.adoptedStyleSheets.push(...styles);
     }
-    renderStyles() {
-        this.shadowRoot?.querySelectorAll('[class]').forEach(el => {
+    renderStyles(el?: HTMLElement | Array<HTMLElement>) {
+        if (el && el instanceof HTMLElement) {
             this.tw(el.className)
-        })
-        this.querySelectorAll('[class]').forEach(el => {
-            this.tw(el.className)
-        })
+        }
+        if (el && el instanceof Array) {
+            el.forEach(_el => {
+                this.tw(_el.className)
+            })
+        }
+        if (!el)
+        {
+            this.shadowRoot?.querySelectorAll('[class]').forEach(_el => {
+                this.tw(_el.className)
+            })
+            this.querySelectorAll('[class]').forEach(_el => {
+                this.tw(_el.className)
+            })
+        }
+        
     }
 
     /**
@@ -251,6 +263,8 @@ export default class AdvectBase extends HTMLElement {
             const mutation = (event as AdvMutationEvent).detail;
             this.mutate(mutation);
         });
+        this.style.display = "block";
+
     }
     onConnect?: () => void;
     connectedCallback() {
@@ -259,7 +273,8 @@ export default class AdvectBase extends HTMLElement {
 
         this.initalContent = this.cloneNode(true);
         this.attachShadow({ mode: "open" });
-        this.shadowRoot?.adoptedStyleSheets.push(...[this.$style]);
+        this.addShadowStyleSheet(this.$style);
+        
         this.tw_sheet = cssomSheet({ target: this.$style })
         const { tw } = create({ sheet: this.tw_sheet });
         this.tw = tw;
@@ -282,13 +297,21 @@ export default class AdvectBase extends HTMLElement {
             this.shadowRoot?.adoptedStyleSheets.push(css);
         });
     }
+
+    addShadowStyleSheet(style: CSSStyleSheet) {
+        this.shadowRoot?.adoptedStyleSheets.push(style);
+    }
+
     onMutate?: (mutation: MutationRecord) => void;
     mutate(mutation: MutationRecord) {
         if (this.onMutate) {
             this.onMutate(mutation);
         }
-        if (mutation.attributeName === "class"){
+        if (mutation.attributeName === "class" && mutation.target === this){
             this.renderStyles();
+        }
+        if (!(mutation.target as HTMLElement).matches("[no-tw]")){
+            this.renderStyles(mutation.target as HTMLElement);
         }
     };
     onDisconnect?: () => void;
