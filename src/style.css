@@ -17,13 +17,38 @@
   }
 }
 :root {
-  font-size: 16px;
+  font-size: 20px;
+  --primary: #7d0000;
+  --secondary: #010020;
+  --tertiary: #ddd;
+  --container-width: 920px;
+
 }
+
+html,
+body {
+  font-family: "Roboto", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: white;
+  background-color: #131313;
+  background-image: linear-gradient(180deg, var(--primary), transparent);
+  padding: 0;
+  margin: 0;
+
+}
+body {
+  max-width: 1920px;
+  margin-inline: auto;
+  }
+
 h1,
 h2,
 h3 {
   font-family: "Roboto", sans-serif;
   font-weight: 900;
+  line-height: 1.2;
+  margin: 0;
 }
 ul {
   list-style: disc;
@@ -32,7 +57,14 @@ ul {
   }
 }
 a {
-  color: black;
+  text-decoration: none;
+  color: white;
+  transition: text-decoration 0.2s ease-in-out;
+  &:hover {
+    text-decoration: underline;
+    
+  }
+
 }
 
 .hero {
@@ -40,9 +72,79 @@ a {
     url("/img/abstract.jpg");
   color: white;
   & .content {
-    padding: 2rem;
-    backdrop-filter: blur(2px);
     animation: panIn 0.5s ease-in-out;
+  }
+  @keyframes panIn {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+@scope(header){
+ /* Defaults */
+ :scope{
+  position:sticky;
+  top:0;
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  
+  backdroup-filter: blur(10px); 
+  & nav{
+    padding-inline: 2rem;
+  }
+  & ul{
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/*** Desktop ***/
+@media (min-width: 768px) {
+  :scope {
+  
+  }
+}
+/*** Mobile ***/
+  @media (max-width: 768px) {
+    :scope {
+      display: flex;
+    }
+  }
+}
+.container{
+  margin-inline: auto;
+  max-width:var(--container-width, 1200px);
+
+}
+
+section {
+  padding-inline: 1rem;
+  &:not(:first-of-type) {
+    margin-top: 1rem;
+  }
+  &:not(:last-of-type) {
+    margin-bottom: 1rem;
+  }
+}
+
+.hero{
+  background-image: linear-gradient(227deg, #7d0000ee, #010020cc),
+    url("/img/abstract.jpg");
+  color: white;
+  & .content {
+    animation: panIn 0.5s ease-in-out;
+    padding-block: 2rem;
   }
   @keyframes panIn {
     from {

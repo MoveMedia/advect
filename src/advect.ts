@@ -24,7 +24,7 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     doc = parser.parseFromString(template.outerHTML, "text/html");
   }
 
-  // shadow mode can be open or closed
+  // shadow mode can be open or closed we prefer open
   const shadow_mode = template.getAttribute('shadow-mode') ?? settings.default_shadow_mode;
   // use internals can be true or false
   //const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
@@ -38,21 +38,18 @@ export async function build(_template: HTMLTemplateElement | string, register = 
   // get the main module expects a default export of a class that extends window.AdvectElement
   let mainModule = null;
   // only take 1 script and treat it as a module
-  const mainScript = template.content.querySelector('script[main]');
+  const mainScript = template.content.querySelector('script[type="module"]');
   if (mainScript && mainScript.textContent) {
     template.content.removeChild(mainScript);
     mainModule = await toModule(mainScript.textContent);
   }
   // Other scripts to add to the context
   // e
-  const dataScripts = [...(doc.querySelector('template')?.content.querySelectorAll('script:not([main])') ?? [])]
+  const dataScripts = [...(doc.querySelector('template')?.content.querySelectorAll('script:not([type="module"])') ?? [])]
     .map(script => { 
       return { id : script.id, script: script.textContent as string }
     });
 
- // const style_els = [...(doc.querySelector('template')?.content.querySelectorAll('style') ?? [])]
-  // const all_css = style_els.map(style => style.textContent).join('\n');
-  // const style_sheet = toStyle(all_css);
   const refs_ids = [...template.content.querySelectorAll('[id]')].map(el => el.id);
   // NOT USED BUT COULD BE
   const slots_names = [...template.content.querySelectorAll('slot')].map(el => el.name);
@@ -62,8 +59,7 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     $ref_ids: string[] = refs_ids;
     $slots_names: string[] = slots_names;
     $template: HTMLTemplateElement = template as HTMLTemplateElement;
-    //$style = style_sheet;
-   // static $use_internals = use_internals;
+
     static $shadow_mode = shadow_mode;
     data_scripts = dataScripts;
     static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
@@ -102,16 +98,17 @@ export async function load(
       return res
     
     })
-    .then((res) => res.text())
-    .then((text) => {
+    .then(async (res) => 
+      ({ 
+        text: await res.text(),
+        res
+      }))
+    .then(({text, res}) => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, "text/html");
-      const src_scripts = doc.querySelectorAll(`script[type='${settings.script_tag_type}']`);
-      src_scripts.forEach((script) => {
-        const src = script.getAttribute("src");
-        if (src) { load(src); }
-      });
-      [...doc.querySelectorAll("template[id][adv]")].forEach((_template: Node) => {
+      // chain load other advect components
+    
+      [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
         const template = _template as HTMLTemplateElement;
         // TODO maybe make upgrading components a thing
         const existingCustomElement = customElements.get(template.id);
@@ -126,6 +123,12 @@ export async function load(
      //   console.log("Adding template", template.id);
         build(template);
       });
+
+      const src_scripts = doc.querySelectorAll(`script[type='${settings.script_tag_type}']`);
+      src_scripts.forEach((script) => {
+        const src = script.getAttribute("src");
+        if (src) { load(src); }
+      });
     })
     .catch((e) => {
       console.error(`Could not parse template from request`, e);
@@ -133,30 +136,21 @@ export async function load(
 }
 
 
-export class MutationSingleton extends MutationObserver {
-  static instance?: MutationSingleton;
-  static get() {
-      if (!this.instance) {
-          this.instance = new MutationSingleton();
-      }
-      return this.instance;
-  }
-  constructor() {
-      super((mutations) => {
-          mutations.forEach((mutation) => {
-            const advect_target = mutation.target as any;
-              if ( advect_target.$is_advect_element){
-                  advect_target.mutate(mutation)
-              }
-          });
-      });
-  }
 
+
+export class AdvMutationEvent extends CustomEvent<MutationRecord>{
+  constructor(mutation: MutationRecord){
+    super("adv:mutation", {
+      bubbles: false,
+      composed: true,
+      cancelable: false,
+      detail: mutation
+    });
+  }
 }
 
-$window.MutationSingleton = MutationSingleton;
 
-MutationSingleton.instance // access for the first time
+
 
   // register all templates with adv attribute
   document.querySelectorAll(`template[id][${settings.load_tag_type}]`).forEach((template) => {
@@ -170,3 +164,5 @@ MutationSingleton.instance // access for the first time
 
 
 customElements.define("adv-view", AdvectView);
+customElements.define("adv-el", AdvectElement);
+

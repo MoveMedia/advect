@@ -1,0 +1,73 @@
+<template id="scene-3d" src>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/light.css" />
+    <script type="module">
+        // Import a spinner from shoeloace, this just adds the script to the head
+        scriptFromUrl('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/components/spinner/spinner.js',
+            "module",
+        true);
+        // import babylonjs its inspector, and loaders
+        import BABYLON from 'https://cdn.jsdelivr.net/npm/babylonjs@7.12.0/+esm';
+        import 'https://cdn.jsdelivr.net/npm/babylonjs-loaders@7.12.0/+esm';
+        import 'https://cdn.jsdelivr.net/npm/babylonjs-inspector@7.12.0/+esm';
+        // add babylon to the component
+        // We load this way because module imports are not available in outside of the 1 module script per component
+        // you can have as many 'scope' scripts as you like, but only one module script
+        // this script's content will be imported as a module using data:text/javascript, so debugging here out of the box is a bitch
+        // using "import() in scope scripts works but with babylon never loads or its inspector never adds the styles it needs"
+
+        export default class Scene3d extends AdvectElement{
+            BABYLON = BABYLON;
+        }
+    
+    </script>
+    <script>
+   /**
+         *  @var self {Scene3d} - the element that the component is mounted to 
+         */
+            const BABYLON = self.BABYLON;
+            const { loader, canvas_wrapper } = refs;
+            // we need to make the canvas in the "light" dom so the inspector works properly pr if this becomes problematic
+            const canvas = document.createElement('canvas');
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.slot = ''; // put the canvas in the default slot
+            self.appendChild(canvas);
+            const engine = new BABYLON.Engine(canvas, true);
+            const scene = new BABYLON.Scene(engine);
+            const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+            camera.setTarget(BABYLON.Vector3.Zero());
+            camera.attachControl(canvas, true);
+            const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+            const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 6, height: 6 }, scene);
+            engine.runRenderLoop(() => scene.render());
+            window.addEventListener('resize', () => engine.resize());
+            BABYLON.SceneLoader.ImportMesh(null, "/", "3d/boombox/BoomBox.glb", scene, function (meshes, particleSystems, skeletons) {
+                // do something with the meshes and skeletons
+                // particleSystems are always null for glTF assets
+                meshes[1].position = new BABYLON.Vector3(0,0,0);
+             
+            });
+            setTimeout(() => {
+                loader.classList.add('opacity-0');
+                canvas_wrapper.classList.remove('opacity-0');
+                // todo make this automatic with ability to opt out
+
+            }, 2000);
+    //    })
+        // load a big library in a non-blocking way, I think need to test
+
+
+    </script>
+    <div class="relative w-full h-[350px]">
+        <div id="canvas_wrapper" class="absolute top-0 left-0 h-[350px]">
+            <slot></slot>
+        </div>
+        <div
+             id="loader"
+             ontransitionend="el.classList.contains('opacity-0') && el.classList.add('hidden')" 
+             class="w-full h-full transition-all flex justify-center items-center absolute top-0 left-0 bg-[#232323]"
+            >
+            <sl-spinner style="font-size: 50px; --track-width: 10px;" />
+        </div>
+    </div>
+</template>
