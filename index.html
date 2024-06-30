@@ -2,82 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  
+
   <!-- Include plugins after the script, -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script type="text/adv" src="components/basic/todo-component.html"></script>
   <script type="text/adv" src="components/basic/tw-button.html"></script>
   <script type="text/adv" src="components/basic/pw-checker.html"></script>
   <script type="text/adv" src="components/basic/scene-3d.html"></script>
-  <script type="text/adv" src="components/complex/page-editor.html"></script>
 
   <link rel="stylesheet" href="styles.css" />
-  
   <title>Advect</title>
 </head>
 <body class="">
-  <header class="sticky w-full flex justify-between col-span-6 bg-white top-0 border-b-2">
+  <header>
     <div>
       <img src="logo.svg" alt="Advect Logo" width="40" height="40" />
     </div>
     <nav id="main-nav">
-      <ul id="main-nav" class="flex justify-end gap-4 p-2 text-white">
+      <ul>
         <li>
           <a href="#">Home</a>
         </li>
         <li>
-          <a href="#">About</a>
+          <a href="#">Docs</a>
         </li>
         <li>
           <a href="#">Contact</a>
-          <ul>
-            <li>
-              <a href="#">Email</a>
-            </li>
-            <li>
-              <a href="#">Phone</a>
-            </li>
-          </ul>
         </li>
       </ul>
     </nav>
   </header>
-    <div class=" col-span-1 ">
-    </div>
-  <main class="col-span-5 min-h-[500px]">
+  <main>
     <section class="hero">
-      <div class="content w-full h-full">
-        <h1 class="text-4xl mb-5">
+      <style>
+        @scope{
+          :scope{
+            background-color: red;  
+            background-image: linear-gradient(90deg, #f12711 0%, #f5af19 100%);
+          }
+        }
+      </style>
+      <div class="container content">
+        <h1>
           Advect
         </h1>
-        <h2 class="text-2xl mb-5">
+        <h2>
           A simple web component library
         </h2>
       </div>
     </section>
-
-      <section>
+      <section class="container">
         <article>
           <h3>Wow</h3>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas quam aspernatur veniam mollitia illum nulla, quae cumque tenetur doloribus repellendus suscipit deleniti aut natus, itaque nobis reiciendis omnis obcaecati beatae?
         </article>
         <todo-component></todo-component>
       </section>
-      <section>
+      <section class="container">
         <tw-button></tw-button>
       </section>
-      <section>
+      <section class="container">
         <pw-checker></pw-checker> 
       </section>
-      <section>
+      <section class="container">
         <scene-3d src="/3d/boombox/BoomBox.glb" exportparts="loader"></scene-3d>
       </section>
-      <section>
-        <page-editor></page-editor>
-      </section>
   </main>
-  <footer class="col-span-6 border-2 min-h-[200px]">
+  <footer class="container">
     <p class="text-center">Made with ❤️</p>
   </footer>
+
+
+
   <script type="module" src="/src/advect.ts"></script>
 </body>
 </html>
