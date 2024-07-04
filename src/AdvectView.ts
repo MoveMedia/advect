@@ -1,5 +1,6 @@
 import { $window } from "./utils";
-import $m from 'mustache';
+//import $m from 'mustache';
+import * as Sqrl from 'squirrelly'
 import AdvectBase from "./AdvectBase";
 /**
  * A Untility element for rendering mustache templates

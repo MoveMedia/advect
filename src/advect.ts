@@ -59,7 +59,6 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     $ref_ids: string[] = refs_ids;
     $slots_names: string[] = slots_names;
     $template: HTMLTemplateElement = template as HTMLTemplateElement;
-
     static $shadow_mode = shadow_mode;
     data_scripts = dataScripts;
     static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
