@@ -1,4 +1,6 @@
-export default {
+import { $window } from "./utils";
+
+const defaultSettings:Record<string,any> = {
     // this tag is used to load additional scripts
     script_tag_type: "text/adv" as const,
     // this tag needs to be added to individual template elements to be compiled, not reqired for templates loaded with script_tag_type
@@ -14,4 +16,24 @@ export default {
      // list of tags that should not be send and onload event
     refs_no_inital_load: ["frame", "iframe", "img", "input[type='image']", "link", "script", "style"] as const,
 
-} as const
+    default_channel: "advect_channel" as const,
+
+} as const;
+
+const settings = new Proxy(defaultSettings, {
+    get: (target, prop:string) => {
+        if (!$window.adv_settings){
+            return target[prop];
+        }
+        return $window.adv_settings?.[prop] ?? target[prop];
+    }
+});
+
+export default settings;
+
+export function getWindowSettings() {
+    const adv_settings = structuredClone(defaultSettings);
+   Object.keys($window.adv_settings ?? {}).forEach(key => {
+         adv_settings[key] = $window.adv_settings[key];
+   })
+}

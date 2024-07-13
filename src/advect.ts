@@ -1,4 +1,4 @@
-import { $window, toModule} from './utils'
+import { toModule} from './utils'
 import settings from './settings';
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
@@ -59,11 +59,12 @@ export async function build(_template: HTMLTemplateElement | string, register = 
     $ref_ids: string[] = refs_ids;
     $slots_names: string[] = slots_names;
     $template: HTMLTemplateElement = template as HTMLTemplateElement;
-
     static $shadow_mode = shadow_mode;
     data_scripts = dataScripts;
     static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
   };
+
+  // TODO plugins.ontemplate_build
 
   if (register) {
     // @ts-ignore valid custom element name
@@ -103,7 +104,7 @@ export async function load(
         text: await res.text(),
         res
       }))
-    .then(({text, res}) => {
+    .then(({text}) => {
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, "text/html");
       // chain load other advect components
@@ -137,25 +138,12 @@ export async function load(
 
 
 
-
-export class AdvMutationEvent extends CustomEvent<MutationRecord>{
-  constructor(mutation: MutationRecord){
-    super("adv:mutation", {
-      bubbles: false,
-      composed: true,
-      cancelable: false,
-      detail: mutation
-    });
-  }
-}
-
-
-
-
   // register all templates with adv attribute
   document.querySelectorAll(`template[id][${settings.load_tag_type}]`).forEach((template) => {
     build(template as HTMLTemplateElement);
   });
+
+
   document.querySelectorAll(`script[type="${settings.script_tag_type}"][src]`).forEach((script) => {
     const src = script.getAttribute("src");
     if (src) { load(src); }

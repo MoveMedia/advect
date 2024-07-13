@@ -1,14 +1,23 @@
 import { create, cssomSheet } from "twind";
-import { AdvMutationEvent } from "./advect";
+import { AdvMutationEvent } from "./AdvMutationEvent";
 import { AdvectView } from "./AdvectView";
 import settings from "./settings";
 import { AsyncFunction } from "./utils";
+import { reactive, effect } from "@vue/reactivity";
+import { createStore } from 'zustand/vanilla'
+
+
 
 /**
  * This is the base cass for All advect elements
  * 
  */
 export default class AdvectBase extends HTMLElement {
+    /**
+     *  Lib
+     */
+    
+
     static $shadow_mode: "open" | "close";
     /**
      * 
@@ -98,6 +107,8 @@ export default class AdvectBase extends HTMLElement {
         this.shadowRoot?.adoptedStyleSheets.push(...styles);
     }
     renderStyles(el?: HTMLElement | Array<HTMLElement>) {
+
+        // only here to support hooks this will be moved to twind.plugin.ts
         if (el && el instanceof HTMLElement) {
             this.tw(el.className)
         }
@@ -121,7 +132,7 @@ export default class AdvectBase extends HTMLElement {
     /**
      * 
      */
-    data: Record<string, any> = {};
+    data: Record<string, any> = reactive({});
     /**
      * attributeChanged function for the element
      */
@@ -138,7 +149,7 @@ export default class AdvectBase extends HTMLElement {
         }
     }
     /**
-     * 
+     *  This ts to id the references so they can be referenced in the scope
      */
     setupRefs() {
         this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
@@ -154,7 +165,6 @@ export default class AdvectBase extends HTMLElement {
      */
     hookRefs(): void {
         // light dom event handlers just 'this' element
-
         this
             .getAttributeNames()
             .filter((name) => name.startsWith("on"))
@@ -224,8 +234,8 @@ export default class AdvectBase extends HTMLElement {
         const scopeFunctions: Promise<ScopeResolution>[] = this.data_scripts
             .map(({ script }) => {
                 return new AsyncFunction
-                    ("self", "refs", "data", "states", script) // @ts-ignore Internals.states DOES exist
-                    (this, this.refs, this.data, this.internals?.states);
+                    ("self", "refs", "data", "states", "reactive", "effect", script) // @ts-ignore Internals.states DOES exist
+                    (this, this.refs, this.data, this.internals?.states, reactive, effect);
             });
         return Promise.all(scopeFunctions).then(async scopes => {
             for (let scope of scopes) {
@@ -273,7 +283,7 @@ export default class AdvectBase extends HTMLElement {
 
         this.initalContent = this.cloneNode(true);
         this.attachShadow({ mode: "open" });
-        this.addShadowStyleSheet(this.$style);
+        this.mergeStyles([this.$style]);
         
         this.tw_sheet = cssomSheet({ target: this.$style })
         const { tw } = create({ sheet: this.tw_sheet });
@@ -294,13 +304,11 @@ export default class AdvectBase extends HTMLElement {
         this.shadowRoot?.querySelectorAll('style').forEach(style => {
             const css = new CSSStyleSheet();
             css.replaceSync(style.textContent ?? "");
-            this.shadowRoot?.adoptedStyleSheets.push(css);
+            this.mergeStyles([css]);
         });
     }
 
-    addShadowStyleSheet(style: CSSStyleSheet) {
-        this.shadowRoot?.adoptedStyleSheets.push(style);
-    }
+ 
 
     onMutate?: (mutation: MutationRecord) => void;
     mutate(mutation: MutationRecord) {
@@ -343,5 +351,9 @@ export default class AdvectBase extends HTMLElement {
                     : __Closest(el.getRootNode().host) // recursion!! break out to parent DOM
     ) {
         return __Closest(base);
+    }
+
+    onPluginDiscovered( ){
+        // TODO onPluginDiscovered
     }
 }

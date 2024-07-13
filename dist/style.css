@@ -1,0 +1,15 @@
+:root{
+  font-size: 20px;
+  color-scheme: dark;
+  color: #fff;
+  background-color: #353535;
+  font-family: 'Roboto', sans-serif;
+}
+
+label{
+  input{
+    display: flex;
+    flex-direction: column;
+  }
+}
+

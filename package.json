@@ -19,6 +19,7 @@
     "vite": "^5.1.4"
   },
   "dependencies": {
+    "@vue/reactivity": "^3.4.31",
     "monaco-editor": "0.50.0",
     "mustache": "^4.2.0",
     "twind": "^0.16.19"

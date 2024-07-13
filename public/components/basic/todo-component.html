@@ -10,55 +10,56 @@
         // "self", "refs", "data", "states" are injected here
         // self: the component itself
         // refs: references to elements in the component
+        // data: a reactive object to store data
+        // states
         // Reference the elements in the component (any element with an id attributz
         const { todo_view, todo_dialog, new_todo_form, todo_name_input } = refs
         // Define data for the compnent, 
-        let todos = []// this could also be place on data.todos
-        data.todos = todos
+        data.todos = []
         // Define the "scope" of functionality for the component
         const scope = {
             // Function to toggle the complete status of a todo
             // given the li element of the todo toggles the complete status in todos and updates the view
             toggleComplete(todoEl) {
-                todos.forEach(todo => {
+                data.todos.forEach(todo => {
                     if (todo.id === todoEl.dataset.id) {
                         todo.complete = !todo.complete;
                     }
                 });
-                this.update();
             },
             renameTodo(todoEl, value) {
-                todos.forEach(todo => {
+                data.todos.forEach(todo => {
                     if (todo.id === todoEl.dataset.id) {
                         todo.title = value;
                     }
                 });
-                this.update();
             },
             // Function to add a todo to the todos array
             addTodo(event) {
                 const todo = {
-                    id: `todo_${todos.length + 1}`,
+                    id: `todo_${data.todos.length + 1}`,
                     title: todo_name_input.value,
                     complete: false
                 }
-                todos.push(todo);
+                data.todos.push(todo);
                 new_todo_form.reset()
-                this.update();
 
             },
             // Function to remove a todo from the todos array
             removeTodo(todoEl) {
-                todos = todos.filter(todo => todo.id !== todoEl.dataset.id);
-                this.update();
+                self.data.todos = data.todos.filter(todo => todo.id !== todoEl.dataset.id);
             },
-            update() {
-                todo_view.render({ todos });
-            }
         }
-
+        // Render the view with the data, it goes against my philosophy to have this happen automagically
+        effect(()=>{
+            todo_view.render(data);
+            // this comes with all the pitfals of reactivity do not alter data here
+            // its like using a setState inside of a useEffect in react
+            // could be useful for animations or other side effects if you use a scheduler
+            // but like captain planet says "the power is yours"
+            // for more for more fined grained control use the built in copy of zustand
+        })
         // update the view
-        scope.update();
         //  we return the scope to make it accessible in to the event handlers of the refs
         return scope;
     </script>
@@ -84,7 +85,6 @@
                         class="text-black h-12 px-2" onchange="scope.renameTodo(el.closest('li'), el.value)">
                     <style>
                         @scope {
-
                             :scope {
                                 border: 2px solid var(--text-color, black);
                                 &[data-complete="true"] {

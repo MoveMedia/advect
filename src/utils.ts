@@ -31,6 +31,10 @@ export function scriptFromUrl(url:string, type:string = "text/javascript", add =
     if (onLoad) script.onload = onLoad;
     return script;
 }
+
+/**
+ * Eh im not to dogmatic about havins scripts with exports and side effects
+ */
 $window.scriptFromUrl = scriptFromUrl;
 
 /**
@@ -45,6 +49,8 @@ export function toStyle(cssStr:string) {
     return css;
 }
 
+
+export type AConstructor<T = {}> = new (...args: any[]) => T;  
 
 
 /**
