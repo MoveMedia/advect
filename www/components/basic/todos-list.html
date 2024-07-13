@@ -1,0 +1,69 @@
+<template id="todos-list" adv>
+    <style>
+        @scope{
+            :scope{
+                display:block;
+                width:100%;
+                background-color: gray;
+                min-height: 200px;
+            }
+        }
+    </style>
+    <script>
+        const scope = {
+            newName: '',
+            todos: [],
+            addTodo:function() {
+                const name = this.newName
+                this.todos.push({ name });
+                console.log(this.todos)
+            },
+            removeTodo:function(todoName) {
+                this.todos = this.todos.filter(todo => todo.name !== todoName)
+            },
+            updateName:function(oldName, newName) {
+                const todo = this.todos.find(todo => todo.name === oldName)
+                todo.name = newName
+            }
+        }
+        return scope;
+    </script>
+
+    <section>
+        <!-- Scope will be pass automatically -->
+        <adv-view id="view">
+            <div>
+                <label for="todo_name">Todo Name</label>
+                <input 
+                    id="new_todo_name" 
+                    type="text" 
+                    onchange="scope.newName = el.value" 
+                    placeholder="enter todo name" />
+                <button id="add_todo_btn" 
+                    onclick="scope.addTodo();
+                    refs.new_todo_name.value = '';
+                    self.render()   
+                    ">
+                Add Todo
+            </button>
+            </div>
+            <ul>
+                {{#each todos}}
+                    <li>
+                        <input 
+                            id="todo_{{index}}_input" 
+                            type="text" 
+                            value="{{name}}" 
+                            onchange="scope.updateName('{{name}}', el.value)"
+                        >
+                        <button 
+                            id="todo_{{index}}_remove" 
+                            onclick="scope.removeTodo('{{name}}')">
+                            Remove
+                        </button>
+                    </li>
+                {{/each}}
+            </ul>
+        </adv-view>
+    </section>
+</template>

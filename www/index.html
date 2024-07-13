@@ -6,7 +6,7 @@
 
   <!-- Include plugins after the script, -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script type="text/adv" src="components/basic/todo-component.html"></script>
+  <script type="text/adv" src="components/basic/todos-list.html"></script>
   <script type="text/adv" src="components/basic/tw-button.html"></script>
   <script type="text/adv" src="components/basic/pw-checker.html"></script>
   <script type="text/adv" src="components/basic/scene-3d.html"></script>
@@ -57,7 +57,7 @@
           <h3>Wow</h3>
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas quam aspernatur veniam mollitia illum nulla, quae cumque tenetur doloribus repellendus suscipit deleniti aut natus, itaque nobis reiciendis omnis obcaecati beatae?
         </article>
-        <todo-component></todo-component>
+        <todos-list></todos-list>
       </section>
       <section class="container">
         <tw-button></tw-button>
@@ -66,7 +66,7 @@
         <pw-checker></pw-checker> 
       </section>
       <section class="container">
-        <scene-3d src="/3d/boombox/BoomBox.glb" exportparts="loader"></scene-3d>
+        <!-- <scene-3d src="/3d/boombox/BoomBox.glb" exportparts="loader"></scene-3d> -->
       </section>
   </main>
   <footer class="container">
@@ -75,6 +75,6 @@
 
 
 
-  <script type="module" src="/src/advect.ts"></script>
+  <script type="module" src="./advect.js"></script>
 </body>
 </html>

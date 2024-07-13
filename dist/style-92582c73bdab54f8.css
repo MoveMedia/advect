@@ -137,3 +137,21 @@ section {
     margin-bottom: 1rem;
   }
 }
+
+.hero{
+  background-image: linear-gradient(227deg, #7d0000ee, #010020cc),
+    url("/img/abstract.jpg");
+  color: white;
+  & .content {
+    animation: panIn 0.5s ease-in-out;
+    padding-block: 2rem;
+  }
+  @keyframes panIn {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}

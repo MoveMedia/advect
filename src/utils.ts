@@ -44,9 +44,13 @@ export function toStyle(cssStr:string) {
     css.replaceSync(cssStr);
     return css;
 }
+export const replaceAngles  = (str:string) => str.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+
+export const dashedCase = (camel:string) => camel.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
 
 
-
+//const cssProps = Object.keys(document.body.style).map(dashedCase);
+//console.log(cssProps);
 /**
  * Async function constructor
  */

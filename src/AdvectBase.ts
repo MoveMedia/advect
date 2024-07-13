@@ -1,4 +1,4 @@
-//import { create, cssomSheet } from "twind";
+import { create, cssomSheet } from "twind";
 import { AdvMutationEvent } from "./advect";
 import { AdvectView } from "./AdvectView";
 import settings from "./settings";
@@ -9,6 +9,17 @@ import { AsyncFunction } from "./utils";
  * 
  */
 export default class AdvectBase extends HTMLElement {
+
+      /**
+     */
+      tw_sheet: any;
+      /**
+       * 
+       */
+      tw: any;
+      /**
+       * 
+       */
     static $shadow_mode: "open" | "close";
     /**
      * a stylesheet to use within the shadow dom, this sheet receives the twind styles
@@ -17,11 +28,6 @@ export default class AdvectBase extends HTMLElement {
     /**
      *  a twind sheet to use within the shadow dom
      */
-    tw_sheet: any;
-    /**
-     *  the twind instance for this element
-     */
-    tw: any;
     /**
      *  Internals attached to the element
      * @private
@@ -36,7 +42,7 @@ export default class AdvectBase extends HTMLElement {
     /**
      *  the scope scripts of the element
      */
-    data_scripts: { id: string, script: string }[] = [];
+    $data_scripts: { id: string, script: string }[] = [];
 
     /**
      * getter for the shadowRoot or the element itself
@@ -102,22 +108,22 @@ export default class AdvectBase extends HTMLElement {
     }
     renderStyles(el?: HTMLElement | Array<HTMLElement>) {
         if (el && el instanceof HTMLElement) {
-           // this.tw(el.className)
+            this.tw(el.className)
         }
         if (el && el instanceof Array) {
             el.forEach(_el => {
-              //  this.tw(_el.className)
+                this.tw(_el.className)
             })
         }
         if (!el)
         {
             // twind on the shadow
             this.shadowRoot?.querySelectorAll('[class]').forEach(_el => {
-              //  this.tw(_el.className)
+                this.tw(_el.className)
             })
             // twind in the light dom
             this.querySelectorAll('[class]').forEach(_el => {
-              //  this.tw(_el.className)
+                this.tw(_el.className)
             })
         }
         
@@ -126,7 +132,7 @@ export default class AdvectBase extends HTMLElement {
     /**
      * the data of the element. Access via self.data or data in scope functions 
      */
-    data: Record<string, any> = {};
+    data:Record<string,any> = {};
     /**
      * attributeChanged function for the element
      * Accessed via self.onAttr scope functions
@@ -178,6 +184,7 @@ export default class AdvectBase extends HTMLElement {
         // shadow dom event handlers
         this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
             // observe a mutation event on the ref, and mutate this element
+            // todo set a flag to make this optional
             ref.addEventListener('adv:mutation', (_event) => {
                 this.mutate((_event as AdvMutationEvent).detail);
             });
@@ -239,7 +246,7 @@ export default class AdvectBase extends HTMLElement {
      */
     generateScope() {
         type ScopeResolution = Record<string, any> | Function | typeof AsyncFunction;
-        const scopeFunctions: Promise<ScopeResolution>[] = this.data_scripts
+        const scopeFunctions: Promise<ScopeResolution>[] = this.$data_scripts
             .map(({ script }) => {
                 return new AsyncFunction
                     ("self", "refs", "data", "states", script) // @ts-ignore Internals.states DOES exist
@@ -291,11 +298,11 @@ export default class AdvectBase extends HTMLElement {
 
         this.initalContent = this.cloneNode(true);
         this.attachShadow({ mode: "open" });
-        this.addShadowStyleSheet(this.$style);
+        this.mergeStyles([this.$style]);
         
-       // this.tw_sheet = cssomSheet({ target: this.$style })
-       // const { tw } = create({ sheet: this.tw_sheet });
-       // this.tw = tw;
+       this.tw_sheet = cssomSheet({ target: this.$style })
+       const { tw } = create({ sheet: this.tw_sheet });
+       this.tw = tw;
 
         // observe all changes on the light dom
         this.observer?.observe(this, {
@@ -312,15 +319,21 @@ export default class AdvectBase extends HTMLElement {
         this.shadowRoot?.querySelectorAll('style').forEach(style => {
             const css = new CSSStyleSheet();
             css.replaceSync(style.textContent ?? "");
-            this.shadowRoot?.adoptedStyleSheets.push(css);
+            this.mergeStyles([css]);
         });
     }
 
-    addShadowStyleSheet(style: CSSStyleSheet) {
-        this.shadowRoot?.adoptedStyleSheets.push(style);
-    }
 
+    /**
+     * Settable function to respond to mutations
+     * accessed in scope scripts as self.onMutate
+     */
     onMutate?: (mutation: MutationRecord) => void;
+    /**
+     * Mutation handler for the element
+     * fires when a mutation is observed on this element's lightdom, shadowdom, or refs
+     * @param mutation 
+     */
     mutate(mutation: MutationRecord) {
         if (this.onMutate) {
             this.onMutate(mutation);
@@ -332,10 +345,18 @@ export default class AdvectBase extends HTMLElement {
             this.renderStyles(mutation.target as HTMLElement);
         }
     };
+    /**
+     * Settable function to respond to disconnect
+     * accessed in scope scripts as self.onDisconnect
+     */
     onDisconnect?: () => void;
+    /**
+     * disconnectCallback for the element
+     */
     disconnectdCallback() {
         if (this.onDisconnect) {
             this.onDisconnect();
+            
         }
     }
 

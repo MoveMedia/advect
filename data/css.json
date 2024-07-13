@@ -1,0 +1,1702 @@
+[
+    {
+        "name": "align-content",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-align-content-property.php",
+        "desc": "Specifies the alignment of flexible container's items within the flex container."
+    },
+    {
+        "name": "align-items",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-align-items-property.php",
+        "desc": "Specifies the default alignment for items within the flex container."
+    },
+    {
+        "name": "align-self",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-align-self-property.php",
+        "desc": "Specifies the alignment for selected items within the flex container."
+    },
+    {
+        "name": "animation",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-property.php",
+        "desc": "Specifies the keyframe-based animations."
+    },
+    {
+        "name": "animation-delay",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-delay-property.php",
+        "desc": "Specifies when the animation will start."
+    },
+    {
+        "name": "animation-direction",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-direction-property.php",
+        "desc": "Specifies whether the animation should play in reverse on alternate cycles or not."
+    },
+    {
+        "name": "animation-duration",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-duration-property.php",
+        "desc": "Specifies the number of seconds or milliseconds an animation should take to complete one cycle."
+    },
+    {
+        "name": "animation-fill-mode",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-fill-mode-property.php",
+        "desc": "Specifies how a CSS animation should apply styles to its target before and after it is executing."
+    },
+    {
+        "name": "animation-iteration-count",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-iteration-count-property.php",
+        "desc": "Specifies the number of times an animation cycle should be played before stopping."
+    },
+    {
+        "name": "animation-name",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-name-property.php",
+        "desc": "Specifies the name of @keyframes defined animations that should be applied to the selected element."
+    },
+    {
+        "name": "animation-play-state",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-play-state-property.php",
+        "desc": "Specifies whether the animation is running or paused."
+    },
+    {
+        "name": "animation-timing-function",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-timing-function-property.php",
+        "desc": "Specifies how a CSS animation should progress over the duration of each cycle."
+    },
+    {
+        "name": "backface-visibility",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-backface-visibility-property.php",
+        "desc": "Specifies whether or not the \"back\" side of a transformed element is visible when facing the user."
+    },
+    {
+        "name": "background",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-property.php",
+        "desc": "Defines a variety of background properties within one declaration."
+    },
+    {
+        "name": "background-attachment",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-attachment-property.php",
+        "desc": "Specify whether the background image is fixed in the viewport or scrolls."
+    },
+    {
+        "name": "background-clip",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-background-clip-property.php",
+        "desc": "Specifies the painting area of the background."
+    },
+    {
+        "name": "background-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-color-property.php",
+        "desc": "Defines an element's background color."
+    },
+    {
+        "name": "background-image",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-image-property.php",
+        "desc": "Defines an element's background image."
+    },
+    {
+        "name": "background-origin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-background-origin-property.php",
+        "desc": "Specifies the positioning area of the background images."
+    },
+    {
+        "name": "background-position",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-position-property.php",
+        "desc": "Defines the origin of a background image."
+    },
+    {
+        "name": "background-repeat",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-repeat-property.php",
+        "desc": "Specify whether/how the background image is tiled."
+    },
+    {
+        "name": "background-size",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-background-size-property.php",
+        "desc": "Specifies the size of the background images."
+    },
+    {
+        "name": "border",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-property.php",
+        "desc": "Sets the width, style, and color for all four sides of an element's border."
+    },
+    {
+        "name": "border-bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-property.php",
+        "desc": "Sets the width, style, and color of the bottom border of an element."
+    },
+    {
+        "name": "border-bottom-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-color-property.php",
+        "desc": "Sets the color of the bottom border of an element."
+    },
+    {
+        "name": "border-bottom-left-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-bottom-left-radius-property.php",
+        "desc": "Defines the shape of the bottom-left border corner of an element."
+    },
+    {
+        "name": "border-bottom-right-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-bottom-right-radius-property.php",
+        "desc": "Defines the shape of the bottom-right border corner of an element."
+    },
+    {
+        "name": "border-bottom-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-style-property.php",
+        "desc": "Sets the style of the bottom border of an element."
+    },
+    {
+        "name": "border-bottom-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-width-property.php",
+        "desc": "Sets the width of the bottom border of an element."
+    },
+    {
+        "name": "border-collapse",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-collapse-property.php",
+        "desc": "Specifies whether table cell borders are connected or separated."
+    },
+    {
+        "name": "border-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-color-property.php",
+        "desc": "Sets the color of the border on all the four sides of an element."
+    },
+    {
+        "name": "border-image",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-property.php",
+        "desc": "Specifies how an image is to be used in place of the border styles."
+    },
+    {
+        "name": "border-image-outset",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-outset-property.php",
+        "desc": "Specifies the amount by which the border image area extends beyond the border box."
+    },
+    {
+        "name": "border-image-repeat",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-repeat-property.php",
+        "desc": "Specifies whether the image-border should be repeated, rounded or stretched."
+    },
+    {
+        "name": "border-image-slice",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-slice-property.php",
+        "desc": "Specifies the inward offsets of the image-border."
+    },
+    {
+        "name": "border-image-source",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-source-property.php",
+        "desc": "Specifies the location of the image to be used as a border."
+    },
+    {
+        "name": "border-image-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-width-property.php",
+        "desc": "Specifies the width of the image-border."
+    },
+    {
+        "name": "border-left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-property.php",
+        "desc": "Sets the width, style, and color of the left border of an element."
+    },
+    {
+        "name": "border-left-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-color-property.php",
+        "desc": "Sets the color of the left border of an element."
+    },
+    {
+        "name": "border-left-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-style-property.php",
+        "desc": "Sets the style of the left border of an element."
+    },
+    {
+        "name": "border-left-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-width-property.php",
+        "desc": "Sets the width of the left border of an element."
+    },
+    {
+        "name": "border-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-radius-property.php",
+        "desc": "Defines the shape of the border corners of an element."
+    },
+    {
+        "name": "border-right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-property.php",
+        "desc": "Sets the width, style, and color of the right border of an element."
+    },
+    {
+        "name": "border-right-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-color-property.php",
+        "desc": "Sets the color of the right border of an element."
+    },
+    {
+        "name": "border-right-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-style-property.php",
+        "desc": "Sets the style of the right border of an element."
+    },
+    {
+        "name": "border-right-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-width-property.php",
+        "desc": "Sets the width of the right border of an element."
+    },
+    {
+        "name": "border-spacing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-spacing-property.php",
+        "desc": "Sets the spacing between the borders of adjacent table cells."
+    },
+    {
+        "name": "border-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-style-property.php",
+        "desc": "Sets the style of the border on all the four sides of an element."
+    },
+    {
+        "name": "border-top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-property.php",
+        "desc": "Sets the width, style, and color of the top border of an element."
+    },
+    {
+        "name": "border-top-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-color-property.php",
+        "desc": "Sets the color of the top border of an element."
+    },
+    {
+        "name": "border-top-left-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-top-left-radius-property.php",
+        "desc": "Defines the shape of the top-left border corner of an element."
+    },
+    {
+        "name": "border-top-right-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-top-right-radius-property.php",
+        "desc": "Defines the shape of the top-right border corner of an element."
+    },
+    {
+        "name": "border-top-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-style-property.php",
+        "desc": "Sets the style of the top border of an element."
+    },
+    {
+        "name": "border-top-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-width-property.php",
+        "desc": "Sets the width of the top border of an element."
+    },
+    {
+        "name": "border-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-width-property.php",
+        "desc": "Sets the width of the border on all the four sides of an element."
+    },
+    {
+        "name": "bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-bottom-property.php",
+        "desc": "Specify the location of the bottom edge of the positioned element."
+    },
+    {
+        "name": "box-shadow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-box-shadow-property.php",
+        "desc": "Applies one or more drop-shadows to the element's box."
+    },
+    {
+        "name": "box-sizing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-box-sizing-property.php",
+        "desc": "Alter the default CSS box model."
+    },
+    {
+        "name": "caption-side",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-caption-side-property.php",
+        "desc": "Specify the position of table's caption."
+    },
+    {
+        "name": "clear",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-clear-property.php",
+        "desc": "Specifies the placement of an element in relation to floating elements."
+    },
+    {
+        "name": "clip",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-clip-property.php",
+        "desc": "Defines the clipping region."
+    },
+    {
+        "name": "color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-color-property.php",
+        "desc": "Specify the color of the text of an element."
+    },
+    {
+        "name": "column-count",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-count-property.php",
+        "desc": "Specifies the number of columns in a multi-column element."
+    },
+    {
+        "name": "column-fill",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-fill-property.php",
+        "desc": "Specifies how columns will be filled."
+    },
+    {
+        "name": "column-gap",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-gap-property.php",
+        "desc": "Specifies the gap between the columns in a multi-column element."
+    },
+    {
+        "name": "column-rule",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-property.php",
+        "desc": "Specifies a straight line, or \"rule\", to be drawn between each column in a multi-column element."
+    },
+    {
+        "name": "column-rule-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-color-property.php",
+        "desc": "Specifies the color of the rules drawn between columns in a multi-column layout."
+    },
+    {
+        "name": "column-rule-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-style-property.php",
+        "desc": "Specifies the style of the rule drawn between the columns in a multi-column layout."
+    },
+    {
+        "name": "column-rule-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-width-property.php",
+        "desc": "Specifies the width of the rule drawn between the columns in a multi-column layout."
+    },
+    {
+        "name": "column-span",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-span-property.php",
+        "desc": "Specifies how many columns an element spans across in a multi-column layout."
+    },
+    {
+        "name": "column-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-width-property.php",
+        "desc": "Specifies the optimal width of the columns in a multi-column element."
+    },
+    {
+        "name": "columns",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-columns-property.php",
+        "desc": "A shorthand property for setting column-width and column-count properties."
+    },
+    {
+        "name": "content",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-content-property.php",
+        "desc": "Inserts generated content."
+    },
+    {
+        "name": "counter-increment",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-counter-increment-property.php",
+        "desc": "Increments one or more counter values."
+    },
+    {
+        "name": "counter-reset",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-counter-reset-property.php",
+        "desc": "Creates or resets one or more counters."
+    },
+    {
+        "name": "cursor",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-cursor-property.php",
+        "desc": "Specify the type of cursor."
+    },
+    {
+        "name": "direction",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-direction-property.php",
+        "desc": "Define the text direction/writing direction."
+    },
+    {
+        "name": "display",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-display-property.php",
+        "desc": "Specifies how an element is displayed onscreen."
+    },
+    {
+        "name": "empty-cells",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-empty-cells-property.php",
+        "desc": "Show or hide borders and backgrounds of empty table cells."
+    },
+    {
+        "name": "flex",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-property.php",
+        "desc": "Specifies the components of a flexible length."
+    },
+    {
+        "name": "flex-basis",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-basis-property.php",
+        "desc": "Specifies the initial main size of the flex item."
+    },
+    {
+        "name": "flex-direction",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-direction-property.php",
+        "desc": "Specifies the direction of the flexible items."
+    },
+    {
+        "name": "flex-flow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-flow-property.php",
+        "desc": "A shorthand property for the flex-direction and the flex-wrap properties."
+    },
+    {
+        "name": "flex-grow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-grow-property.php",
+        "desc": "Specifies how the flex item will grow relative to the other items inside the flex container."
+    },
+    {
+        "name": "flex-shrink",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-shrink-property.php",
+        "desc": "Specifies how the flex item will shrink relative to the other items inside the flex container."
+    },
+    {
+        "name": "flex-wrap",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-wrap-property.php",
+        "desc": "Specifies whether the flexible items should wrap or not."
+    },
+    {
+        "name": "float",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-float-property.php",
+        "desc": "Specifies whether or not a box should float."
+    },
+    {
+        "name": "font",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-property.php",
+        "desc": "Defines a variety of font properties within one declaration."
+    },
+    {
+        "name": "font-family",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-family-property.php",
+        "desc": "Defines a list of fonts for element."
+    },
+    {
+        "name": "font-size",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-size-property.php",
+        "desc": "Defines the font size for the text."
+    },
+    {
+        "name": "font-size-adjust",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-font-size-adjust-property.php",
+        "desc": "Preserves the readability of text when font fallback occurs."
+    },
+    {
+        "name": "font-stretch",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-font-stretch-property.php",
+        "desc": "Selects a normal, condensed, or expanded face from a font."
+    },
+    {
+        "name": "font-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-style-property.php",
+        "desc": "Defines the font style for the text."
+    },
+    {
+        "name": "font-variant",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-variant-property.php",
+        "desc": "Specify the font variant."
+    },
+    {
+        "name": "font-weight",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-weight-property.php",
+        "desc": "Specify the font weight of the text."
+    },
+    {
+        "name": "height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-height-property.php",
+        "desc": "Specify the height of an element."
+    },
+    {
+        "name": "justify-content",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-justify-content-property.php",
+        "desc": "Specifies how flex items are aligned along the main axis of the flex container after any flexible lengths and auto margins have been resolved."
+    },
+    {
+        "name": "left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-left-property.php",
+        "desc": "Specify the location of the left edge of the positioned element."
+    },
+    {
+        "name": "letter-spacing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-letter-spacing-property.php",
+        "desc": "Sets the extra spacing between letters."
+    },
+    {
+        "name": "line-height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-line-height-property.php",
+        "desc": "Sets the height between lines of text."
+    },
+    {
+        "name": "list-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-property.php",
+        "desc": "Defines the display style for a list and list elements."
+    },
+    {
+        "name": "list-style-image",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-image-property.php",
+        "desc": "Specifies the image to be used as a list-item marker."
+    },
+    {
+        "name": "list-style-position",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-position-property.php",
+        "desc": "Specifies the position of the list-item marker."
+    },
+    {
+        "name": "list-style-type",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-type-property.php",
+        "desc": "Specifies the marker style for a list-item."
+    },
+    {
+        "name": "margin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-property.php",
+        "desc": "Sets the margin on all four sides of the element."
+    },
+    {
+        "name": "margin-bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-bottom-property.php",
+        "desc": "Sets the bottom margin of the element."
+    },
+    {
+        "name": "margin-left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-left-property.php",
+        "desc": "Sets the left margin of the element."
+    },
+    {
+        "name": "margin-right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-right-property.php",
+        "desc": "Sets the right margin of the element."
+    },
+    {
+        "name": "margin-top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-top-property.php",
+        "desc": "Sets the top margin of the element."
+    },
+    {
+        "name": "max-height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-max-height-property.php",
+        "desc": "Specify the maximum height of an element."
+    },
+    {
+        "name": "max-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-max-width-property.php",
+        "desc": "Specify the maximum width of an element."
+    },
+    {
+        "name": "min-height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-min-height-property.php",
+        "desc": "Specify the minimum height of an element."
+    },
+    {
+        "name": "min-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-min-width-property.php",
+        "desc": "Specify the minimum width of an element."
+    },
+    {
+        "name": "opacity",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-opacity-property.php",
+        "desc": "Specifies the transparency of an element."
+    },
+    {
+        "name": "order",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-order-property.php",
+        "desc": "Specifies the order in which a flex items are displayed and laid out within a flex container."
+    },
+    {
+        "name": "outline",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-property.php",
+        "desc": "Sets the width, style, and color for all four sides of an element's outline."
+    },
+    {
+        "name": "outline-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-color-property.php",
+        "desc": "Sets the color of the outline."
+    },
+    {
+        "name": "outline-offset",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-outline-offset-property.php",
+        "desc": "Set the space between an outline and the border edge of an element."
+    },
+    {
+        "name": "outline-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-style-property.php",
+        "desc": "Sets a style for an outline."
+    },
+    {
+        "name": "outline-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-width-property.php",
+        "desc": "Sets the width of the outline."
+    },
+    {
+        "name": "overflow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-overflow-property.php",
+        "desc": "Specifies the treatment of content that overflows the element's box."
+    },
+    {
+        "name": "overflow-x",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-overflow-x-property.php",
+        "desc": "Specifies the treatment of content that overflows the element's box horizontally."
+    },
+    {
+        "name": "overflow-y",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-overflow-y-property.php",
+        "desc": "Specifies the treatment of content that overflows the element's box vertically."
+    },
+    {
+        "name": "padding",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-property.php",
+        "desc": "Sets the padding on all four sides of the element."
+    },
+    {
+        "name": "padding-bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-bottom-property.php",
+        "desc": "Sets the padding to the bottom side of an element."
+    },
+    {
+        "name": "padding-left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-left-property.php",
+        "desc": "Sets the padding to the left side of an element."
+    },
+    {
+        "name": "padding-right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-right-property.php",
+        "desc": "Sets the padding to the right side of an element."
+    },
+    {
+        "name": "padding-top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-top-property.php",
+        "desc": "Sets the padding to the top side of an element."
+    },
+    {
+        "name": "page-break-after",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-page-break-after-property.php",
+        "desc": "Insert a page breaks after an element."
+    },
+    {
+        "name": "page-break-before",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-page-break-before-property.php",
+        "desc": "Insert a page breaks before an element."
+    },
+    {
+        "name": "page-break-inside",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-page-break-inside-property.php",
+        "desc": "Insert a page breaks inside an element."
+    },
+    {
+        "name": "perspective",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-perspective-property.php",
+        "desc": "Defines the perspective from which all child elements of the object are viewed."
+    },
+    {
+        "name": "perspective-origin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-perspective-origin-property.php",
+        "desc": "Defines the origin (the vanishing point for the 3D space) for the perspective property."
+    },
+    {
+        "name": "position",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-position-property.php",
+        "desc": "Specifies how an element is positioned."
+    },
+    {
+        "name": "quotes",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-quotes-property.php",
+        "desc": "Specifies quotation marks for embedded quotations."
+    },
+    {
+        "name": "resize",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-resize-property.php",
+        "desc": "Specifies whether or not an element is resizable by the user."
+    },
+    {
+        "name": "right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-right-property.php",
+        "desc": "Specify the location of the right edge of the positioned element."
+    },
+    {
+        "name": "tab-size",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-tab-size-property.php",
+        "desc": "Specifies the length of the tab character."
+    },
+    {
+        "name": "table-layout",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-table-layout-property.php",
+        "desc": "Specifies a table layout algorithm."
+    },
+    {
+        "name": "text-align",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-align-property.php",
+        "desc": "Sets the horizontal alignment of inline content."
+    },
+    {
+        "name": "text-align-last",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-align-last-property.php",
+        "desc": "Specifies how the last line of a block or a line right before a forced line break is aligned when text-align is justify."
+    },
+    {
+        "name": "text-decoration",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-decoration-property.php",
+        "desc": "Specifies the decoration added to text."
+    },
+    {
+        "name": "text-decoration-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-decoration-color-property.php",
+        "desc": "Specifies the color of the text-decoration-line."
+    },
+    {
+        "name": "text-decoration-line",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-decoration-line-property.php",
+        "desc": "Specifies what kind of line decorations are added to the element."
+    },
+    {
+        "name": "text-decoration-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-decoration-style-property.php",
+        "desc": "Specifies the style of the lines specified by the text-decoration-line property"
+    },
+    {
+        "name": "text-indent",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-indent-property.php",
+        "desc": "Indent the first line of text."
+    },
+    {
+        "name": "text-justify",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-justify-property.php",
+        "desc": "Specifies the justification method to use when the text-align property is set to justify."
+    },
+    {
+        "name": "text-overflow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-overflow-property.php",
+        "desc": "Specifies how the text content will be displayed, when it overflows the block containers."
+    },
+    {
+        "name": "text-shadow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-shadow-property.php",
+        "desc": "Applies one or more shadows to the text content of an element."
+    },
+    {
+        "name": "text-transform",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-transform-property.php",
+        "desc": "Transforms the case of the text."
+    },
+    {
+        "name": "top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-top-property.php",
+        "desc": "Specify the location of the top edge of the positioned element."
+    },
+    {
+        "name": "transform",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transform-property.php",
+        "desc": "Applies a 2D or 3D transformation to an element."
+    },
+    {
+        "name": "transform-origin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transform-origin-property.php",
+        "desc": "Defines the origin of transformation for an element."
+    },
+    {
+        "name": "transform-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transform-style-property.php",
+        "desc": "Specifies how nested elements are rendered in 3D space."
+    },
+    {
+        "name": "transition",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-property.php",
+        "desc": "Defines the transition between two states of an element."
+    },
+    {
+        "name": "transition-delay",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-delay-property.php",
+        "desc": "Specifies when the transition effect will start."
+    },
+    {
+        "name": "transition-duration",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-duration-property.php",
+        "desc": "Specifies the number of seconds or milliseconds a transition effect should take to complete."
+    },
+    {
+        "name": "transition-property",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-property-property.php",
+        "desc": "Specifies the names of the CSS properties to which a transition effect should be applied."
+    },
+    {
+        "name": "transition-timing-function",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-timing-function-property.php",
+        "desc": "Specifies the speed curve of the transition effect."
+    },
+    {
+        "name": "vertical-align",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-vertical-align-property.php",
+        "desc": "Sets the vertical positioning of an element relative to the current text baseline."
+    },
+    {
+        "name": "visibility",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-visibility-property.php",
+        "desc": "Specifies whether or not an element is visible."
+    },
+    {
+        "name": "white-space",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-white-space-property.php",
+        "desc": "Specifies how white space inside the element is handled."
+    },
+    {
+        "name": "width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-width-property.php",
+        "desc": "Specify the width of an element."
+    },
+    {
+        "name": "word-break",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-word-break-property.php",
+        "desc": "Specifies how to break lines within words."
+    },
+    {
+        "name": "word-spacing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-word-spacing-property.php",
+        "desc": "Sets the spacing between words."
+    },
+    {
+        "name": "word-wrap",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-word-wrap-property.php",
+        "desc": "Specifies whether to break words when the content overflows the boundaries of its container."
+    },
+    {
+        "name": "z-index",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-z-index-property.php",
+        "desc": "Specifies a layering or stacking order for positioned elements."
+    },
+    {
+        "name": "animation",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-property.php",
+        "desc": "Specifies the keyframe-based animations."
+    },
+    {
+        "name": "animation-delay",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-delay-property.php",
+        "desc": "Specifies when the animation will start."
+    },
+    {
+        "name": "animation-direction",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-direction-property.php",
+        "desc": "Specifies whether the animation should play in reverse on alternate cycles or not."
+    },
+    {
+        "name": "animation-duration",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-duration-property.php",
+        "desc": "Specifies the number of seconds or milliseconds an animation should take to complete one cycle."
+    },
+    {
+        "name": "animation-fill-mode",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-fill-mode-property.php",
+        "desc": "Specifies how a CSS animation should apply styles to its target before and after it is executing."
+    },
+    {
+        "name": "animation-iteration-count",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-iteration-count-property.php",
+        "desc": "Specifies the number of times an animation cycle should be played before stopping."
+    },
+    {
+        "name": "animation-name",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-name-property.php",
+        "desc": "Specifies the name of @keyframes defined animations that should be applied to the selected element."
+    },
+    {
+        "name": "animation-play-state",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-play-state-property.php",
+        "desc": "Specifies whether the animation is running or paused."
+    },
+    {
+        "name": "animation-timing-function",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-animation-timing-function-property.php",
+        "desc": "Specifies how a CSS animation should progress over the duration of each cycle."
+    },
+    {
+        "name": "background",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-property.php",
+        "desc": "Defines a variety of background properties within one declaration."
+    },
+    {
+        "name": "background-attachment",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-attachment-property.php",
+        "desc": "Specify whether the background image is fixed in the viewport or scrolls."
+    },
+    {
+        "name": "background-clip",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-background-clip-property.php",
+        "desc": "Specifies the painting area of the background."
+    },
+    {
+        "name": "background-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-color-property.php",
+        "desc": "Defines an element's background color."
+    },
+    {
+        "name": "background-image",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-image-property.php",
+        "desc": "Defines an element's background image."
+    },
+    {
+        "name": "background-origin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-background-origin-property.php",
+        "desc": "Specifies the positioning area of the background images."
+    },
+    {
+        "name": "background-position",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-position-property.php",
+        "desc": "Defines the origin of a background image."
+    },
+    {
+        "name": "background-repeat",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-background-repeat-property.php",
+        "desc": "Specify whether/how the background image is tiled."
+    },
+    {
+        "name": "background-size",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-background-size-property.php",
+        "desc": "Specifies the size of the background images."
+    },
+    {
+        "name": "border",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-property.php",
+        "desc": "Sets the width, style, and color for all four sides of an element's border."
+    },
+    {
+        "name": "border-bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-property.php",
+        "desc": "Sets the width, style, and color of the bottom border of an element."
+    },
+    {
+        "name": "border-bottom-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-color-property.php",
+        "desc": "Sets the color of the bottom border of an element."
+    },
+    {
+        "name": "border-bottom-left-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-bottom-left-radius-property.php",
+        "desc": "Defines the shape of the bottom-left border corner of an element."
+    },
+    {
+        "name": "border-bottom-right-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-bottom-right-radius-property.php",
+        "desc": "Defines the shape of the bottom-right border corner of an element."
+    },
+    {
+        "name": "border-bottom-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-style-property.php",
+        "desc": "Sets the style of the bottom border of an element."
+    },
+    {
+        "name": "border-bottom-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-bottom-width-property.php",
+        "desc": "Sets the width of the bottom border of an element."
+    },
+    {
+        "name": "border-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-color-property.php",
+        "desc": "Sets the color of the border on all the four sides of an element."
+    },
+    {
+        "name": "border-image",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-property.php",
+        "desc": "Specifies how an image is to be used in place of the border styles."
+    },
+    {
+        "name": "border-image-outset",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-outset-property.php",
+        "desc": "Specifies the amount by which the border image area extends beyond the border box."
+    },
+    {
+        "name": "border-image-repeat",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-repeat-property.php",
+        "desc": "Specifies whether the image-border should be repeated, rounded or stretched."
+    },
+    {
+        "name": "border-image-slice",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-slice-property.php",
+        "desc": "Specifies the inward offsets of the image-border."
+    },
+    {
+        "name": "border-image-source",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-source-property.php",
+        "desc": "Specifies the location of the image to be used as a border."
+    },
+    {
+        "name": "border-image-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-image-width-property.php",
+        "desc": "Specifies the width of the image-border."
+    },
+    {
+        "name": "border-left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-property.php",
+        "desc": "Sets the width, style, and color of the left border of an element."
+    },
+    {
+        "name": "border-left-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-color-property.php",
+        "desc": "Sets the color of the left border of an element."
+    },
+    {
+        "name": "border-left-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-style-property.php",
+        "desc": "Sets the style of the left border of an element."
+    },
+    {
+        "name": "border-left-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-left-width-property.php",
+        "desc": "Sets the width of the left border of an element."
+    },
+    {
+        "name": "border-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-radius-property.php",
+        "desc": "Defines the shape of the border corners of an element."
+    },
+    {
+        "name": "border-right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-property.php",
+        "desc": "Sets the width, style, and color of the right border of an element."
+    },
+    {
+        "name": "border-right-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-color-property.php",
+        "desc": "Sets the color of the right border of an element."
+    },
+    {
+        "name": "border-right-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-style-property.php",
+        "desc": "Sets the style of the right border of an element."
+    },
+    {
+        "name": "border-right-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-right-width-property.php",
+        "desc": "Sets the width of the right border of an element."
+    },
+    {
+        "name": "border-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-style-property.php",
+        "desc": "Sets the style of the border on all the four sides of an element."
+    },
+    {
+        "name": "border-top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-property.php",
+        "desc": "Sets the width, style, and color of the top border of an element."
+    },
+    {
+        "name": "border-top-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-color-property.php",
+        "desc": "Sets the color of the top border of an element."
+    },
+    {
+        "name": "border-top-left-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-top-left-radius-property.php",
+        "desc": "Defines the shape of the top-left border corner of an element."
+    },
+    {
+        "name": "border-top-right-radius",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-border-top-right-radius-property.php",
+        "desc": "Defines the shape of the top-right border corner of an element."
+    },
+    {
+        "name": "border-top-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-style-property.php",
+        "desc": "Sets the style of the top border of an element."
+    },
+    {
+        "name": "border-top-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-top-width-property.php",
+        "desc": "Sets the width of the top border of an element."
+    },
+    {
+        "name": "border-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-width-property.php",
+        "desc": "Sets the width of the border on all the four sides of an element."
+    },
+    {
+        "name": "color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-color-property.php",
+        "desc": "Specify the color of the text of an element."
+    },
+    {
+        "name": "opacity",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-opacity-property.php",
+        "desc": "Specifies the transparency of an element."
+    },
+    {
+        "name": "height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-height-property.php",
+        "desc": "Specify the height of an element."
+    },
+    {
+        "name": "max-height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-max-height-property.php",
+        "desc": "Specify the maximum height of an element."
+    },
+    {
+        "name": "min-height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-min-height-property.php",
+        "desc": "Specify the minimum height of an element."
+    },
+    {
+        "name": "min-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-min-width-property.php",
+        "desc": "Specify the minimum width of an element."
+    },
+    {
+        "name": "width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-width-property.php",
+        "desc": "Specify the width of an element."
+    },
+    {
+        "name": "content",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-content-property.php",
+        "desc": "Inserts generated content."
+    },
+    {
+        "name": "quotes",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-quotes-property.php",
+        "desc": "Specifies quotation marks for embedded quotations."
+    },
+    {
+        "name": "counter-reset",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-counter-reset-property.php",
+        "desc": "Creates or resets one or more counters."
+    },
+    {
+        "name": "counter-increment",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-counter-increment-property.php",
+        "desc": "Increments one or more counter values."
+    },
+    {
+        "name": "align-content",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-align-content-property.php",
+        "desc": "Specifies the alignment of flexible container's items within the flex container."
+    },
+    {
+        "name": "align-items",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-align-items-property.php",
+        "desc": "Specifies the default alignment for items within the flex container."
+    },
+    {
+        "name": "align-self",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-align-self-property.php",
+        "desc": "Specifies the alignment for selected items within the flex container."
+    },
+    {
+        "name": "flex",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-property.php",
+        "desc": "Specifies the components of a flexible length."
+    },
+    {
+        "name": "flex-basis",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-basis-property.php",
+        "desc": "Specifies the initial main size of the flex item."
+    },
+    {
+        "name": "flex-direction",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-direction-property.php",
+        "desc": "Specifies the direction of the flexible items."
+    },
+    {
+        "name": "flex-flow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-flow-property.php",
+        "desc": "A shorthand property for the flex-direction and the flex-wrap properties."
+    },
+    {
+        "name": "flex-grow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-grow-property.php",
+        "desc": "Specifies how the flex item will grow relative to the other items inside the flex container."
+    },
+    {
+        "name": "flex-shrink",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-shrink-property.php",
+        "desc": "Specifies how the flex item will shrink relative to the other items inside the flex container."
+    },
+    {
+        "name": "flex-wrap",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-flex-wrap-property.php",
+        "desc": "Specifies whether the flexible items should wrap or not."
+    },
+    {
+        "name": "justify-content",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-justify-content-property.php",
+        "desc": "Specifies how flex items are aligned along the main axis of the flex container after any flexible lengths and auto margins have been resolved."
+    },
+    {
+        "name": "order",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-order-property.php",
+        "desc": "Specifies the order in which a flex items are displayed and laid out within a flex container."
+    },
+    {
+        "name": "font",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-property.php",
+        "desc": "Defines a variety of font properties within one declaration."
+    },
+    {
+        "name": "font-family",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-family-property.php",
+        "desc": "Defines a list of fonts for element."
+    },
+    {
+        "name": "font-size",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-size-property.php",
+        "desc": "Defines the font size for the text."
+    },
+    {
+        "name": "font-size-adjust",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-font-size-adjust-property.php",
+        "desc": "Preserves the readability of text when font fallback occurs."
+    },
+    {
+        "name": "font-stretch",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-font-stretch-property.php",
+        "desc": "Selects a normal, condensed, or expanded face from a font."
+    },
+    {
+        "name": "font-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-style-property.php",
+        "desc": "Defines the font style for the text."
+    },
+    {
+        "name": "font-variant",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-variant-property.php",
+        "desc": "Specify the font variant."
+    },
+    {
+        "name": "font-weight",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-font-weight-property.php",
+        "desc": "Specify the font weight of the text."
+    },
+    {
+        "name": "list-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-property.php",
+        "desc": "Defines the display style for a list and list elements."
+    },
+    {
+        "name": "list-style-image",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-image-property.php",
+        "desc": "Specifies the image to be used as a list-item marker."
+    },
+    {
+        "name": "list-style-position",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-position-property.php",
+        "desc": "Specifies the position of the list-item marker."
+    },
+    {
+        "name": "list-style-type",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-list-style-type-property.php",
+        "desc": "Specifies the marker style for a list-item."
+    },
+    {
+        "name": "margin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-property.php",
+        "desc": "Sets the margin on all four sides of the element."
+    },
+    {
+        "name": "margin-bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-bottom-property.php",
+        "desc": "Sets the bottom margin of the element."
+    },
+    {
+        "name": "margin-left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-left-property.php",
+        "desc": "Sets the left margin of the element."
+    },
+    {
+        "name": "margin-right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-right-property.php",
+        "desc": "Sets the right margin of the element."
+    },
+    {
+        "name": "margin-top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-margin-top-property.php",
+        "desc": "Sets the top margin of the element."
+    },
+    {
+        "name": "column-count",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-count-property.php",
+        "desc": "Specifies the number of columns in a multi-column element."
+    },
+    {
+        "name": "column-fill",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-fill-property.php",
+        "desc": "Specifies how columns will be filled."
+    },
+    {
+        "name": "column-gap",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-gap-property.php",
+        "desc": "Specifies the gap between the columns in a multi-column element."
+    },
+    {
+        "name": "column-rule",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-property.php",
+        "desc": "Specifies a straight line, or \"rule\", to be drawn between each column in a multi-column element."
+    },
+    {
+        "name": "column-rule-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-color-property.php",
+        "desc": "Specifies the color of the rules drawn between columns in a multi-column layout."
+    },
+    {
+        "name": "column-rule-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-style-property.php",
+        "desc": "Specifies the style of the rule drawn between the columns in a multi-column layout."
+    },
+    {
+        "name": "column-rule-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-rule-width-property.php",
+        "desc": "Specifies the width of the rule drawn between the columns in a multi-column layout."
+    },
+    {
+        "name": "column-span",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-span-property.php",
+        "desc": "Specifies how many columns an element spans across in a multi-column layout."
+    },
+    {
+        "name": "column-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-column-width-property.php",
+        "desc": "Specifies the optimal width of the columns in a multi-column element."
+    },
+    {
+        "name": "columns",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-columns-property.php",
+        "desc": "A shorthand property for setting column-width and column-count properties."
+    },
+    {
+        "name": "outline",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-property.php",
+        "desc": "Sets the width, style, and color for all four sides of an element's outline."
+    },
+    {
+        "name": "outline-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-color-property.php",
+        "desc": "Sets the color of the outline."
+    },
+    {
+        "name": "outline-offset",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-outline-offset-property.php",
+        "desc": "Set the space between an outline and the border edge of an element."
+    },
+    {
+        "name": "outline-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-style-property.php",
+        "desc": "Sets a style for an outline."
+    },
+    {
+        "name": "outline-width",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-outline-width-property.php",
+        "desc": "Sets the width of the outline."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "padding",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-property.php",
+        "desc": "Sets the padding on all four sides of the element."
+    },
+    {
+        "name": "padding-bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-bottom-property.php",
+        "desc": "Sets the padding to the bottom side of an element."
+    },
+    {
+        "name": "padding-left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-left-property.php",
+        "desc": "Sets the padding to the left side of an element."
+    },
+    {
+        "name": "padding-right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-right-property.php",
+        "desc": "Sets the padding to the right side of an element."
+    },
+    {
+        "name": "padding-top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-padding-top-property.php",
+        "desc": "Sets the padding to the top side of an element."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "page-break-after",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-page-break-after-property.php",
+        "desc": "Insert a page breaks after an element."
+    },
+    {
+        "name": "page-break-before",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-page-break-before-property.php",
+        "desc": "Insert a page breaks before an element."
+    },
+    {
+        "name": "page-break-inside",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-page-break-inside-property.php",
+        "desc": "Insert a page breaks inside an element."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "border-collapse",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-collapse-property.php",
+        "desc": "Specifies whether table cell borders are connected or separated."
+    },
+    {
+        "name": "border-spacing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-border-spacing-property.php",
+        "desc": "Sets the spacing between the borders of adjacent table cells."
+    },
+    {
+        "name": "caption-side",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-caption-side-property.php",
+        "desc": "Specify the position of table's caption."
+    },
+    {
+        "name": "empty-cells",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-empty-cells-property.php",
+        "desc": "Show or hide borders and backgrounds of empty table cells."
+    },
+    {
+        "name": "table-layout",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-table-layout-property.php",
+        "desc": "Specifies a table layout algorithm."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "direction",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-direction-property.php",
+        "desc": "Define the text direction/writing direction."
+    },
+    {
+        "name": "tab-size",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-tab-size-property.php",
+        "desc": "Specifies the length of the tab character."
+    },
+    {
+        "name": "text-align",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-align-property.php",
+        "desc": "Sets the horizontal alignment of inline content."
+    },
+    {
+        "name": "text-align-last",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-align-last-property.php",
+        "desc": "Specifies how the last line of a block or a line right before a forced line break is aligned when text-align is justify."
+    },
+    {
+        "name": "text-decoration",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-decoration-property.php",
+        "desc": "Specifies the decoration added to text."
+    },
+    {
+        "name": "text-decoration-color",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-decoration-color-property.php",
+        "desc": "Specifies the color of the text-decoration-line."
+    },
+    {
+        "name": "text-decoration-line",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-decoration-line-property.php",
+        "desc": "Specifies what kind of line decorations are added to the element."
+    },
+    {
+        "name": "text-decoration-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-decoration-style-property.php",
+        "desc": "Specifies the style of the lines specified by the text-decoration-line property"
+    },
+    {
+        "name": "text-indent",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-indent-property.php",
+        "desc": "Indent the first line of text."
+    },
+    {
+        "name": "text-justify",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-justify-property.php",
+        "desc": "Specifies the justification method to use when the text-align property is set to justify."
+    },
+    {
+        "name": "text-overflow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-overflow-property.php",
+        "desc": "Specifies how the text content will be displayed, when it overflows the block containers."
+    },
+    {
+        "name": "text-shadow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-text-shadow-property.php",
+        "desc": "Applies one or more shadows to the text content of an element."
+    },
+    {
+        "name": "text-transform",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-text-transform-property.php",
+        "desc": "Transforms the case of the text."
+    },
+    {
+        "name": "line-height",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-line-height-property.php",
+        "desc": "Sets the height between lines of text."
+    },
+    {
+        "name": "vertical-align",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-vertical-align-property.php",
+        "desc": "Sets the vertical positioning of an element relative to the current text baseline."
+    },
+    {
+        "name": "letter-spacing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-letter-spacing-property.php",
+        "desc": "Sets the extra spacing between letters."
+    },
+    {
+        "name": "word-spacing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-word-spacing-property.php",
+        "desc": "Sets the spacing between words."
+    },
+    {
+        "name": "white-space",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-white-space-property.php",
+        "desc": "Specifies how white space inside the element is handled."
+    },
+    {
+        "name": "word-break",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-word-break-property.php",
+        "desc": "Specifies how to break lines within words."
+    },
+    {
+        "name": "word-wrap",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-word-wrap-property.php",
+        "desc": "Specifies whether to break words when the content overflows the boundaries of its container."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "backface-visibility",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-backface-visibility-property.php",
+        "desc": "Specifies whether or not the \"back\" side of a transformed element is visible when facing the user."
+    },
+    {
+        "name": "perspective",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-perspective-property.php",
+        "desc": "Defines the perspective from which all child elements of the object are viewed."
+    },
+    {
+        "name": "perspective-origin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-perspective-origin-property.php",
+        "desc": "Defines the origin (the vanishing point for the 3D space) for the perspective property."
+    },
+    {
+        "name": "transform",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transform-property.php",
+        "desc": "Applies a 2D or 3D transformation to an element."
+    },
+    {
+        "name": "transform-origin",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transform-origin-property.php",
+        "desc": "Defines the origin of transformation for an element."
+    },
+    {
+        "name": "transform-style",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transform-style-property.php",
+        "desc": "Specifies how nested elements are rendered in 3D space."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "transition",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-property.php",
+        "desc": "Defines the transition between two states of an element."
+    },
+    {
+        "name": "transition-delay",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-delay-property.php",
+        "desc": "Specifies when the transition effect will start."
+    },
+    {
+        "name": "transition-duration",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-duration-property.php",
+        "desc": "Specifies the number of seconds or milliseconds a transition effect should take to complete."
+    },
+    {
+        "name": "transition-property",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-property-property.php",
+        "desc": "Specifies the names of the CSS properties to which a transition effect should be applied."
+    },
+    {
+        "name": "transition-timing-function",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-transition-timing-function-property.php",
+        "desc": "Specifies the speed curve of the transition effect."
+    },
+    {
+        "name": "",
+        "info": "",
+        "desc": ""
+    },
+    {
+        "name": "display",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-display-property.php",
+        "desc": "Specifies how an element is displayed onscreen."
+    },
+    {
+        "name": "position",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-position-property.php",
+        "desc": "Specifies how an element is positioned."
+    },
+    {
+        "name": "top",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-top-property.php",
+        "desc": "Specify the location of the top edge of the positioned element."
+    },
+    {
+        "name": "right",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-right-property.php",
+        "desc": "Specify the location of the right edge of the positioned element."
+    },
+    {
+        "name": "bottom",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-bottom-property.php",
+        "desc": "Specify the location of the bottom edge of the positioned element."
+    },
+    {
+        "name": "left",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-left-property.php",
+        "desc": "Specify the location of the left edge of the positioned element."
+    },
+    {
+        "name": "float",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-float-property.php",
+        "desc": "Specifies whether or not a box should float."
+    },
+    {
+        "name": "clear",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-clear-property.php",
+        "desc": "Specifies the placement of an element in relation to floating elements."
+    },
+    {
+        "name": "z-index",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-z-index-property.php",
+        "desc": "Specifies a layering or stacking order for positioned elements."
+    },
+    {
+        "name": "overflow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-overflow-property.php",
+        "desc": "Specifies the treatment of content that overflows the element's box."
+    },
+    {
+        "name": "overflow-x",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-overflow-x-property.php",
+        "desc": "Specifies how to manage the content when it overflows the width of the element's content area."
+    },
+    {
+        "name": "overflow-y",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-overflow-y-property.php",
+        "desc": "Specifies how to manage the content when it overflows the height of the element's content area."
+    },
+    {
+        "name": "resize",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-resize-property.php",
+        "desc": "Specifies whether or not an element is resizable by the user."
+    },
+    {
+        "name": "clip",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-clip-property.php",
+        "desc": "Defines the clipping region."
+    },
+    {
+        "name": "visibility",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-visibility-property.php",
+        "desc": "Specifies whether or not an element is visible."
+    },
+    {
+        "name": "cursor",
+        "info": "https://www.tutorialrepublic.com/css-reference/css-cursor-property.php",
+        "desc": "Specify the type of cursor."
+    },
+    {
+        "name": "box-shadow",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-box-shadow-property.php",
+        "desc": "Applies one or more drop-shadows to the element's box."
+    },
+    {
+        "name": "box-sizing",
+        "info": "https://www.tutorialrepublic.com/css-reference/css3-box-sizing-property.php",
+        "desc": "Alter the default CSS box model."
+    }
+]
