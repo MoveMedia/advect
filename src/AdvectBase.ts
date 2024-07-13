@@ -1,10 +1,9 @@
-import { create, cssomSheet } from "twind";
 import { AdvMutationEvent } from "./AdvMutationEvent";
 import { AdvectView } from "./AdvectView";
 import settings from "./settings";
-import { AsyncFunction } from "./utils";
+import { $window, AsyncFunction } from "./utils";
 import { reactive, effect } from "@vue/reactivity";
-import { createStore } from 'zustand/vanilla'
+import Advect from "./advect";
 
 
 
@@ -13,10 +12,15 @@ import { createStore } from 'zustand/vanilla'
  * 
  */
 export default class AdvectBase extends HTMLElement {
+
+    extras: Record<string, any> = {};
+
     /**
      *  Lib
      */
-    
+    get adv() {
+        return $window.advect as Advect
+    }
 
     static $shadow_mode: "open" | "close";
     /**
@@ -26,11 +30,7 @@ export default class AdvectBase extends HTMLElement {
     /**
      * 
      */
-    tw_sheet: any;
-    /**
-     * 
-     */
-    tw: any;
+
     /**
      * 
      */
@@ -106,28 +106,12 @@ export default class AdvectBase extends HTMLElement {
     mergeStyles(styles: CSSStyleSheet[]) {
         this.shadowRoot?.adoptedStyleSheets.push(...styles);
     }
-    renderStyles(el?: HTMLElement | Array<HTMLElement>) {
 
-        // only here to support hooks this will be moved to twind.plugin.ts
-        if (el && el instanceof HTMLElement) {
-            this.tw(el.className)
-        }
-        if (el && el instanceof Array) {
-            el.forEach(_el => {
-                this.tw(_el.className)
-            })
-        }
-        if (!el)
-        {
-            this.shadowRoot?.querySelectorAll('[class]').forEach(_el => {
-                this.tw(_el.className)
-            })
-            this.querySelectorAll('[class]').forEach(_el => {
-                this.tw(_el.className)
-            })
-        }
-        
+    render() {
+
     }
+
+
 
     /**
      * 
@@ -181,6 +165,8 @@ export default class AdvectBase extends HTMLElement {
             });
         // refs
         this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
+            // @ts-ignore refs have a reference to this
+            ref.$adv_parent = this;
             ref.addEventListener('adv:mutation', (_event) => {
                 this.mutate((_event as AdvMutationEvent).detail);
             });
@@ -276,6 +262,7 @@ export default class AdvectBase extends HTMLElement {
         this.style.display = "block";
 
     }
+
     onConnect?: () => void;
     connectedCallback() {
         //@ts-ignore
@@ -284,10 +271,8 @@ export default class AdvectBase extends HTMLElement {
         this.initalContent = this.cloneNode(true);
         this.attachShadow({ mode: "open" });
         this.mergeStyles([this.$style]);
-        
-        this.tw_sheet = cssomSheet({ target: this.$style })
-        const { tw } = create({ sheet: this.tw_sheet });
-        this.tw = tw;
+
+    
 
         // observe all changes on the light dom
         this.observer?.observe(this, {
@@ -300,27 +285,27 @@ export default class AdvectBase extends HTMLElement {
         //     childList: true,
         //     subtree: true
         // });
-
         this.shadowRoot?.querySelectorAll('style').forEach(style => {
             const css = new CSSStyleSheet();
             css.replaceSync(style.textContent ?? "");
             this.mergeStyles([css]);
         });
+
+        this.adv.plugins.connected(this);
+
     }
 
- 
+
 
     onMutate?: (mutation: MutationRecord) => void;
     mutate(mutation: MutationRecord) {
         if (this.onMutate) {
             this.onMutate(mutation);
         }
-        if (mutation.attributeName === "class" && mutation.target === this){
-            this.renderStyles();
+        if (mutation.target === this) {
+            this.adv.plugins.mutated(this, mutation);
         }
-        if (!(mutation.target as HTMLElement).matches("[no-tw]")){
-            this.renderStyles(mutation.target as HTMLElement);
-        }
+       
     };
     onDisconnect?: () => void;
     disconnectdCallback() {
@@ -353,7 +338,7 @@ export default class AdvectBase extends HTMLElement {
         return __Closest(base);
     }
 
-    onPluginDiscovered( ){
+    onPluginDiscovered() {
         // TODO onPluginDiscovered
     }
 }

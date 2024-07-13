@@ -1,6 +1,7 @@
-import { $window } from "./utils";
+import { $window, AdvectRenderFunction } from "./utils";
 import $m from 'mustache';
 import AdvectBase from "./AdvectBase";
+import settings from "./settings";
 /**
  * A Untility element for rendering mustache templates
  */
@@ -18,7 +19,7 @@ export class AdvectView extends AdvectBase {
   get ic() { return this.constructor.ic; }
 
 
-  static observedAttributes = ['data', 'main-script', 'open-tag', 'close-tag'];
+  static observedAttributes = ['data', 'main-script', 'open-tag', 'close-tag', "renderer"];
 
   main_script?: string;
 
@@ -35,13 +36,11 @@ export class AdvectView extends AdvectBase {
     super.connectedCallback();
     // @ts-ignore instance counter
     this.constructor.ic++;
-
- 
     this.render = this.render.bind(this);
-
     this.shadowRoot?.addEventListener("advect:render", ( _ ) => {
       this.render();
     });
+    this.adv.plugins.connected(this);
     this.render();
 
   }
@@ -50,13 +49,22 @@ export class AdvectView extends AdvectBase {
     return this.#view;
   }
   async render(newData?: Record<string, any>) {
+    let renderFunc: AdvectRenderFunction | undefined;
+    const renderer_name = this.getAttribute('renderer')?.valueOf() ?? settings.default_renderer;
+       renderFunc = this.adv.plugins.getRenderer(renderer_name);
+    // if new data is reactive pretty sure we dont want to just pass that to mustache
     this.#view = {
       ...(newData ?? this.#view),
       ...this.dataset
     }
-    const open_tag = this.getAttribute('open-tag')?.valueOf() ?? '{{';
-    const close_tag = this.getAttribute('close-tag')?.valueOf() ?? '}}';
-    const rendered = $m.render(this.innerHTML, this.#view, {}, [open_tag, close_tag]);
+
+    if (!renderFunc) {
+      console.error(`No renderer found for ${renderer_name}`);
+      return `No renderer found for ${renderer_name}`;
+    }
+
+    let rendered = renderFunc(this, this.innerHTML, this.#view);
+
     const wrapper = document.createElement("div");
     wrapper.setAttribute("part", "content");
     wrapper.innerHTML = rendered;
@@ -68,13 +76,11 @@ export class AdvectView extends AdvectBase {
     await this.generateScope()
       .then(() => {
         this.hookRefs();
-        this.renderStyles();
-  
+        this.adv.plugins.rendered(this);
       })
       .catch((err) => {
         console.error('advect-view',err);
       });;
-
 
     return rendered
   }

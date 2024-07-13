@@ -79,10 +79,10 @@
             <ul class="max-w-[500px]">
                 {{#todos}}
                 <li id="{{id}}" data-title="{{title}}" data-id="{{id}}" data-complete="{{complete}}"
-                    class="flex justify-between mx-5 p-5">
+                    class="flex justify-between mx-5 p-5 text-black">
 
                     <input id="title_{{id}}" data-id="{{id}}" name=" title {{id}}" value="{{title}}" type="text"
-                        class="text-black h-12 px-2" onchange="scope.renameTodo(el.closest('li'), el.value)">
+                        class="h-12 px-2" onchange="scope.renameTodo(el.closest('li'), el.value)">
                     <style>
                         @scope {
                             :scope {

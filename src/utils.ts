@@ -1,10 +1,14 @@
+import { AdvectView } from "./AdvectView";
 
 
 
 /**
  * Reference to the window object without type checking
  */
-export const $window = (window as (Record<string, any> & Window) ) ;
+export const $window = (window as (Record<string, any> & Window & {
+    adv_settings?: Record<string, any>;
+    adv_plugins?: Record<string, any>;
+}));
 
 /**
  * Creates a module from a string and imports it as a module returing the module
@@ -57,3 +61,6 @@ export type AConstructor<T = {}> = new (...args: any[]) => T;
  * Async function constructor
  */
 export const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
+
+export type AdvectRenderFunction = (view:AdvectView, template_str:string, ctx:Record<string, any>, options?:any) => string;

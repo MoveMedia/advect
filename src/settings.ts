@@ -16,7 +16,10 @@ const defaultSettings:Record<string,any> = {
      // list of tags that should not be send and onload event
     refs_no_inital_load: ["frame", "iframe", "img", "input[type='image']", "link", "script", "style"] as const,
 
-    default_channel: "advect_channel" as const,
+    default_renderer: "mustache" as const,
+
+    include_twind: true as const,
+
 
 } as const;
 
@@ -30,10 +33,3 @@ const settings = new Proxy(defaultSettings, {
 });
 
 export default settings;
-
-export function getWindowSettings() {
-    const adv_settings = structuredClone(defaultSettings);
-   Object.keys($window.adv_settings ?? {}).forEach(key => {
-         adv_settings[key] = $window.adv_settings[key];
-   })
-}
