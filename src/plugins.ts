@@ -1,6 +1,5 @@
 import { AConstructor, AdvectRenderFunction } from "./utils";
 import AdvectBase from "./AdvectBase";
-import { AdvectView } from "./AdvectView";
 
 export interface AdvectPlugin{
 
@@ -8,15 +7,32 @@ export interface AdvectPlugin{
     priority: number;
 
     name: string;
-
+    /**
+     * 
+     * @param existing the existing plugins
+     */
     init?(existing:Map<string, AdvectPlugin>): void;
-    discovered?($new:AdvectPlugin): void;
-    built?(template: AConstructor<any>): any;
-    loaded?(doc:Document): Document;
-
 
     /**
-     * An Advect Base has been connected
+     * A new plugin has been discovered
+     * @param $new the new plugin that has been discovered
+     */
+    discovered?($new:AdvectPlugin): void;
+    /**
+     * A new template has been built
+     * @param template the Class that has been built
+     * @returns the modified template class
+     */
+    built?(template: AConstructor<any>): any;
+    /**
+     * A new template document has been loaded
+     * @param doc the document that has been loaded
+     * @returns the modified document
+     */
+    loaded?(doc:Document): Document;
+
+    /**
+     * An AdvectsBase has been connected
      * @param el the AdvectBase that has been connected
      * this can be custom elements or templates, or adv-views
      */
@@ -32,12 +48,8 @@ export interface AdvectPlugin{
      * Called when a ref is hooked in the shadowDom
      * @param template 
      */
-    refShadow?(ref:HTMLElement): void;
-    /**
-     * Called when a ref is hooked in the lightDom
-     * @param template 
-     */
-    refLight?(ref:HTMLElement): void;
+    ref?(ref:HTMLElement): void;
+
 
     /**
      * Only for adv-views this allows you to use a different template engine, or build your own
@@ -156,16 +168,10 @@ export class PluginSystem implements AdvectPlugin{
     }
 
 
-    refShadow?(ref:HTMLElement){
+    ref?(ref:HTMLElement){
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.refShadow) plugin.refShadow(ref);
+            if (plugin.ref) plugin.ref(ref);
         }
-    };
- 
-    refLight?(ref:HTMLElement){
-        for (const plugin of this.unfoldPlugins()) {
-            if (plugin.refLight) plugin.refLight(ref);
-        }   
     };
 
 

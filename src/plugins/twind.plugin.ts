@@ -20,9 +20,11 @@ const twindPlugin: AdvectPlugin & Record<string, any> = {
                 tw(_el.className)
             })
         }
+        el.extras.tw_render()
     },
 
     mutated(el: AdvectBase, mutation: MutationRecord) {
+
         // @ts-ignore
         if (mutation.attributeName === "class" && mutation.target === el) {
             el?.extras?.tw_render()

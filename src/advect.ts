@@ -80,6 +80,8 @@ export default class Advect {
             doc = parser.parseFromString(template.outerHTML, "text/html");
         }
 
+        doc = this.plugins.loaded(doc);
+
         // shadow mode can be open or closed we prefer open
         const shadow_mode = template.getAttribute('shadow-mode') ?? settings.default_shadow_mode;
         // use internals can be true or false
@@ -147,7 +149,7 @@ export default class Advect {
 }
 
 const adv = $window.advect = new Advect();
-
+adv.plugins.addPlugin(markdownPlugin);
 adv.plugins.addPlugin(mustachePlugin);
 adv.plugins.addPlugin(twindPlugin);
 
@@ -155,6 +157,7 @@ adv.plugins.addPlugin(twindPlugin);
 
 import { AdvectElement } from './AdvectElement';
 import { AdvectView } from './AdvectView';
+import markdownPlugin from './plugins/markdown.plugin';
 
 adv.start();
 

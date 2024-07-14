@@ -1,5 +1,4 @@
 import { $window, AdvectRenderFunction } from "./utils";
-import $m from 'mustache';
 import AdvectBase from "./AdvectBase";
 import settings from "./settings";
 /**
@@ -7,7 +6,6 @@ import settings from "./settings";
  */
 export class AdvectView extends AdvectBase {
 
-  $style =new CSSStyleSheet();
   /**
    * instance counter
    */
@@ -28,6 +26,9 @@ export class AdvectView extends AdvectBase {
     super();
   }
 
+  defaultSlot: HTMLSlotElement = document.createElement("slot");
+  noRenderSlot: HTMLSlotElement = document.createElement("slot");
+
   /**
    * connectedCallback for the element
    * must call super.connectedCallback() if overriden
@@ -41,6 +42,7 @@ export class AdvectView extends AdvectBase {
       this.render();
     });
     this.adv.plugins.connected(this);
+    this.noRenderSlot.setAttribute("name", "norender");
     this.render();
 
   }
@@ -50,13 +52,14 @@ export class AdvectView extends AdvectBase {
   }
   async render(newData?: Record<string, any>) {
     let renderFunc: AdvectRenderFunction | undefined;
-    const renderer_name = this.getAttribute('renderer')?.valueOf() ?? settings.default_renderer;
+    const renderer_name = this.getAttribute('render')?.valueOf() ?? settings.default_renderer;
        renderFunc = this.adv.plugins.getRenderer(renderer_name);
     // if new data is reactive pretty sure we dont want to just pass that to mustache
     this.#view = {
       ...(newData ?? this.#view),
       ...this.dataset
     }
+    
 
     if (!renderFunc) {
       console.error(`No renderer found for ${renderer_name}`);
@@ -64,6 +67,9 @@ export class AdvectView extends AdvectBase {
     }
 
     let rendered = renderFunc(this, this.innerHTML, this.#view);
+
+  console.log(renderer_name, rendered);
+   
 
     const wrapper = document.createElement("div");
     wrapper.setAttribute("part", "content");
@@ -79,14 +85,10 @@ export class AdvectView extends AdvectBase {
         this.adv.plugins.rendered(this);
       })
       .catch((err) => {
-        console.error('advect-view',err);
+        console.error('advect-view', err);
       });;
 
     return rendered
   }
-  mutate(mutation: MutationRecord): void {
-      super.mutate(mutation);
-  }
-
 }
 $window.AdvectView = AdvectView;

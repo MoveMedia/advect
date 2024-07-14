@@ -1,3 +1,4 @@
+import { AdvectPlugin } from "./plugins";
 import { $window } from "./utils";
 
 const defaultSettings:Record<string,any> = {
@@ -19,6 +20,8 @@ const defaultSettings:Record<string,any> = {
     default_renderer: "mustache" as const,
 
     include_twind: true as const,
+    
+    plugins: [] as AdvectPlugin[],
 
 
 } as const;
