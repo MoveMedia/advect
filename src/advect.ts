@@ -1,16 +1,13 @@
+import './style.css'
 import { $window, toModule} from './utils'
 import settings from './settings';
-
-import './style.css'
 import { PluginSystem } from './plugins';
-import mustachePlugin from './plugins/mustache.plugin';
 import twindPlugin from './plugins/twind.plugin';
-
+import advectCorePlugin from './plugins/advectcore.plugin';
 
 const parser = new DOMParser();
 
 export default class Advect {
-
     plugins = new PluginSystem();
     globals:Record<string, any> = [];
     async load(
@@ -80,7 +77,7 @@ export default class Advect {
             doc = parser.parseFromString(template.outerHTML, "text/html");
         }
 
-        doc = this.plugins.loaded(doc);
+        doc = this.plugins.template_loaded(doc);
 
         // shadow mode can be open or closed we prefer open
         const shadow_mode = template.getAttribute('shadow-mode') ?? settings.default_shadow_mode;
@@ -122,9 +119,7 @@ export default class Advect {
             static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
         };
 
-        const PostPlugin = this.plugins.built(TemplateClass);
-
-        // TODO plugins.ontemplate_build
+        const PostPlugin = this.plugins.template_built(TemplateClass);
 
         if (register) {
             // @ts-ignore valid custom element name
@@ -149,19 +144,14 @@ export default class Advect {
 }
 
 const adv = $window.advect = new Advect();
-adv.plugins.addPlugin(markdownPlugin);
-adv.plugins.addPlugin(mustachePlugin);
+
+adv.plugins.addPlugin(advectCorePlugin);
 adv.plugins.addPlugin(twindPlugin);
-
-
-
-import { AdvectElement } from './AdvectElement';
-import { AdvectView } from './AdvectView';
-import markdownPlugin from './plugins/markdown.plugin';
 
 adv.start();
 
-
+import { AdvectElement } from './AdvectElement';
+import { AdvectView } from './AdvectView';
 customElements.define("adv-view", AdvectView);
 customElements.define("adv-el", AdvectElement);
 

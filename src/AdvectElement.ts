@@ -94,7 +94,7 @@ export class AdvectElement extends AdvectBase{
         this.onConnect();
     }
 
-    this.adv.plugins.connected(this);
+    this.adv.plugins.component_connected(this);
 
     });
   }

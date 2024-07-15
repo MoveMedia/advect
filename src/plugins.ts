@@ -11,44 +11,44 @@ export interface AdvectPlugin{
      * 
      * @param existing the existing plugins
      */
-    init?(existing:Map<string, AdvectPlugin>): void;
+    plugin_init?(existing:Map<string, AdvectPlugin>): void;
 
     /**
      * A new plugin has been discovered
      * @param $new the new plugin that has been discovered
      */
-    discovered?($new:AdvectPlugin): void;
+    plugin_discovered?($new:AdvectPlugin): void;
     /**
      * A new template has been built
      * @param template the Class that has been built
      * @returns the modified template class
      */
-    built?(template: AConstructor<any>): any;
+    template_built?(template: AConstructor<any>): any;
     /**
      * A new template document has been loaded
      * @param doc the document that has been loaded
      * @returns the modified document
      */
-    loaded?(doc:Document): Document;
+    template_loaded?(doc:Document): Document;
 
     /**
      * An AdvectsBase has been connected
      * @param el the AdvectBase that has been connected
      * this can be custom elements or templates, or adv-views
      */
-    connected?(el:AdvectBase): void;
+    component_connected?(el:AdvectBase): void;
         /**
      * An Advect Base has been disconnected
      * @param el the AdvectBase that has been disconnected
      * this can be custom elements or templates, or adv-views
      */
-    disconnected?(el:HTMLElement): void;
+    component_disconnected?(el:HTMLElement): void;
     
     /**
      * Called when a ref is hooked in the shadowDom
      * @param template 
      */
-    ref?(ref:HTMLElement): void;
+    ref_found?(ref:HTMLElement): void;
 
 
     /**
@@ -57,11 +57,11 @@ export interface AdvectPlugin{
      * @param name the name to match the renderer attribute
      * @param el the element to render
      */
-    renderer?: AdvectRenderFunction
+    renderers?: Record<string, AdvectRenderFunction>
 
-    rendered?(el:AdvectBase): void;
+    view_rendered?(el:AdvectBase): void;
 
-    mutated?(el:AdvectBase, mut:MutationRecord): void;
+    component_mutated?(el:AdvectBase, mut:MutationRecord): void;
     
 }
 
@@ -71,10 +71,12 @@ export class PluginSystem implements AdvectPlugin{
     priority = 0; // formality
     name = "plugin_system";// formality
     plugins = new Map<string, AdvectPlugin>();
-    
-    getRenderer(name:string){ 
-        console.log(Array.from(this.plugins.entries()));
-        return this.plugins.get(name)?.renderer;
+    #last_plugin_length = 0;
+    #plugin_list: AdvectPlugin[] = [];
+    getRenderer(name:string):AdvectRenderFunction | undefined{ 
+        return this.unfoldPlugins()
+            .map((plugin) => plugin.renderers)
+            .find( r => r && r[name])?.[name]
     }
 
     addPlugin( plugin: AdvectPlugin) {
@@ -84,7 +86,7 @@ export class PluginSystem implements AdvectPlugin{
         }
         console.log(`Adding plugin ${plugin.name}`);
         this.plugins.set(plugin.name, plugin);
-        this.discovered(plugin);
+        this.plugin_discovered(plugin);
     }
     getPlugin(name: string) {
         return this.plugins.get(name);
@@ -95,6 +97,9 @@ export class PluginSystem implements AdvectPlugin{
     }
 
     unfoldPlugins(){
+        if (this.#last_plugin_length === this.plugins.size) {
+            return this.#plugin_list;
+        }
         for (const [name, plugin] of this.plugins.entries()) {
             if (typeof plugin.priorityOrAfter === "string") {
                 const after = this.plugins.get(plugin.priorityOrAfter);
@@ -107,70 +112,70 @@ export class PluginSystem implements AdvectPlugin{
                 plugin.priority = plugin.priorityOrAfter;
             }
         }
-
-        const plugins_list = Array.from(this.plugins.values()).sort((a,b) => a.priority - b.priority);
-        return plugins_list;
+        this.#last_plugin_length = this.plugins.size;
+        this.#plugin_list = Array.from(this.plugins.values()).sort((a,b) => a.priority - b.priority);
+        return this.#plugin_list;
     }
 
 
-    discovered($new:AdvectPlugin): void{
+    plugin_discovered($new:AdvectPlugin): void{
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.discovered && plugin.name != $new.name) plugin.discovered($new);
+            if (plugin.plugin_discovered && plugin.name != $new.name) plugin.plugin_discovered($new);
         }
-        if ($new.init) $new.init(this.plugins);
+        if ($new.plugin_init) $new.plugin_init(this.plugins);
     };
 
-    built(template: AConstructor<any>){
+    template_built(template: AConstructor<any>){
         let lastResult = template;
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.built) lastResult = plugin?.built(template);
+            if (plugin.template_built) lastResult = plugin?.template_built(template);
         }
         return lastResult;
     };
 
-    loaded(doc:Document){
+    template_loaded(doc:Document){
        const plugins = 
        this.unfoldPlugins()
-            .filter( p => p.loaded)
+            .filter( p => p.template_loaded)
         
         let lastResult = doc;
         for (const plugin of plugins) {
-            if (plugin.loaded) lastResult = plugin.loaded(lastResult);
+            if (plugin.template_loaded) lastResult = plugin.template_loaded(lastResult);
         }
         return lastResult
     };
 
 
  
-    connected(el:AdvectBase){
+    component_connected(el:AdvectBase){
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.connected) plugin.connected(el);
+            if (plugin.component_connected) plugin.component_connected(el);
         }
     };
 
-    disconnected?(el:HTMLElement){
+    component_disconnected?(el:HTMLElement){
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.disconnected) plugin.disconnected(el);
+            if (plugin.component_disconnected) plugin.component_disconnected(el);
         }
     };
     
 
-    rendered(el:AdvectBase){    
+    view_rendered(el:AdvectBase){    
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.rendered) plugin.rendered(el);
+            if (plugin.view_rendered) plugin.view_rendered(el);
         }
     };
 
-    mutated(el: AdvectBase, mut:MutationRecord): void {
+    component_mutated(el: AdvectBase, mut:MutationRecord): void {
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.mutated) plugin.mutated(el, mut);
+            if (plugin.component_mutated) plugin.component_mutated(el, mut);
         }
     }
 
 
-    ref?(ref:HTMLElement){
+    ref_found?(ref:HTMLElement){
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.ref) plugin.ref(ref);
+            if (plugin.ref_found) plugin.ref_found(ref);
         }
     };
 

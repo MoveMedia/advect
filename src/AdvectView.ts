@@ -41,7 +41,7 @@ export class AdvectView extends AdvectBase {
     this.shadowRoot?.addEventListener("advect:render", ( _ ) => {
       this.render();
     });
-    this.adv.plugins.connected(this);
+    this.adv.plugins.component_connected(this);
     this.noRenderSlot.setAttribute("name", "norender");
     this.render();
 
@@ -82,7 +82,7 @@ export class AdvectView extends AdvectBase {
     await this.generateScope()
       .then(() => {
         this.hookRefs();
-        this.adv.plugins.rendered(this);
+        this.adv.plugins.view_rendered(this);
       })
       .catch((err) => {
         console.error('advect-view', err);

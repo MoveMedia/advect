@@ -163,7 +163,7 @@ export default class AdvectBase extends HTMLElement {
         // refs
         this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
             // @ts-ignore refs have a reference to this
-            this.adv.plugins.ref(ref);
+            this.adv.plugins.ref_found(ref);
             ref.addEventListener('adv:mutation', (_event) => {
                 this.mutate((_event as AdvMutationEvent).detail);
             });
@@ -288,7 +288,7 @@ export default class AdvectBase extends HTMLElement {
             this.mergeStyles([css]);
         });
 
-        this.adv.plugins.connected(this);
+        this.adv.plugins.component_connected(this);
 
     }
 
@@ -299,7 +299,7 @@ export default class AdvectBase extends HTMLElement {
         if (this.onMutate) {
             this.onMutate(mutation);
         }
-        this.adv.plugins.mutated(this, mutation);
+        this.adv.plugins.component_mutated(this, mutation);
        
     };
     onDisconnect?: () => void;

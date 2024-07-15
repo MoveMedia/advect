@@ -8,7 +8,7 @@ const twindPlugin: AdvectPlugin & Record<string, any> = {
     priority: 0,
     name: "twind",
     // only called for AdvectBase descendants
-    connected(el: AdvectBase) {
+    component_connected(el: AdvectBase) {
         const sheet = cssomSheet({ target: el.$style })
         const { tw } = create({ sheet });
         el.extras.tw_render = () =>{
@@ -23,7 +23,7 @@ const twindPlugin: AdvectPlugin & Record<string, any> = {
         el.extras.tw_render()
     },
 
-    mutated(el: AdvectBase, mutation: MutationRecord) {
+    component_mutated(el: AdvectBase, mutation: MutationRecord) {
 
         // @ts-ignore
         if (mutation.attributeName === "class" && mutation.target === el) {
@@ -33,7 +33,7 @@ const twindPlugin: AdvectPlugin & Record<string, any> = {
             el?.extras?.tw_render()
         }
     },
-    rendered(el: AdvectView) {
+    view_rendered(el: AdvectView) {
         el?.extras?.tw_render()
     },
 
