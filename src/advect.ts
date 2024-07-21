@@ -54,10 +54,10 @@ export default class Advect {
         continue;
       }
       if (!result?.text) {
-        this.loaded.push(url);
         console.warn(`Loaded ${url} but no template found`);
         continue;
       }
+      this.loaded.push(url);
 
       const doc = parser.parseFromString(result?.text, "text/html");
       const src_scripts = doc.querySelectorAll(
@@ -149,9 +149,7 @@ export default class Advect {
         attr.name.toLocaleLowerCase()
       );
     };
-
     const PostPlugin = this.plugins.template_built(TemplateClass);
-
     if (register) {
       // @ts-ignore valid custom element name
       customElements.define(template.id, PostPlugin);

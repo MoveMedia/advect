@@ -6,9 +6,6 @@ import Advect from "./advect";
 import { createStore } from "zustand/vanilla";
 
 
-
-
-
 /**
  * This is the base cass for All advect elements
  * 
@@ -119,7 +116,7 @@ export default class AdvectBase extends HTMLElement {
 
 
     /**
-     * 
+     * A helper for the dataset that when set calls render
      */
     data: Record<string, any> = new Proxy({},{
         get: (_, name:string) => {
@@ -159,7 +156,7 @@ export default class AdvectBase extends HTMLElement {
         });
     }
     /**
-     * 
+     * Sets up event listeners for refs (ie elements with ids)
      */
     hookRefs(): void {
 
@@ -219,6 +216,10 @@ export default class AdvectBase extends HTMLElement {
         });
     }
 
+    /**
+     * Merges the scope and styles of the views in the shadowRoot
+     * and sets the parent of the view to this element
+     */
     hookViews(): void {
         this.shadowRoot?.querySelectorAll('adv-view').forEach(v => {
             const view = v as AdvectView;

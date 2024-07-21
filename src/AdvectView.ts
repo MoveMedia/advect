@@ -2,7 +2,7 @@ import { $window, AdvectRenderFunction, RenderDescriptor } from "./utils";
 import AdvectBase from "./AdvectBase";
 import settings from "./settings";
 /**
- * A Untility element for rendering mustache templates
+ * A Utility element for rendering  templates
  */
 export class AdvectView extends AdvectBase {
 
