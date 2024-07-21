@@ -88,13 +88,12 @@ export class AdvectElement extends AdvectBase{
     this.shadowRoot.innerHTML = this.$template.innerHTML;
     this.setupRefs();
     this.generateScope().then(() => {
-      this.hookRefs()
       this.hookViews();
+      this.hookRefs()
       if (this.onConnect) {
         this.onConnect();
-    }
-
-    this.adv.plugins.component_connected(this);
+      }
+      this.adv.plugins.component_connected(this);
 
     });
   }

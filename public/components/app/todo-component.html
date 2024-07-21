@@ -70,67 +70,48 @@
          id: Math.random().toString(36).substr(2, 9),
          title: refs.new_todo_title.value,
          complete: refs.new_todo_complete.checked,
-          tag: refs.new_todo_tag.value
      }); 
      refs.new_todo_diag.close();
      ">
       Add
     </button>
     <button id="cancel" onclick="refs.new_todo_diag.close()">Cancel</button>
-    <adv-view id="new_todo_tag" onload="{
-        el.renderTo(refs.new_todo_tag, scope);
-    }">
-      <label for="new_todo_tag">Tag</label>
-      <select id="new_todo_tag" name="new_todo_tag">
-        {{#getTags}}
-            <option value="{{.}}">{{.}}</option>
-        {{/getTags}}
-      </select>
-    </adv-view>
   </dialog>
-  <adv-view id="todos_view">
+  <adv-view id="todos_view" render="sqrl">
     <div>
-      {{#todos}}
+      {{@each(it.todos) => todo,todo_index}}
       <div>
-        <label for="title_input_{{id}}">
+        <label for="title_input_{{todo.id}}">
           <input
-            id="title_input_{{id}}"
+            id="title_input_{{todo.id}}"
             type="text"
-            name="title_input_{{id}}"
-            value="{{title}}"
-            data-id="{{id}}"
+            name="title_input_{{todo.id}}"
+            value="{{todo.title}}"
+            data-id="{{todo.id}}"
             onchange="scope.updateTitle(el.dataset.id, el.value)"
           />
         </label>
-        <label for="tag">
-          <select id="tag" name="tag" value="{{tag}}">
-            {{#getTags}}
-              <option {{{.}}} value="{{.}}">{{.}}</option>
-            {{/getTags}}
-          </select>
-        </label>
-        <label for="complete_{{id}}">
+
+        <label for="complete_{{todo.id}}">
           <input
-            id="complete_{{id}}"
-            name="complete_{{id}}"
+            id="complete_{{todo.id}}"
+            name="complete_{{todo.id}}"
             type="checkbox"
-            data-id="{{id}}"
-            data-checked="{{complete}}"
+            data-id="{{todo.id}}"
+            data-checked="{{todo.complete}}"
             onload="el.checked = el.dataset.checked === 'true'"
             onchange="scope.updateComplete(el.dataset.id, el.checked)"
           />
         </label>
         <button
-          id="remove_{{id}}"
-          data-id="{{id}}"
+          id="remove_{{todo.id}}"
+          data-id="{{todo.id}}"
           onclick="scope.removeTodo(el.dataset.id)">
           X
         </button>
       </div>
-      {{/todos}}
-       {{^todos}}
-        <div>No todos</div>
-      {{/todos}}
+      {{/each}}
+     
     </div>
   </adv-view>
 </template>

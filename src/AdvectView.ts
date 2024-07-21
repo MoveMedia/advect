@@ -1,4 +1,4 @@
-import { $window, AdvectRenderFunction } from "./utils";
+import { $window, AdvectRenderFunction, RenderDescriptor } from "./utils";
 import AdvectBase from "./AdvectBase";
 import settings from "./settings";
 /**
@@ -17,7 +17,7 @@ export class AdvectView extends AdvectBase {
   get ic() { return this.constructor.ic; }
 
 
-  static observedAttributes = ['data', 'main-script', 'open-tag', 'close-tag', "renderer"];
+  static observedAttributes = ['data', 'main-script', 'open-tag', 'close-tag', "render", 'target'];
 
   main_script?: string;
 
@@ -25,10 +25,6 @@ export class AdvectView extends AdvectBase {
   constructor() {
     super();
   }
-
-  defaultSlot: HTMLSlotElement = document.createElement("slot");
-  noRenderSlot: HTMLSlotElement = document.createElement("slot");
-
   /**
    * connectedCallback for the element
    * must call super.connectedCallback() if overriden
@@ -42,22 +38,21 @@ export class AdvectView extends AdvectBase {
       this.render();
     });
     this.adv.plugins.component_connected(this);
-    this.noRenderSlot.setAttribute("name", "norender");
     this.render();
 
   }
-  #view:Record<string,any> = {};
-  get view(){
-    return this.#view;
+  async renderTo(target: HTMLElement, data?: Record<string, any>) {
+    const markup = await this.render(data, true);
+    target.innerHTML = markup;
   }
-  async render(newData?: Record<string, any>) {
+  async render(newData?: Record<string, any>, markupOnly = false) {
     let renderFunc: AdvectRenderFunction | undefined;
     const renderer_name = this.getAttribute('render')?.valueOf() ?? settings.default_renderer;
        renderFunc = this.adv.plugins.getRenderer(renderer_name);
     // if new data is reactive pretty sure we dont want to just pass that to mustache
-    this.#view = {
-      ...(newData ?? this.#view),
-      ...this.dataset
+    let ctx= {
+      ...(newData ?? {}),
+      ...this.dataset,
     }
     
 
@@ -66,10 +61,16 @@ export class AdvectView extends AdvectBase {
       return `No renderer found for ${renderer_name}`;
     }
 
-    let rendered = renderFunc(this, this.innerHTML, this.#view);
+    const desc:RenderDescriptor = {
+      template: this.innerHTML,
+      ctx,
+      view: this,
+    }
+    let rendered = renderFunc(desc);
 
-  console.log(renderer_name, rendered);
-   
+    if (markupOnly) {
+      return rendered;
+    }
 
     const wrapper = document.createElement("div");
     wrapper.setAttribute("part", "content");
@@ -87,8 +88,10 @@ export class AdvectView extends AdvectBase {
       .catch((err) => {
         console.error('advect-view', err);
       });;
-
     return rendered
   }
 }
+// add it to the window 
+// we dont set it to the custom element because we want to be able to use it in the plugins
 $window.AdvectView = AdvectView;
+

@@ -6,20 +6,22 @@
     <title>Document</title>
   </head>
   <body>
-
-    <adv-markup id="my_markup">
-      <div>
-        <h1>{{itemRef.title}}</h1>
-        <p>{{itemRef.description}}</p>
-      </div>
-    </adv-markup>
-
-    <adv-loop id="my_markup">
-        <div>
-          <h1>{{itemRef.title}}</h1>
-          <p>{{itemRef.description}}</p>
-        </div>
-      </adv-loop>
-
+    <x-select>
+      <option value="1">One</option>
+      <option value="2">Two</option>
+      <option value="3">Three</option>
+    </x-select>
+    <script>
+      class x extends HTMLSelectElement{
+        constructor(){
+          super();
+          this.addEventListener('change', this.onChange);
+        }
+        onChange(e){
+          console.log(e.target.value);
+        }
+      }
+      customElements.define('x-select', x, { extends: 'select' });
+    </script>
   </body>
 </html>

@@ -1,160 +1,186 @@
-import './style.css'
-import { $window, toModule} from './utils'
-import settings from './settings';
-import { PluginSystem } from './plugins';
-import twindPlugin from './plugins/twind.plugin';
-import advectCorePlugin from './plugins/advectcore.plugin';
+import "./style.css";
+import { $window, toModule } from "./utils";
+import settings from "./settings";
+import { PluginSystem } from "./plugins";
+import advectCorePlugin from "./plugins/advectcore.plugin";
+import { AdvectElement } from "./AdvectElement";
+import { AdvectView } from "./AdvectView";
+import AdvectDebug from "./debug";
 
+/**
+ * Single dom parser not sure if this is more efficient
+ */
 const parser = new DOMParser();
 
+/**
+ * The main class for the Advect framework
+ * contains the plugins and the global variables
+ * and the start function
+ */
 export default class Advect {
-    plugins = new PluginSystem();
-    globals:Record<string, any> = [];
-    async load(
-        url: string,
-        method: 'GET' | 'POST' | 'PATCH' = 'GET',
-        headers: Record<string, string> = {
-            "Content-Type": "text/html",
-            accept: "text/html",
-        }) {
-        return fetch(url, {
-            method,
-            headers
+  debug: typeof AdvectDebug = AdvectDebug;
+  plugins = new PluginSystem();
+  globals: Record<string, any> = [];
+  loaded: string[] = [];
+  async load(
+    url: string,
+    method: "GET" | "POST" | "PATCH" = "GET",
+    headers: Record<string, string> = {
+      "Content-Type": "text/html",
+      accept: "text/html",
+    }
+  ) {
+    const url_queue = [url];
+
+    if (this.loaded.includes(url)) {
+      console.log(`Already loaded ${url}`);
+      return;
+    }
+    while (url_queue.length > 0) {
+      const url = url_queue.pop() as string;
+      const result = await fetch(url, { method, headers })
+        .then(async (res) => {
+          if (res.ok) {
+            return {
+              text: await res.text(),
+              response: res,
+              error: null,
+            };
+          }
         })
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error(`Could not fetch template from ${url}`);
-                }
-                return res
+        .catch((e) => ({ error: e, text: null }));
+      if (result?.error) {
+        console.error(`Could not fetch template from ${url}`, result.error);
+        continue;
+      }
+      if (!result?.text) {
+        this.loaded.push(url);
+        console.warn(`Loaded ${url} but no template found`);
+        continue;
+      }
 
-            })
-            .then(async (res) =>
-            ({
-                text: await res.text(),
-                res
-            }))
-            .then(({ text }) => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, "text/html");
-                // chain load other advect components
-
-                [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
-                    const template = _template as HTMLTemplateElement;
-                    // TODO maybe make upgrading components a thing
-                    const existingCustomElement = customElements.get(template.id);
-                    if (existingCustomElement) {
-                        console.warn(`Template with id ${template.id} already exists`);
-                        return;
-                    }
-                    if (template.tagName.toLocaleLowerCase() != "template") {
-                        console.error("Template tag must be a template tag");
-                        return;
-                    }
-                    //   console.log("Adding template", template.id);
-                    this.build(template);
-                });
-
-                const src_scripts = doc.querySelectorAll(`script[type='${settings.script_tag_type}']`);
-                src_scripts.forEach((script) => {
-                    const src = script.getAttribute("src");
-                    if (src) { this.load(src); }
-                });
-                
-            })
-            .catch((e) => {
-                console.error(`Could not parse template from request`, e);
-            });
+      const doc = parser.parseFromString(result?.text, "text/html");
+      const src_scripts = doc.querySelectorAll(
+        `script[type='${settings.script_tag_type}']`
+      );
+      
+      src_scripts.forEach((script) => {
+        const src = script.getAttribute("src");
+        if (src && !this.loaded.includes(src)) {
+          url_queue.push(src);
+        }
+      });
+      [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
+        const template = _template as HTMLTemplateElement;
+        // TODO maybe make upgrading components a thing
+        const existingCustomElement = customElements.get(template.id);
+        if (existingCustomElement) {
+          console.warn(`Template with id ${template.id} already exists`);
+          return;
+        }
+        if (template.tagName.toLocaleLowerCase() != "template") {
+          console.error("Template tag must be a template tag");
+          return;
+        }
+        //   console.log("Adding template", template.id);
+        this.build(template);
+      });
     }
-    async build(_template: HTMLTemplateElement | string, register = true) {
-        let template: HTMLTemplateElement | null = null;
-        let doc: Document;
-        if (typeof _template == "string") {
-            doc = parser.parseFromString(_template, "text/html");
-            template = doc.querySelector('template') as HTMLTemplateElement;
-        }
-        else {
-            template = _template;
-            doc = parser.parseFromString(template.outerHTML, "text/html");
-        }
-
-        doc = this.plugins.template_loaded(doc);
-
-        // shadow mode can be open or closed we prefer open
-        const shadow_mode = template.getAttribute('shadow-mode') ?? settings.default_shadow_mode;
-        // use internals can be true or false
-        //const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
-        // get all the attributes except core to add to observedAttributes
-        const attrs = [...template.attributes].filter(
-            attr => attr.name != 'adv' // no need to copy the adv attribute
-                && attr.name != 'id' //switching ids is a bad idea
-                && attr.name != 'shadow-mode' // not sure id want this switching
-                && attr.name != 'use-internals' // not sure id want this switching
-        );
-        // get the main module expects a default export of a class that extends window.AdvectElement
-        let mainModule = null;
-        // only take 1 script and treat it as a module
-        const mainScript = template.content.querySelector('script[type="module"]');
-        if (mainScript && mainScript.textContent) {
-            template.content.removeChild(mainScript);
-            mainModule = await toModule(mainScript.textContent);
-        }
-        // Other scripts to add to the context
-        // e
-        const dataScripts = [...(doc.querySelector('template')?.content.querySelectorAll('script:not([type="module"])') ?? [])]
-            .map(script => {
-                return { id: script.id, script: script.textContent as string }
-            });
-
-        const refs_ids = [...template.content.querySelectorAll('[id]')].map(el => el.id);
-        // NOT USED BUT COULD BE
-        const slots_names = [...template.content.querySelectorAll('slot')].map(el => el.name);
-
-        const TemplateClass = class extends (mainModule?.default ?? class extends AdvectElement { }) {
-            $doc: Document = doc;
-            $ref_ids: string[] = refs_ids;
-            $slots_names: string[] = slots_names;
-            $template: HTMLTemplateElement = template as HTMLTemplateElement;
-            static $shadow_mode = shadow_mode;
-            data_scripts = dataScripts;
-            static observedAttributes = attrs.map(attr => attr.name.toLocaleLowerCase());
-        };
-
-        const PostPlugin = this.plugins.template_built(TemplateClass);
-
-        if (register) {
-            // @ts-ignore valid custom element name
-            customElements.define(template.id, PostPlugin);
-        }
-        return TemplateClass;
+  }
+  async build(_template: HTMLTemplateElement | string, register = true) {
+    let template: HTMLTemplateElement | null = null;
+    let doc: Document;
+    if (typeof _template == "string") {
+      doc = parser.parseFromString(_template, "text/html");
+      template = doc.querySelector("template") as HTMLTemplateElement;
+    } else {
+      template = _template;
+      doc = parser.parseFromString(template.outerHTML, "text/html");
     }
 
-    start() {
-        // register all templates with adv attribute
-        document.querySelectorAll(`template[id][${settings.load_tag_type}]`).forEach((template) => {
-            this.build(template as HTMLTemplateElement);
-        });
+    doc = this.plugins.template_loaded(doc);
 
-
-        document.querySelectorAll(`script[type="${settings.script_tag_type}"][src]`).forEach((script) => {
-            const src = script.getAttribute("src");
-            if (src) { this.load(src); }
-        });
+    // shadow mode can be open or closed we prefer open
+    const shadow_mode =
+      template.getAttribute("shadow-mode") ?? settings.default_shadow_mode;
+    // use internals can be true or false
+    //const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
+    // get all the attributes except core to add to observedAttributes
+    const attrs = [...template.attributes].filter(
+      (attr) =>
+        attr.name != "adv" && // no need to copy the adv attribute
+        attr.name != "id" //switching ids is a bad idea
+    );
+    // get the main module expects a default export of a class that extends window.AdvectElement
+    let mainModule = null;
+    // only take 1 script and treat it as a module
+    const mainScript = template.content.querySelector('script[type="module"]');
+    if (mainScript && mainScript.textContent) {
+      template.content.removeChild(mainScript);
+      mainModule = await toModule(mainScript.textContent);
     }
+    // Other scripts to add to the context
+    // e
+    const $scope_scripts = [
+      ...(doc
+        .querySelector("template")
+        ?.content.querySelectorAll("script:not([type]):not([ignore])") ?? []),
+    ].map((script) => {
+      return { id: script.id, script: script.textContent as string };
+    });
 
+    const refs_ids = [...template.content.querySelectorAll("[id]")].map(
+      (el) => el.id
+    );
+    // NOT USED BUT COULD BE
+    const slots_names = [...template.content.querySelectorAll("slot")].map(
+      (el) => el.name
+    );
+
+    const TemplateClass = class extends (mainModule?.default ??
+      class extends AdvectElement {}) {
+      $doc: Document = doc;
+      $ref_ids: string[] = refs_ids;
+      $slots_names: string[] = slots_names;
+      $template: HTMLTemplateElement = template as HTMLTemplateElement;
+      static $shadow_mode = shadow_mode;
+      $scopes_scripts = $scope_scripts;
+      static observedAttributes = attrs.map((attr) =>
+        attr.name.toLocaleLowerCase()
+      );
+    };
+
+    const PostPlugin = this.plugins.template_built(TemplateClass);
+
+    if (register) {
+      // @ts-ignore valid custom element name
+      customElements.define(template.id, PostPlugin);
+    }
+    return TemplateClass;
+  }
+
+  start() {
+    adv.plugins.addPlugin(advectCorePlugin);
+    settings.plugins.forEach((plugin) => adv.plugins.addPlugin(plugin));
+    // register all templates with adv attribute
+    document
+      .querySelectorAll(`template[id][${settings.load_tag_type}]`)
+      .forEach((template) => {
+        this.build(template as HTMLTemplateElement);
+      });
+    document
+      .querySelectorAll(`script[type="${settings.script_tag_type}"][src]`)
+      .forEach((script) => {
+        const src = script.getAttribute("src");
+        if (src) {
+          this.load(src);
+        }
+      });
+  }
 }
 
-const adv = $window.advect = new Advect();
-
-adv.plugins.addPlugin(advectCorePlugin);
-adv.plugins.addPlugin(twindPlugin);
-
+const adv = ($window.advect = new Advect());
+$window.AdvectElement = AdvectElement;
 adv.start();
 
-import { AdvectElement } from './AdvectElement';
-import { AdvectView } from './AdvectView';
 customElements.define("adv-view", AdvectView);
-customElements.define("adv-el", AdvectElement);
-
-
-
-

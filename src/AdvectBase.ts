@@ -2,8 +2,10 @@ import { AdvMutationEvent } from "./AdvMutationEvent";
 import { AdvectView } from "./AdvectView";
 import settings from "./settings";
 import { $window, AsyncFunction } from "./utils";
-import { reactive, effect } from "@vue/reactivity";
 import Advect from "./advect";
+import { createStore } from "zustand/vanilla";
+
+
 
 
 
@@ -12,9 +14,7 @@ import Advect from "./advect";
  * 
  */
 export default class AdvectBase extends HTMLElement {
-
     extras: Record<string, any> = {};
-
     /**
      *  Lib
      */
@@ -44,7 +44,7 @@ export default class AdvectBase extends HTMLElement {
     /**
      * 
      */
-    data_scripts: { id: string, script: string }[] = [];
+    $scopes_scripts: { id: string, script: string }[] = [];
 
     /**
      * getter for the shadowRoot or the element itself
@@ -54,6 +54,16 @@ export default class AdvectBase extends HTMLElement {
             const id = c.dataset.ogid as string;
             return { ...p, [id]: c }
         }, {});
+    }
+    get views(): Record<string, Element> {
+        return this.view_list.reduce((p, c) => {
+            const id = c.dataset.ogid as string;
+            return { ...p, [id]: c }
+        }, {});
+    }
+
+    get view_list(): AdvectView[] {
+        return this.allRefs.filter( r => r.tagName == 'ADV-VIEW') as AdvectView[];
     }
     /**
      * 
@@ -94,7 +104,7 @@ export default class AdvectBase extends HTMLElement {
     mergeScope(scope: Record<string, any>) {
         for (let key in scope) {
             // @ts-ignore
-            this.scope[key] = scope[key];
+            this._scope[key] = scope[key];
         }
     }
 
@@ -108,12 +118,19 @@ export default class AdvectBase extends HTMLElement {
     }
 
 
-
-
     /**
      * 
      */
-    data: Record<string, any> = reactive({});
+    data: Record<string, any> = new Proxy({},{
+        get: (_, name:string) => {
+            return this.dataset[name];
+        },
+        set: (_, name:string, value) => {
+            this.dataset[name] = value;
+            this.render();
+            return true;
+        }
+    });
     /**
      * attributeChanged function for the element
      */
@@ -145,6 +162,7 @@ export default class AdvectBase extends HTMLElement {
      * 
      */
     hookRefs(): void {
+
         // light dom event handlers just 'this' element
         this
             .getAttributeNames()
@@ -181,16 +199,16 @@ export default class AdvectBase extends HTMLElement {
 
                 if (name.toLowerCase() === "onmutate") {
                     ref.addEventListener('adv:mutation', (_event) => {
-                        new AsyncFunction("self", "event", "el", "refs", "data", "scope", attr_val)
-                            (this, _event, ref, this.refs, this.data, this.scope)
+                        new AsyncFunction("self", "event", "el", "refs", "data", "scope", "createStore", attr_val)
+                            (this, _event, ref, this.refs, this.data, this.scope, createStore);
                     });
 
 
                 } else {
                     // @ts-expect-error assigning event handlers by name nothing to see here
                     ref[name] = (_event) => {
-                        new AsyncFunction("self", "event", "el", "refs", "data", "scope", attr_val)
-                            (this, _event, ref, this.refs, this.data, this.scope);
+                        new AsyncFunction("self", "event", "el", "refs", "data", "scope",  "createStore", attr_val)
+                            (this, _event, ref, this.refs, this.data, this.scope, createStore);
                     }
                 }
             });
@@ -204,21 +222,25 @@ export default class AdvectBase extends HTMLElement {
     hookViews(): void {
         this.shadowRoot?.querySelectorAll('adv-view').forEach(v => {
             const view = v as AdvectView;
-            view.mergeScope(this._scope);
-            view.mergeStyles(this.shadowRoot?.adoptedStyleSheets ?? [])
+            view?.mergeScope(this._scope);
+            view?.mergeStyles(this.shadowRoot?.adoptedStyleSheets ?? [])
+            // @ts-ignore
+            view.parent = this;
         });
     }
     /**
-     * 
+     * Generates the scope for the element
+     * all scripts besides the one designated as the module script are run in the scope of the element
+     * these scripts
      * @returns 
      */
     generateScope() {
         type ScopeResolution = Record<string, any> | Function | typeof AsyncFunction;
-        const scopeFunctions: Promise<ScopeResolution>[] = this.data_scripts
+        const scopeFunctions: Promise<ScopeResolution>[] = this.$scopes_scripts
             .map(({ script }) => {
                 return new AsyncFunction
-                    ("self", "refs", "data", "states", "reactive", "effect", script) // @ts-ignore Internals.states DOES exist
-                    (this, this.refs, this.data, this.internals?.states, reactive, effect);
+                    ("self", "refs", "data", "istates", "createStore", script) // @ts-ignore Internals.states DOES exist
+                    (this, this.refs, this.data, this.internals?.states, createStore);
             });
         return Promise.all(scopeFunctions).then(async scopes => {
             for (let scope of scopes) {
@@ -231,6 +253,7 @@ export default class AdvectBase extends HTMLElement {
                     this.mergeScope(scope);
                 }
             }
+
         });
         // TODO Add addtionals to scope
     }
@@ -269,8 +292,6 @@ export default class AdvectBase extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.mergeStyles([this.$style]);
 
-    
-
         // observe all changes on the light dom
         this.observer?.observe(this, {
             attributes: true,
@@ -278,21 +299,17 @@ export default class AdvectBase extends HTMLElement {
             childList: true,
             subtree: true
         });
-        // this.observer?.observe(this.shadowRoot, {
-        //     childList: true,
-        //     subtree: true
-        // });
+        this.observer?.observe(this.shadowRoot, {
+            childList: true,
+            subtree: true
+        });
         this.shadowRoot?.querySelectorAll('style').forEach(style => {
             const css = new CSSStyleSheet();
             css.replaceSync(style.textContent ?? "");
             this.mergeStyles([css]);
         });
-
         this.adv.plugins.component_connected(this);
-
     }
-
-
 
     onMutate?: (mutation: MutationRecord) => void;
     mutate(mutation: MutationRecord) {
@@ -300,7 +317,7 @@ export default class AdvectBase extends HTMLElement {
             this.onMutate(mutation);
         }
         this.adv.plugins.component_mutated(this, mutation);
-       
+
     };
     onDisconnect?: () => void;
     disconnectdCallback() {
@@ -308,10 +325,6 @@ export default class AdvectBase extends HTMLElement {
             this.onDisconnect();
         }
     }
-
-
-
-
     /**
      * 
      * @param selector 
@@ -335,5 +348,13 @@ export default class AdvectBase extends HTMLElement {
 
     onPluginDiscovered() {
         // TODO onPluginDiscovered
+    }
+
+    /**
+     * Stubs to be used in adv-view, adv-of, and adv-for, adv-if 
+     * @param _ 
+     */
+  async render(_?: Record<string, any>) {
+    return "";
     }
 }

@@ -7,7 +7,6 @@ import { AdvectView } from "./AdvectView";
  */
 export const $window = (window as (Record<string, any> & Window & {
     adv_settings?: Record<string, any>;
-    adv_plugins?: Record<string, any>;
 }));
 
 /**
@@ -27,6 +26,7 @@ export function toModule(script:string, inject:string[] = []) {
         .catch(err => { console.error(err); return null });
 }
 
+$window.scriptFromUrl = scriptFromUrl;
 export function scriptFromUrl(url:string, type:string = "text/javascript", add = true, onLoad?: (event:Event) =>void) {
     const script = document.createElement('script');
     script.src = url;
@@ -39,7 +39,6 @@ export function scriptFromUrl(url:string, type:string = "text/javascript", add =
 /**
  * Eh im not to dogmatic about havins scripts with exports and side effects
  */
-$window.scriptFromUrl = scriptFromUrl;
 
 /**
  * Creates a style element from a string of css and appends it to the head
@@ -63,4 +62,10 @@ export type AConstructor<T = {}> = new (...args: any[]) => T;
 export const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
 
-export type AdvectRenderFunction = (view:AdvectView, template_str:string, ctx:Record<string, any>, options?:any) => string;
+export type RenderDescriptor = {
+    template: string;
+    ctx?: Record<string, any>;
+    view?: AdvectView;
+    options?: Record<string, any>;
+}
+export type AdvectRenderFunction = (desc:RenderDescriptor) => string;

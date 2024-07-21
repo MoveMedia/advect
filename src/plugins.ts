@@ -53,7 +53,7 @@ export interface AdvectPlugin{
 
     /**
      * Only for adv-views this allows you to use a different template engine, or build your own
-     * the default is mustache
+     * the default is squirlly
      * @param name the name to match the renderer attribute
      * @param el the element to render
      */

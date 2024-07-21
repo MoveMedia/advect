@@ -5,6 +5,7 @@ export default defineConfig({
         rollupOptions: {
           input:{
             advect: path.resolve(__dirname, 'src','advect.ts'),
+
           },
           output: {
             entryFileNames: `[name].js`,
