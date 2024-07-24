@@ -15,11 +15,11 @@
   },
   "devDependencies": {
     "@types/mustache": "^4.2.5",
+    "typedoc": "^0.26.5",
     "typescript": "^5.4.5",
     "vite": "^5.1.4"
   },
   "dependencies": {
-    "ejs": "^3.1.10",
     "snarkdown": "^2.0.0",
     "squirrelly": "^9.1.0",
     "twind": "^0.16.19",

@@ -1,5 +1,5 @@
 <template id="eta-test" adv>
-    <adv-view id="test" render="sqrl" 
+    <adv-view id="test"
         onload="{
             el.render({
                 name: 'world',
@@ -12,9 +12,11 @@
         }"
     >
         <h1>Hello new Trainer {{ it.name }} </h1>
-        <ul>
+        <ul class="list-disc">
             {{@each(it.someArray) => val, index}}
+            <li>
                 The current array item is {{val.name}}, the current index is {{index}}
+            </li>
             {{/each}}
         </ul>
     </adv-view>

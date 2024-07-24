@@ -79,45 +79,52 @@
     <button id="cancel" onclick="refs.new_todo_diag.close()">Cancel</button>
   </dialog>
   <adv-view id="todos_view">
-    {{@each(it.todos) => todo, todo_index}}
-    <div
-      id="todo_{{todo.id}}"
-      data-id="{{todo.id}}"
-      class="transition-[all 2s] relative"
-    >
-      <label for="title_input_{{todo.id}}">
-        <input
-          id="title_input_{{todo.id}}"
-          type="text"
-          name="title_input_{{todo.id}}"
-          value="{{todo.title}}"
-          onchange="scope.updateTitle(el.dataset.id, el.value)"
-        />
-      </label>
+    <for data="it.todos" name="todo" index="todo_index">
+      <div
+        id="todo_{{todo.id}}"
+        data-id="{{todo.id}}"
+        class="transition-[all 2s] relative"
+      >
+        <label for="title_input_{{todo.id}}">
+          <input
+            id="title_input_{{todo.id}}"
+            type="text"
+            name="title_input_{{todo.id}}"
+            value="{{todo.title}}"
+            onchange="scope.updateTitle(el.dataset.id, el.value)"
+          />
+        </label>
 
-      <label for="complete_{{todo.id}}">
-        <input
-          id="complete_{{todo.id}}"
-          name="complete_{{todo.id}}"
-          type="checkbox"
-          data-checked="{{todo.complete}}"
-          onload="el.checked = el.dataset.checked === 'true'"
-          onchange="{
+        <label for="complete_{{todo.id}}">
+          <input
+            id="complete_{{todo.id}}"
+            name="complete_{{todo.id}}"
+            type="checkbox"
+            data-checked="{{todo.complete}}"
+            onload="el.checked = el.dataset.checked === 'true'"
+            onchange="{
                 const wrapper = el.closest('[data-id]');
               scope.updateComplete(wrapper.dataset.id, el.checked);
             }"
-        />
-      </label>
-      <button
-        id="remove_{{todo.id}}"
-        onclick="{
+          />
+        </label>
+        <button
+          id="remove_{{todo.id}}"
+
+
+          onclick="{
               const wrapper = el.closest('[data-id]');
               scope.removeTodo(wrapper.dataset.id);
             }"
-      >
-        X
-      </button>
-    </div>
-    {{/each}}
+        >
+          X
+        </button>
+      </div>
+    </for>
+    <if check="it.todos.length == 0">
+      <p>No todos</p>
+      <else/>
+      {{it.todos.length}}
+    </if>
   </adv-view>
 </template>

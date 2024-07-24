@@ -1,4 +1,4 @@
-import { AdvMutationEvent } from "./AdvMutationEvent";
+import { AdvectMutationEvent } from "./AdvectMutationEvent";
 import { AdvectView } from "./AdvectView";
 import settings from "./settings";
 import { $window, AsyncFunction } from "./utils";
@@ -180,7 +180,7 @@ export default class AdvectBase extends HTMLElement {
             // @ts-ignore refs have a reference to this
             this.adv.plugins.ref_found(ref);
             ref.addEventListener('adv:mutation', (_event) => {
-                this.mutate((_event as AdvMutationEvent).detail);
+                this.mutate((_event as AdvectMutationEvent).detail);
             });
 
             this.observer.observe(ref, { attributes: true, childList: true, subtree: true });
@@ -260,7 +260,7 @@ export default class AdvectBase extends HTMLElement {
     }
     static _observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-            const event = new AdvMutationEvent(mutation);
+            const event = new AdvectMutationEvent(mutation);
             mutation.target.dispatchEvent(event);
         });
     })
@@ -277,7 +277,7 @@ export default class AdvectBase extends HTMLElement {
         this.#internals = this.attachInternals();
         this.generateScope = this.generateScope.bind(this);
         this.addEventListener("adv:mutation", (event) => {
-            const mutation = (event as AdvMutationEvent).detail;
+            const mutation = (event as AdvectMutationEvent).detail;
             this.mutate(mutation);
         });
         this.style.display = "block";

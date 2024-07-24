@@ -2,7 +2,7 @@ import "./style.css";
 import { $window, toModule } from "./utils";
 import settings from "./settings";
 import { PluginSystem } from "./plugins";
-import advectCorePlugin from "./plugins/advectcore.plugin";
+import advectCorePlugin from "./plugins/core.plugin";
 import { AdvectElement } from "./AdvectElement";
 import { AdvectView } from "./AdvectView";
 import AdvectDebug from "./debug";

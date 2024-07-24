@@ -18,9 +18,9 @@
         { id: "12", title: "Todo 12", complete: true, tag: "fun" },
         { id: "13", title: "Todo 13", complete: false, tag: "adulting" },
       ],
-      getTags: () => g().todos.map(todo => todo.tag),
+      getTags: () => g().todos.map((todo) => todo.tag),
       addTodo: (todo) => s({ todos: [...g().todos, todo] }),
-      
+
       removeTodo: (id) =>
         s({ todos: g().todos.filter((todo) => todo.id !== id) }),
       updateTitle: (id, title) =>
@@ -42,16 +42,16 @@
         }),
     }));
     subscribe((state, prevState) => {
-    //  changing complete
-        if (state.todos.length !== prevState.todos.length) {
-            self.view_list.forEach( v => v.render(state));
-        }
+      //  changing complete
+      if (state.todos.length !== prevState.todos.length) {
+        self.view_list.forEach((v) => v.render(state));
+      }
     });
-  // render all the views
+    // render all the views
 
     // we'll use the store state as the scope, but we can use anythign
     const scope = getState();
-     self.view_list.forEach( v => v.render(scope));
+    self.view_list.forEach((v) => v.render(scope));
     return scope;
   </script>
   <h2>Todo List</h2>
@@ -70,67 +70,54 @@
          id: Math.random().toString(36).substr(2, 9),
          title: refs.new_todo_title.value,
          complete: refs.new_todo_complete.checked,
-          tag: refs.new_todo_tag.value
      }); 
      refs.new_todo_diag.close();
-     ">
+     "
+    >
       Add
     </button>
     <button id="cancel" onclick="refs.new_todo_diag.close()">Cancel</button>
-    <adv-view id="new_todo_tag" onload="{
-        el.renderTo(refs.new_todo_tag, scope);
-    }">
-      <label for="new_todo_tag">Tag</label>
-      <select id="new_todo_tag" name="new_todo_tag">
-        {{#getTags}}
-            <option value="{{.}}">{{.}}</option>
-        {{/getTags}}
-      </select>
-    </adv-view>
   </dialog>
   <adv-view id="todos_view">
-    <div>
-      {{#todos}}
-      <div>
-        <label for="title_input_{{id}}">
-          <input
-            id="title_input_{{id}}"
-            type="text"
-            name="title_input_{{id}}"
-            value="{{title}}"
-            data-id="{{id}}"
-            onchange="scope.updateTitle(el.dataset.id, el.value)"
-          />
-        </label>
-        <label for="tag">
-          <select id="tag" name="tag" value="{{tag}}">
-            {{#getTags}}
-              <option {{{.}}} value="{{.}}">{{.}}</option>
-            {{/getTags}}
-          </select>
-        </label>
-        <label for="complete_{{id}}">
-          <input
-            id="complete_{{id}}"
-            name="complete_{{id}}"
-            type="checkbox"
-            data-id="{{id}}"
-            data-checked="{{complete}}"
-            onload="el.checked = el.dataset.checked === 'true'"
-            onchange="scope.updateComplete(el.dataset.id, el.checked)"
-          />
-        </label>
-        <button
-          id="remove_{{id}}"
-          data-id="{{id}}"
-          onclick="scope.removeTodo(el.dataset.id)">
-          X
-        </button>
-      </div>
-      {{/todos}}
-       {{^todos}}
-        <div>No todos</div>
-      {{/todos}}
+    {{@each(it.todos) => todo, todo_index}}
+    <div
+      id="todo_{{todo.id}}"
+      data-id="{{todo.id}}"
+      class="transition-[all 2s] relative"
+    >
+      <label for="title_input_{{todo.id}}">
+        <input
+          id="title_input_{{todo.id}}"
+          type="text"
+          name="title_input_{{todo.id}}"
+          value="{{todo.title}}"
+          onchange="scope.updateTitle(el.dataset.id, el.value)"
+        />
+      </label>
+
+      <label for="complete_{{todo.id}}">
+        <input
+          id="complete_{{todo.id}}"
+          name="complete_{{todo.id}}"
+          type="checkbox"
+          data-checked="{{todo.complete}}"
+          onload="el.checked = el.dataset.checked === 'true'"
+          onchange="{
+                const wrapper = el.closest('[data-id]');
+              scope.updateComplete(wrapper.dataset.id, el.checked);
+            }"
+        />
+      </label>
+      <button
+        id="remove_{{todo.id}}"
+        onclick="{
+              const wrapper = el.closest('[data-id]');
+              scope.removeTodo(wrapper.dataset.id);
+            }"
+      >
+        X
+      </button>
     </div>
+    {{/each}}
   </adv-view>
 </template>

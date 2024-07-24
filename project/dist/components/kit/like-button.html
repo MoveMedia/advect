@@ -1,0 +1,59 @@
+<template id="like-button" adv>
+<div id="root" class="relative flex justify-center max-w-[2em] max-h-[2em]">
+    <div id="bg" class="bg"></div>
+    <div class="selected absolute">😠</div>
+    <slot id="slot" class="absolute"></slot>
+</div>
+  <script>
+    console.log("like button", self.querySelectorAll("[slot]"));
+    const options = Array.from(self.querySelectorAll("[slot]"));
+    const selected = options[0];
+    const positions = options.map((el, i) => {
+      const id = i;
+      const angle = (360 / options.length) * i;
+      const x = Math.cos(angle);
+      const y = Math.sin(angle);
+      const delay = `${i * 0.1}s`; 
+      el.style.transition = "all 0.5s ease var(--delay)";
+      el.classList.add("option");   
+      el.style.setProperty("--x", x);
+      el.style.setProperty("--y", y);
+      el.style.setProperty("--delay", delay);
+      return { x, y, delay };
+    });
+  </script>
+    <style>
+        @scope{
+            :scope{
+                width: 2em;
+                height: 2em;
+                & .bg{
+                    background-color:black;
+                    min-width: 2em;
+                    min-height: 2em;
+                    position: absolute;
+                    border-radius: 50%;
+                    transition: all 0.5s ease 0s;
+                    top: -20%;
+                    bottom: 50%
+                }
+                &:hover{
+                    & .bg{
+                        background-color:blue;
+                        min-width: 7em;
+                        min-height: 7em;
+                        top: -120%;
+
+                        
+                    }
+                    .option{
+                        transform: translate(calc(var(--x) * 1em), calc(var(--y) * 1em )) ;
+                    }
+                }
+            }
+            .option{
+
+            }
+        }
+    </style>
+</template>
