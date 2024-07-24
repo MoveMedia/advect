@@ -17,6 +17,8 @@
   <script type="text/adv" src="components/basic/simple-counter.html"></script>
   <script type="text/adv" src="components/basic/eta-test.html"></script>
   <script type="text/adv" src="components/does-not-exist.html"></script>
+  <script type="text/adv" src="components/kit/like-button.html"></script>
+
 
 
 
@@ -137,12 +139,17 @@
         - of items
       </adv-view>
     </section>
-    <section>
+    <section class="container">
       <eta-test>
         
       </eta-test>
     </section>
-
+    <section class="container flex justify-center py-[100px]">
+      <like-button>
+          <span slot>Like</span>
+          <span slot>Dislike</span>
+      </like-button>
+    </section>
   </main>
   <footer class="container">
     <p class="text-center">Made with ❤️</p>

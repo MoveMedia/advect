@@ -1,0 +1,34 @@
+<template id="content-skeleton">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/light.css" />
+    <script type="module">
+        //
+       scriptFromUrl('https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/components/skeleton/skeleton.js',
+       "module",
+       true);
+    </script>
+    <div class="skeleton-paragraphs">
+        <sl-skeleton></sl-skeleton>
+        <sl-skeleton></sl-skeleton>
+        <sl-skeleton></sl-skeleton>
+        <sl-skeleton></sl-skeleton>
+        <sl-skeleton></sl-skeleton>
+      </div>
+      
+      <style>
+        .skeleton-paragraphs sl-skeleton {
+          margin-bottom: 1rem;
+        }
+      
+        .skeleton-paragraphs sl-skeleton:nth-child(2) {
+          width: 95%;
+        }
+      
+        .skeleton-paragraphs sl-skeleton:nth-child(4) {
+          width: 90%;
+        }
+      
+        .skeleton-paragraphs sl-skeleton:last-child {
+          width: 50%;
+        }
+      </style>
+</template>

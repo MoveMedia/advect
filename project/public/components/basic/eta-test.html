@@ -1,0 +1,23 @@
+<template id="eta-test" adv>
+    <adv-view id="test"
+        onload="{
+            el.render({
+                name: 'world',
+                someArray:[
+                    {name: 'pikachu', type: 'electric'},
+                    {name: 'charmander', type: 'fire'},
+                    {name: 'squirtle', type: 'water'}
+                ]
+            });
+        }"
+    >
+        <h1>Hello new Trainer {{ it.name }} </h1>
+        <ul class="list-disc">
+            {{@each(it.someArray) => val, index}}
+            <li>
+                The current array item is {{val.name}}, the current index is {{index}}
+            </li>
+            {{/each}}
+        </ul>
+    </adv-view>
+</template>
