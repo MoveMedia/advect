@@ -1,7 +1,7 @@
 {
   "name": "@advect/advect",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
@@ -23,7 +23,7 @@
     "zustand": "^4.5.4"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
-  "main": "scratch.js",
+  "main": "dist/advect.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moveapp2k/advect.git"
