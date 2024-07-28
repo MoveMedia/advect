@@ -1,12 +1,9 @@
 {
-  "name": "advect",
+  "name": "@advect/advect",
   "private": false,
   "version": "0.1.0",
   "type": "module",
-  "author": {
-    "name": "PartyGodTroy",
-    "email": ""
-  },
+  "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
@@ -24,5 +21,20 @@
     "squirrelly": "^9.1.0",
     "twind": "^0.16.19",
     "zustand": "^4.5.4"
-  }
+  },
+  "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
+  "main": "scratch.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moveapp2k/advect.git"
+  },
+  "keywords": [
+    "web",
+    "components",
+    "vanilla"
+  ],
+  "bugs": {
+    "url": "https://github.com/moveapp2k/advect/issues"
+  },
+  "homepage": "https://github.com/moveapp2k/advect#readme"
 }

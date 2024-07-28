@@ -1,7 +1,13 @@
 <template id="todo-component" adv>
   <script>
-    console.log('correct file')
-    const { todos_view } = refs;
+/**
+ * A number, or a string containing a number.
+ * @typedef {Record<string, HTMLElement>} Refs 
+ */
+
+
+    /** @type {Refs} */;
+    const { todos_view } = refs 
     const { getState, setState, subscribe } = createStore((s, g) => ({
       name: "Todo List",
       todos: [
@@ -111,6 +117,8 @@
         </label>
         <button
           id="remove_{{todo.id}}"
+
+
           onclick="{
               const wrapper = el.closest('[data-id]');
               scope.removeTodo(wrapper.dataset.id);
@@ -118,9 +126,12 @@
         >
           X
         </button>
-
       </div>
     </for>
- 
+    <if check="it.todos.length == 0">
+      <p>No todos</p>
+      <else/>
+      {{it.todos.length}}
+    </if>
   </adv-view>
 </template>

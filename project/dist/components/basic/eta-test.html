@@ -13,11 +13,11 @@
     >
         <h1>Hello new Trainer {{ it.name }} </h1>
         <ul class="list-disc">
-            {{@each(it.someArray) => val, index}}
+            <for data="it.someArray" name="val" index="index">
             <li>
                 The current array item is {{val.name}}, the current index is {{index}}
             </li>
-            {{/each}}
+            </for>
         </ul>
     </adv-view>
 </template>

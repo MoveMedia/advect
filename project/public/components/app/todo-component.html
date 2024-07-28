@@ -1,6 +1,13 @@
 <template id="todo-component" adv>
   <script>
-    const { todos_view } = refs;
+/**
+ * A number, or a string containing a number.
+ * @typedef {Record<string, HTMLElement>} Refs 
+ */
+
+
+    /** @type {Refs} */;
+    const { todos_view } = refs 
     const { getState, setState, subscribe } = createStore((s, g) => ({
       name: "Todo List",
       todos: [
