@@ -6,6 +6,7 @@ import advectCorePlugin from "./plugins/core.plugin";
 import { AdvectElement } from "./AdvectElement";
 import { AdvectView } from "./AdvectView";
 import AdvectDebug from "./debug";
+import { AdvectDisconnectEvent, AdvectMutationEvent } from "./events";
 
 /**
  * Single dom parser not sure if this is more efficient
@@ -33,8 +34,7 @@ export default class Advect {
     const url_queue = [url];
 
     if (this.loaded.includes(url)) {
-      console.log(`Already loaded ${url}`);
-      return;
+      url_queue.pop();
     }
     while (url_queue.length > 0) {
       const url = url_queue.pop() as string;
@@ -149,7 +149,7 @@ export default class Advect {
         attr.name.toLocaleLowerCase()
       );
     };
-    const PostPlugin = this.plugins.template_built(TemplateClass);
+    const PostPlugin = this.plugins.template_built(TemplateClass) || TemplateClass;
     if (register) {
       // @ts-ignore valid custom element name
       customElements.define(template.id, PostPlugin);
@@ -179,6 +179,8 @@ export default class Advect {
 
 const adv = ($window.advect = new Advect());
 $window.AdvectElement = AdvectElement;
+$window.AdvectMutationEvent = AdvectMutationEvent;
+$window.AdvectDisconnectEvent = AdvectDisconnectEvent;
 adv.start();
 
 customElements.define("adv-view", AdvectView);

@@ -7,17 +7,39 @@
                     {name: 'pikachu', type: 'electric'},
                     {name: 'charmander', type: 'fire'},
                     {name: 'squirtle', type: 'water'}
-                ]
+                ],
+                someMap:{
+                    badges:{
+                        boulder: { name: 'boulder', gym: 'pewter city', type: 'rock', aquired: true},
+                        cascade: { name: 'cascade', gym: 'cerulean city', type: 'water', aquired: false},
+                        thunder: { name: 'thunder', gym: 'vermilion city', type: 'electric', aquired: false},
+                        rainbow: { name: 'rainbow', gym: 'celadon city', type: 'grass', aquired: false},
+                        soul: { name: 'soul', gym: 'fuchsia city', type: 'poison', aquired: false},
+                        marsh: { name: 'marsh', gym: 'saffron city', type: 'psychic', aquired: false},
+                        volcano: { name: 'volcano', gym: 'cinnabar island', type: 'fire', aquired: false},
+                        earth: { name: 'earth', gym: 'viridian city', type: 'ground', aquired: false}
+                        
+                    }
+                }
             });
         }"
     >
         <h1>Hello new Trainer {{ it.name }} </h1>
         <ul class="list-disc">
             <for data="it.someArray" name="val" index="index">
-            <li>
-                The current array item is {{val.name}}, the current index is {{index}}
-            </li>
+                <li>
+                    The current array item is {{val.name}}, the current index is {{index}}
+                </li>
             </for>
+            <h2>Badges</h2>
+            <h3>
+            </h3>
+            <of data="it.someMap.badges" name="badge_name" value="badge">
+
+                <li>
+                    <span>{{badge_name}}</span> badge from {{badge.gym}} gym is of type {{badge.type}} and is {{badge.aquired ? 'aquired' : 'not aquired'}}
+                </li>
+            </of>
         </ul>
     </adv-view>
 </template>

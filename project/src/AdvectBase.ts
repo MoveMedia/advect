@@ -1,9 +1,8 @@
-import { AdvectMutationEvent } from "./AdvectMutationEvent";
+import { AdvectDisconnectEvent, AdvectMutationEvent } from "./events";
 import { AdvectView } from "./AdvectView";
 import settings from "./settings";
 import { $window, AsyncFunction } from "./utils";
 import Advect from "./advect";
-import { createStore } from "zustand/vanilla";
 
 
 /**
@@ -179,7 +178,7 @@ export default class AdvectBase extends HTMLElement {
         this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
             // @ts-ignore refs have a reference to this
             this.adv.plugins.ref_found(ref);
-            ref.addEventListener('adv:mutation', (_event) => {
+            ref.addEventListener(AdvectMutationEvent.Type, (_event) => {
                 this.mutate((_event as AdvectMutationEvent).detail);
             });
 
@@ -196,16 +195,14 @@ export default class AdvectBase extends HTMLElement {
 
                 if (name.toLowerCase() === "onmutate") {
                     ref.addEventListener('adv:mutation', (_event) => {
-                        new AsyncFunction("self", "event", "el", "refs", "data", "scope", "createStore", attr_val)
-                            (this, _event, ref, this.refs, this.data, this.scope, createStore);
+                        new AsyncFunction("self", "event", "el", "refs", "data", "scope", attr_val)
+                            (this, _event, ref, this.refs, this.data, this.scope);
                     });
-
-
                 } else {
                     // @ts-expect-error assigning event handlers by name nothing to see here
                     ref[name] = (_event) => {
-                        new AsyncFunction("self", "event", "el", "refs", "data", "scope",  "createStore", attr_val)
-                            (this, _event, ref, this.refs, this.data, this.scope, createStore);
+                        new AsyncFunction("self", "event", "el", "refs", "data", "scope", attr_val)
+                            (this, _event, ref, this.refs, this.data, this.scope);
                     }
                 }
             });
@@ -240,8 +237,8 @@ export default class AdvectBase extends HTMLElement {
         const scopeFunctions: Promise<ScopeResolution>[] = this.$scopes_scripts
             .map(({ script }) => {
                 return new AsyncFunction
-                    ("self", "refs", "data", "istates", "createStore", script) // @ts-ignore Internals.states DOES exist
-                    (this, this.refs, this.data, this.internals?.states, createStore);
+                    ("self", "refs", "data", "istates", script) // @ts-ignore Internals.states DOES exist
+                    (this, this.refs, this.data, this.internals?.states);
             });
         return Promise.all(scopeFunctions).then(async scopes => {
             for (let scope of scopes) {
@@ -280,6 +277,7 @@ export default class AdvectBase extends HTMLElement {
             const mutation = (event as AdvectMutationEvent).detail;
             this.mutate(mutation);
         });
+        
         this.style.display = "block";
 
     }
@@ -322,6 +320,7 @@ export default class AdvectBase extends HTMLElement {
     };
     onDisconnect?: () => void;
     disconnectdCallback() {
+        this.dispatchEvent(new AdvectDisconnectEvent(this));
         if (this.onDisconnect) {
             this.onDisconnect();
         }

@@ -23,7 +23,7 @@ export interface AdvectPlugin{
      * @param template the Class that has been built
      * @returns the modified template class
      */
-    template_built?(template: AConstructor<any>): any;
+    template_built?(template: AConstructor<any> & any): any;
     /**
      * A new template document has been loaded
      * @param doc the document that has been loaded
@@ -58,9 +58,7 @@ export interface AdvectPlugin{
      * @param el the element to render
      */
     renderers?: Record<string, AdvectRenderFunction>
-
     view_rendered?(el:AdvectBase): void;
-
     component_mutated?(el:AdvectBase, mut:MutationRecord): void;
     
 }

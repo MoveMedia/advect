@@ -1,6 +1,7 @@
 import { $window, AdvectRenderFunction, RenderDescriptor } from "./utils";
 import AdvectBase from "./AdvectBase";
 import settings from "./settings";
+import { AdvectRenderEvent } from "./events";
 /**
  * A Utility element for rendering  templates
  */
@@ -34,7 +35,7 @@ export class AdvectView extends AdvectBase {
     // @ts-ignore instance counter
     this.constructor.ic++;
     this.render = this.render.bind(this);
-    this.shadowRoot?.addEventListener("advect:render", ( _ ) => {
+    this.shadowRoot?.addEventListener(AdvectRenderEvent.Type, ( _ ) => {
       this.render();
     });
     this.adv.plugins.component_connected(this);

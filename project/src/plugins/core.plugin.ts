@@ -5,18 +5,23 @@ import { create, cssomSheet } from "twind";
 import AdvectBase from "../AdvectBase";
 import * as sqrl from 'squirrelly'
 import { $window } from "../utils";
-
-
+import { createStore }  from 'zustand/vanilla';
+import { useStore } from "zustand";
 
 const advectCorePlugin: AdvectPlugin = {
     priorityOrAfter: 0,
     priority: 0,
     name: "advect.core",
+    template_built(templateClass) {
+      // add zustand store to the class`
+      templateClass.prototype.createStore = createStore;
+      templateClass.prototype.useStore = useStore;
+      return templateClass
+    },
     component_connected(el: AdvectBase) {
         const sheet = cssomSheet({ target: el.$style })
         const { tw } = create({ sheet });
-        el.extras.tw_render = () =>{
-          
+        const render = () =>{
             tw(el.className)
             el.shadowRoot?.querySelectorAll('[class]').forEach(_el => {
                 tw(_el.className)
@@ -25,35 +30,28 @@ const advectCorePlugin: AdvectPlugin = {
                 tw(_el.className)
             })
         }
-        el.extras.tw_render()
+        el.extras.twind = {
+          sheet,
+          tw,
+          render,
+        }
+        el.extras.twind.render();
     },
     component_mutated(el: AdvectBase, mutation: MutationRecord) {
         // @ts-ignore
         if (mutation.attributeName === "class" && mutation.target === el) {
-            el?.extras?.tw_render()
+          el?.extras?.twind?.render();
+
         }
         // @ts-ignore
         if (mutation.target.matches && !(mutation.target as HTMLElement)?.matches("[no-tw]")) {
-            el?.extras?.tw_render()
+          el?.extras?.twind?.render();
+
         }
     },
     view_rendered(el: AdvectView) {
-        el?.extras?.tw_render()
+      el?.extras?.twind?.render();
     },
-    // ref_found(ref: HTMLElement) {
-
-    // },
-
-    // component_connected(el: AdvectBase) {
-
-    // },
-
-    // component_mutated(el: AdvectBase, mutation: MutationRecord) {
-
-    // },
-    // view_rendered(el: AdvectView) {
-
-    // },
     renderers: {
         "markdown": function ({ template, ctx }) {
             ctx = ctx ?? {};
@@ -76,9 +74,7 @@ const advectCorePlugin: AdvectPlugin = {
             const fields = Object.keys(ctx);
             ctx.___fields = fields;
             ctx.___hasFields = fields.length - 1 > 0;
-            // const clean = template
-            //     .replace('&gt;', '>').replace('&lt;', '<')
-            //     ;   
+     
             const clean = cleanTemplate(template);
             let rendered = "";
             try {
@@ -93,9 +89,6 @@ const advectCorePlugin: AdvectPlugin = {
                     console.error(e);
                  }
 
-
-
-
             }
             return rendered;
            
@@ -107,16 +100,19 @@ const advectCorePlugin: AdvectPlugin = {
 
 
 function cleanTemplate(template:string) {
-    const clean = template
-    .replace('&gt;', '>').replace('&lt;', '<')
-    
-    const _if = convertIfElse(clean);
+    const unescaped = convertEscapedChars(template);
+    const _if = convertIfElse(unescaped);
     const _for = convertFor(_if);
     const _of = convertOf(_for);
-
-   
+    //console.log(_of);
     return _of;
 }
+
+function convertEscapedChars(template:string) {
+    return template
+      .replace(/&gt;/g, '>').replace(/&lt;/g, '<')
+      .replace(/&amp;/g, '&');
+  }
 
 
 
@@ -168,84 +164,17 @@ function convertFor(template:string) {
  * // Outputs: "{{@foreach(options.someObject)}}{{/foreach}}"
  */
 function convertOf(template:string) {
-    return template.replace(/<of data="([^"]+)">/g, '{{@foreach($1)}}')
-                   .replace(/<\/of>/g, '{{/foreach}}');
+    return template.replace(/<of data="([^"]+)"(?: name="([^"]+)")?(?: value="([^"]+)")?>/g, function(_, data, name, index) {
+      if (name && index) {
+        return `{{@foreach(${data}) => ${name}, ${index}}}`;
+      } else if (name) {
+        return `{{@foreach(${data}) => ${name}}}`;
+      } else {
+        return `{{@foreach(${data})}}`;
+      }
+    }).replace(/<\/of>/g, '{{/foreach}}');
   }
   
-
-
-
-
-/***
- 
-    think about your your answer before you responde
-
-  you are using the squirrellyjs renderer to render the templates
-  the documentation for a cheat sheet is https://v7--squirrellyjs.netlify.app/docs/v7/cheatsheet
-  
-  I want you to preparse the template string with virtual dom elements <if>, <else>, <for>, and <of>
-  each one corresponds to a squirrelly template tag.
-  
-DO NOT INCLUDE SAMPLE CODE IN THE RESPONSE 
-
-THE CODE SHOULD WORK FOR optional index and name attributes
-
-
-  example 1 the if statment
-  
-  <if check="options.someval === "someothervalue">
-       <else/>
-  </if>
-  
-  will output
-  
-  {{@if(options.someval === "someothervalue")}}
-     {{#else}}
-  {{/if}}
-  
-  
-  example 2 the for loop
-  
-  
-  <for data="it.todos" name="todo" index="todo_index">
-  
-  </for>
-  
-  will output
-  
-   
- {{@each(it.todos) => todo, todo_index}}
-  ...
-  {{/each}}
-  
-  optionally the index, and the name can be omitted
-  
-  
-  
-  example 3 the of loop
-  
-  
-  <of data="options">
-  </of>
-  
-  
-  will output
-
-
-  {{@foreach(options.someObject)}}
-  {{/foreach}}
-  
- 
-  given these examples write a regex that will replace the virtual dom elements with the corresponding squirrelly template tags
-  do not be verbose in your response but do include documentation on the regex in the code
-  create 1 function for each virtual tag and include an example in the documentation
-
-
-
-
- */
-
-
 
 
 export default advectCorePlugin;
