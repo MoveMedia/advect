@@ -1,3 +1,4 @@
+import Advect from "./advect";
 import { AdvectView } from "./AdvectView";
 
 
@@ -7,6 +8,7 @@ import { AdvectView } from "./AdvectView";
  */
 export const $window = (window as (Record<string, any> & Window & {
     adv_settings?: Record<string, any>;
+    advect?: Advect
 }));
 
 /**

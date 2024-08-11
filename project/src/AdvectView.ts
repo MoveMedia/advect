@@ -2,11 +2,12 @@ import { $window, AdvectRenderFunction, RenderDescriptor } from "./utils";
 import AdvectBase from "./AdvectBase";
 import settings from "./settings";
 import { AdvectRenderEvent } from "./events";
+import Advect from "./advect";
 /**
  * A Utility element for rendering  templates
  */
 export class AdvectView extends AdvectBase {
-
+  static $Style: CSSStyleSheet;
   /**
    * instance counter
    */
@@ -25,6 +26,7 @@ export class AdvectView extends AdvectBase {
 
   constructor() {
     super();
+    
   }
   /**
    * connectedCallback for the element

@@ -14,6 +14,11 @@ const defaultSettings = {
     refs_no_inital_load: ["frame", "iframe", "img", "input[type='image']", "link", "script", "style"] as const,
     default_renderer: "sqrl" as const,
     include_twind: true as const,
+    shim:{
+        useShim: true as const,
+        selector: null as string | null,
+        once: true as const,
+    },
     plugins: [] as AdvectPlugin[],
 
 } as const;

@@ -19,10 +19,15 @@ export default class AdvectBase extends HTMLElement {
     }
 
     static $shadow_mode: "open" | "close";
+
+
     /**
      * 
      */
-    $style: CSSStyleSheet = new CSSStyleSheet();
+    get $style(): CSSStyleSheet {
+        // @ts-ignore set in build function for custom elements and inside of AdvectViews
+        return this.constructor.$Style;
+    } ;
     /**
      * 
      */
@@ -277,9 +282,7 @@ export default class AdvectBase extends HTMLElement {
             const mutation = (event as AdvectMutationEvent).detail;
             this.mutate(mutation);
         });
-        
         this.style.display = "block";
-
     }
 
     onConnect?: () => void;

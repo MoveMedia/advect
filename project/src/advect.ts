@@ -179,6 +179,7 @@ export default class Advect {
 
 const adv = ($window.advect = new Advect());
 $window.AdvectElement = AdvectElement;
+$window.AdvectView = AdvectView;
 $window.AdvectMutationEvent = AdvectMutationEvent;
 $window.AdvectDisconnectEvent = AdvectDisconnectEvent;
 adv.start();
