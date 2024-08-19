@@ -13,7 +13,7 @@ wrap your ```<advect-view>```  inside a ```{% verbatum %}``` like
     ... Other content 
 -->
 {% verbatum %}
-    <advect-view id="stats" data-name="john" data-height="5'7" weight="100lb">
+    <advect-view ref="stats" data-name="john" data-height="5'7" weight="100lb">
         Hey [[name]],
         your height is [[height]] and your weight is [[weight]]
     </advect-view>

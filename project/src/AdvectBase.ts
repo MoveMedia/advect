@@ -52,13 +52,13 @@ export default class AdvectBase extends HTMLElement {
      */
     get refs(): Record<string, Element> {
         return this.allRefs.reduce((p, c) => {
-            const id = c.dataset.ogid as string;
+            const id = c.getAttribute("ref") || c.tagName.toLowerCase() + "-" + Math.random().toString(36).substring(7); 
             return { ...p, [id]: c }
         }, {});
     }
     get views(): Record<string, Element> {
         return this.view_list.reduce((p, c) => {
-            const id = c.dataset.ogid as string;
+            const id = c.getAttribute("ref") as string;
             return { ...p, [id]: c }
         }, {});
     }
@@ -70,7 +70,7 @@ export default class AdvectBase extends HTMLElement {
      * 
      */
     get allRefs() {
-        return [...(this.shadowRoot?.querySelectorAll(`[id]`) ?? [])] as HTMLElement[];
+        return [...(this.shadowRoot?.querySelectorAll(`[ref]`) ?? [])] as HTMLElement[];
     }
 
 
@@ -150,15 +150,7 @@ export default class AdvectBase extends HTMLElement {
     /**
      *  This ts to id the references so they can be referenced in the scope
      */
-    setupRefs() {
-        this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
-            const new_id = `${this.nodeName.toLowerCase()}-${ref.id}`;
-            try {
-                (ref as HTMLElement).dataset.ogid = ref.id;
-            } catch (e) { console.warn("Could not set ogid", e); }
-            ref.id = new_id;
-        });
-    }
+  
     /**
      * Sets up event listeners for refs (ie elements with ids)
      */
@@ -180,7 +172,7 @@ export default class AdvectBase extends HTMLElement {
                     (this, _event, this.scope);
             });
         // refs
-        this.shadowRoot?.querySelectorAll("[id]").forEach((ref) => {
+        this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
             // @ts-ignore refs have a reference to this
             this.adv.plugins.ref_found(ref);
             ref.addEventListener(AdvectMutationEvent.Type, (_event) => {

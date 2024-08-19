@@ -82,7 +82,6 @@ export class AdvectView extends AdvectBase {
       this.shadowRoot.removeChild(this.shadowRoot.firstChild);
     }
     this.shadowRoot?.appendChild(wrapper);
-    this.setupRefs();
     await this.generateScope()
       .then(() => {
         this.hookRefs();

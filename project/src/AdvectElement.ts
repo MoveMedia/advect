@@ -86,7 +86,6 @@ export class AdvectElement extends AdvectBase{
     if (!this.shadowRoot)  return;
     // @ts-ignore template defined in build
     this.shadowRoot.innerHTML = this.$template.innerHTML;
-    this.setupRefs();
     this.generateScope().then(() => {
       this.hookViews();
       this.hookRefs()
