@@ -3,36 +3,35 @@
     const { container } = refs;
     const buttons = Array.from(container.children);
     const steps = 360 / buttons.length;
+
     buttons.forEach((button, index) => {
       button.onclick = () => {
         buttons.forEach((b) => b.removeAttribute("selected"));
         button.setAttribute("selected", "");
       };
-      button.style.setProperty("--delay", `${(index * 0.125) + 0.05}s`);
+      button.style.setProperty("--delay", `${index * 0.125 + 0.05}s`);
       button.style.setProperty(
         "--x",
         `calc(${Math.cos((steps * index * Math.PI) / 180) * 50}px)`
       );
-        button.style.setProperty(
-            "--y",
-            `calc(${Math.sin((steps * index * Math.PI) / 180) * 50}px)`
-        );
-
+      button.style.setProperty(
+        "--y",
+        `calc(${Math.sin((steps * index * Math.PI) / 180) * 50}px)`
+      );
+      button.style.setProperty("--z", `calc(${1}px)`);
     });
     const scope = {
-      selectReaction: function (reaction) {
-       
-      },
-    }
+      selectReaction: function (reaction) {},
+    };
   </script>
-  <div ref="container" class="container">
+  <div ref="container" class="container" onclick="{
+  }">
     <button class="reaction">😠</button>
     <button class="reaction">🤯</button>
     <button class="reaction">😉</button>
     <button class="reaction" selected>💖</button>
     <button class="reaction">🤡</button>
     <button class="reaction">😓</button>
-
   </div>
   <style>
     @scope {
@@ -44,7 +43,7 @@
         height: 1em;
         margin-inline: 0.5em 0.75em;
         --bg-size: 2em;
-
+        transform-style: preserve-3d;
         &:hover {
           --bg-size: 5em;
         }
@@ -54,6 +53,8 @@
           width: var(--bg-size);
           height: var(--bg-size);
           transform: translate(calc(-50% + 0.65em), calc(-50% + 0.65em));
+          transform-style: preserve-3d;
+
           transform-origin: center;
           border-radius: 50%;
           background-color: var(--bg-color, #323232);
@@ -61,28 +62,44 @@
           box-sizing: content-box;
         }
         & .container {
-            display: flex;
+          display: flex;
         }
         & .reaction {
           border-radius: 50%;
           background-color: #3e3e3e;
+          transform-style: preserve-3d;
 
-            position: absolute;
-            transition: all 0.2s ease-in var(--delay);
-            z-index: 10;
-            order:1;
-            &[selected]{
-                z-index:100;
-                --z: 10px;
-            }
-          }
+          position: absolute;
+          transition: all 0.2s ease-in var(--delay);
+        }
         &:hover {
-         
-          & .reaction:not([selected]){
+          & .reaction:not([selected]) {
             transform: translate(var(--x), var(--y));
+          }
+
+          & .reaction[selected] {
+            transform: translate(0, 0, 10px);
           }
         }
       }
     }
   </style>
 </template>
+<script>
+    /**
+     * Refs
+     * @typedef {Record<string, HTMLElement|Element>} Refs
+     * @type {Refs}
+     */
+     var refs
+    /**
+     * Self
+     * @typedef {HTMLElement} Self
+     * @type {Self}
+     */
+     var self
+     /**
+      * @type {CustomStateSet}
+      */ 
+     var istate
+</script>
