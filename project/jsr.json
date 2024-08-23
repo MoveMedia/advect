@@ -2,6 +2,7 @@
     "name": "@advect/advect",
     "version": "0.1.2",
     "exports": "./mod.ts",
+    "license": "MIT",
     "publish": {
         "include": [
           "LICENSE",
