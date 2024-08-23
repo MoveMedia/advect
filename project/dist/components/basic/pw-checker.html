@@ -3,7 +3,7 @@
     
 -->
 
-<template id="pw-checker" adv>
+<template ref="pw-checker" adv>
     <script>
         const {pw} =  refs
 
@@ -58,14 +58,14 @@
         <label for="password">Enter Password</label>
         <!--  -->
         <input 
-            id="pw" 
+            ref="pw" 
             name="password" 
             type="password" 
             placeholder="Enter password"
             class="border border-[var(--border-color)] p-2 rounded-md w-full" 
             oninput="scope.checkPw()" 
         />
-        <div id="ratings" 
+        <div ref="ratings" 
             class="flex gap-2 h-2 bg-gray-200 my-2"
             onload="([...el.children]).forEach((child, index) => {
                 child.style.setProperty('--opacity', 0);
@@ -78,7 +78,7 @@
             <div class="w-1/4 transition-all delay-300 bg-green-500  opacity-[var(--opacity)]"></div>
          
         </div>
-        <div id="validation" class="text-red w-full">
+        <div ref="validation" class="text-red w-full">
 
         </div>
     </div>

@@ -1,5 +1,5 @@
 <template id="eta-test" adv>
-    <adv-view id="test"
+    <adv-view ref="test"
         onload="{
             el.render({
                 name: 'world',
@@ -32,9 +32,12 @@
                 </li>
             </for>
             <h2>Badges</h2>
-            <of data="it.someMap.badges" name="badge">
+            <h3>
+            </h3>
+            <of data="it.someMap.badges" name="badge_name" value="badge">
+
                 <li>
-                    <span>{{badge.name}}</span> badge from {{badge.gym}} gym is of type {{badge.type}} and is {{badge.aquired ? 'aquired' : 'not aquired'}}
+                    <span>{{badge_name}}</span> badge from {{badge.gym}} gym is of type {{badge.type}} and is {{badge.aquired ? 'aquired' : 'not aquired'}}
                 </li>
             </of>
         </ul>

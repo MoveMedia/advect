@@ -1,9 +1,9 @@
 <template id="simple-counter" adv>
     <div class="flex justify-center items-center gap-4">
-        <button id="subtract" onclick="refs.counter.data.count--"> - </button>
-        <adv-view id="counter" onload="el.data.count = 0"> 
+        <button ref="subtract" onclick="refs.counter.data.count--"> - </button>
+        <adv-view ref="counter" onload="el.data.count = 0"> 
             {{ it.count }}
         </adv-view>
-        <button id="add" onclick="refs.counter.data.count++"> + </button>
+        <button ref="add" onclick="refs.counter.data.count++"> + </button>
     </div>
 </template>

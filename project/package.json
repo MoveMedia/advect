@@ -9,7 +9,9 @@
     "dev": "vite",
     "build": "tsc  && vite build",
     "preview": "vite preview",
-    "publish": "npm publish || npx jsr plublish"
+    "publish-npm": "npm publish",
+    "publish-jsr": "bunx jsr publish",
+    "publish": "bun run build && bun run publish-npm || bun run publish-jsr"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.5",
