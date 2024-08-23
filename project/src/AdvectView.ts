@@ -2,7 +2,6 @@ import { $window, AdvectRenderFunction, RenderDescriptor } from "./utils";
 import AdvectBase from "./AdvectBase";
 import settings from "./settings";
 import { AdvectRenderEvent } from "./events";
-import Advect from "./advect";
 /**
  * A Utility element for rendering  templates
  */

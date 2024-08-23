@@ -3,7 +3,8 @@ import { AdvectPlugin } from "../plugins";
 import snarkdown from "snarkdown";
 import { create, cssomSheet } from "twind";
 import AdvectBase from "../AdvectBase";
-import * as sqrl from "squirrelly";
+// @ts-ignore
+import * as sqrl from "squirrelly/dist/squirrelly.es.js";
 import { $window } from "../utils";
 import { createStore } from "zustand/vanilla";
 import { useStore } from "zustand";
@@ -113,6 +114,7 @@ const advectCorePlugin: AdvectPlugin = {
         $window.test = str;
         if (str.includes("    at each (") && str.includes("563:31")) {
           // that wieird error that happens when you use each
+          console.log('that wierd error that happens when you use each');
         } else {
           console.error(e);
         }
