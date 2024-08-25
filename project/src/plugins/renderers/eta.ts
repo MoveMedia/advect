@@ -1,23 +1,20 @@
+import { AdvectView } from "../../AdvectView";
 import { $window, RenderDescriptor } from "../../utils";
 import { Eta } from "eta"
 
 
-const eta = new Eta({
-    autoEscape: false,
-    tags: ["{{", "}}"],
-});
 
-export default function ({ template, ctx }:RenderDescriptor) {
+export default function ({ template, ctx, view }:RenderDescriptor) {
     if (!ctx) return "";
     const fields = Object.keys(ctx);
     ctx.___fields = fields;
     ctx.___hasFields = fields.length - 1 > 0;
 
     const clean = cleanTemplate(template);
-    console.log(clean);
     let rendered = "";
     try {
-      rendered = eta.renderString(clean, ctx);
+      // add the view to the view in main context
+      rendered = (view as AdvectView & { eta:Eta })?.eta.renderString(clean, ctx);
       return rendered;
     } catch (e) {
       const str = JSON.stringify((e as Error).stack);

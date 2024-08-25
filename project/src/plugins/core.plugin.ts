@@ -10,6 +10,7 @@ import { useStore } from "zustand";
 import { setup, disconnect } from "twind/shim";
 import settings from "../settings";
 import eta from "./renderers/eta";
+import { Eta } from "eta";
 
 
 // Render a template
@@ -48,6 +49,11 @@ const advectCorePlugin: AdvectPlugin = {
     }
   },
   component_connected(el: AdvectBase) {
+    if (el.nodeName === "ADV-VIEW") {
+      (el as AdvectView & {eta:Eta}).eta = new Eta( {
+        tags: [el.getAttribute("openTag") ?? "{{", el.getAttribute("closeTag") ?? "}}"],
+      });
+    }
     const sheet = cssomSheet({ target: el.$style });
     const { tw } = create({ sheet });
     const render = () => {
