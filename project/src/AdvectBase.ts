@@ -132,6 +132,17 @@ export default class AdvectBase extends HTMLElement {
             return true;
         }
     });
+
+    attr: Record<string, any> = new Proxy({},{
+        get: (_, name:string) => {
+            return this.getAttribute(name);
+        },
+        set: (_, name:string, value) => {
+            this.setAttribute(name, value);
+            return true;
+        }
+    });
+
     /**
      * attributeChanged function for the element
      */
@@ -171,6 +182,8 @@ export default class AdvectBase extends HTMLElement {
                 this[name] = (_event) => new AsyncFunction("self", "event", "scope", attr_val)
                     (this, _event, this.scope);
             });
+            this.dispatchEvent(new Event("load", { bubbles: false, cancelable: false }));
+        
         // refs
         this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
             // @ts-ignore refs have a reference to this

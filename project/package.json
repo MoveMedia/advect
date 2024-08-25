@@ -20,8 +20,8 @@
     "vite": "^5.1.4"
   },
   "dependencies": {
+    "eta": "^3.5.0",
     "snarkdown": "^2.0.0",
-    "squirrelly": "^9.1.0",
     "twind": "^0.16.19",
     "zustand": "^4.5.4"
   },

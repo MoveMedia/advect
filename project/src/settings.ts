@@ -12,7 +12,7 @@ const defaultSettings = {
     adv_skip: "adv-skip" as const,
      // list of tags that should not be send and onload event
     refs_no_inital_load: ["frame", "iframe", "img", "input[type='image']", "link", "script", "style"] as const,
-    default_renderer: "sqrl" as const,
+    default_renderer: "eta" as const,
     include_twind: true as const,
     shim:{
         useShim: true as const,

@@ -1,57 +1,12 @@
-<!DOCTYPE html>
-<html lang="en" hidden>
-
-<head>
-  <meta charset="UTF-8" />
-
-  <!-- <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script> -->
-  <script src="https://unpkg.com/htmx.org@2.0.1/dist/htmx.js"
-    integrity="sha384-gpIh5aLQ0qmX8kZdyhsd6jA24uKLkqIr1WAGtantR4KsS97l/NRBvh8/8OYGThAf"
-    crossorigin="anonymous"></script>
-  <!-- Include plugins after the script, -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script type="text/adv" src="components/app/todo-component.html"></script>
-  <script type="text/adv" src="components/basic/tw-button.html"></script>
-  <script type="text/adv" src="components/basic/pw-checker.html"></script>
-  <script type="text/adv" src="components/basic/simple-counter.html"></script>
-  <script type="text/adv" src="components/basic/eta-test.html"></script>
-  <script type="text/adv" src="components/does-not-exist.html"></script>
-  <script type="text/adv" src="components/kit/like-button.html"></script>
-
-
-
-
-
-  <!-- <script type="text/adv" src="components/basic/scene-3d.html"></script>   -->
-
-
-
-  <link rel="stylesheet" href="styles.css" />
-  <title>Advect</title>
-</head>
-
-<body class="">
-  <header>
-    <div>
-      <img src="logo.svg" alt="Advect Logo" width="40" height="40" />
-    </div>
-    <nav id="main-nav">
-      <ul>
-        <li>
-          <a href="#">Home</a>
-        </li>
-        <li>
-          <a href="#">Docs</a>
-        </li>
-        <li>
-          <a href="#">Contact</a>
-        </li>
-      </ul>
-    </nav>
-  </header>
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+  
   <main>
     <style>
-      @scope{
+      @@scope{
         :scope{
           scroll-snap-type: mandatory;
         }
@@ -59,7 +14,7 @@
     </style>
     <section class="bg-gray-50 text-black">
       <style>
-        @scope {
+        @@scope {
           :scope {
             scroll-snap-align: start;
             --grid-color: rgba(0, 0, 0, 0.1);
@@ -151,14 +106,3 @@
       this is some text after
     </section>
   </main>
-  <footer class="container">
-    <p class="text-center">Made with ❤️</p>
-  </footer>
-
-
-
-  <script type="module" src="/src/advect.ts"></script>
-
-</body>
-
-</html>

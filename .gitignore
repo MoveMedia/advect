@@ -13,6 +13,7 @@ dist/components
 
 scratch.html
 scratch.js
+test.html
 
 *.local
 
@@ -26,3 +27,6 @@ scratch.js
 *.njsproj
 *.sln
 *.sw?
+
+advect.io/bin
+advect.io/obj
