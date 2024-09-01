@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" hidden>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,43 +7,23 @@
   <script src="https://unpkg.com/htmx.org@2.0.1/dist/htmx.js"
     integrity="sha384-gpIh5aLQ0qmX8kZdyhsd6jA24uKLkqIr1WAGtantR4KsS97l/NRBvh8/8OYGThAf"
     crossorigin="anonymous"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@@advect/advect@@0.1.4/dist/advect.min.js"></script>
     <title>@ViewData["Title"] - advect.io</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/advect.io.styles.css" asp-append-version="true" />
 </head>
-<body>
-  <header>
-    <div>
-      <img src="logo.svg" alt="Advect Logo" width="40" height="40" />
-    </div>
-    <nav id="main-nav">
-      <ul>
-        <li>
-          <a href="#">Home</a>
-        </li>
-        <li>
-          <a href="#">Docs</a>
-        </li>
-        <li>
-          <a href="#">Contact</a>
-        </li>
-         <li>
-          <a href="#">Privacy</a>
-        </li>
-      </ul>
-    </nav>
-  </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+<body onload="
+    // handy way to trigger onload events on elements
+    document.querySelectorAll('[onload]:not(body):not(img):not(html)').forEach(el => {
+        el.onload(event);
+    });
+">
+    @await Html.PartialAsync("~/Pages/Shared/Header.cshtml")
+      <main role="main" class="pb-3 min-h-[400px]">
+          @RenderBody()
+      </main>
+    @await Html.PartialAsync("~/Pages/Shared/Footer.cshtml")
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; @( DateTime.Now.Year ) - advect.io - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

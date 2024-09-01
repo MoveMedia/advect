@@ -91,7 +91,7 @@
     <button ref="cancel" onclick="refs.new_todo_diag.close()">Cancel</button>
   </dialog>
   <adv-view ref="todos_view">
-    <for data="it.todos" name="todo" index="todo_index">
+    <for data="it.todos ?? []" name="todo" index="todo_index">
       <div ref="todo_{{=todo.id}}" class="transition-[all 2s] relative">
         <label for="title_input_{{=todo.id}}">
           <input

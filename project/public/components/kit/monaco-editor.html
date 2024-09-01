@@ -1,0 +1,84 @@
+<template id="monaco-editor-2" language value autorun adv>
+<link href="https://cdn.jsdelivr.net/npm/vscode-codicons@0.0.17/dist/codicon.min.css" rel="stylesheet">
+  <script type="module">
+    import * as monaco from "https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/+esm";
+    export default class MonacoEditor extends AdvectElement {
+      monaco = monaco;
+    }
+  </script>
+  <script>
+    const {template,output, editor_el} = refs;
+    const value = template?.innerHTML.replaceAll('&gt;', '>').replace('&lt;', '<');
+    const language = self.getAttribute('language') ?? 'javascript'
+        
+    // lines of code to added befor the input code
+    const inject = language === 'javascript'
+        ? [``]
+        : [];
+
+    const editor = self.monaco.editor.create(editor_el,{
+        theme:'vs-dark',
+        language,
+        value: self.getAttribute('value') ?? '',
+        readOnly: self.getAttribute('readOnly') == 'true' ?? false,
+    })
+    const execute = () => {
+            const value = `${inject.join('\n')} ${editor.getValue()}`;
+            const script = new Function(value);
+            Promise.resolve((async () => {
+                script();
+             })())
+        .catch(console.warn)
+        .then(console.log);
+
+        }
+    
+    const runFullscreen = () => {
+        Promise.resolve((async () => {
+            output.requestFullscreen({navigationUI: 'show'})
+        })())
+        
+    }
+
+
+    const scope = {
+        editor,
+        getValue: () => editor.getValue(),
+        setValue: (value) => editor.setValue(value),
+        execute,
+        output,
+        runFullscreen
+      
+    }
+    if (self.getAttribute('autorun') =="true" && value){
+        execute();
+    }
+    return scope;
+  </script>
+  <div class="code-editor sl-theme-dark" id="editor-wrapper">
+    <slot name="resources">
+        
+    </slot>
+    <div style="display:none" id="template">
+        <slot></slot>
+    </div>
+    <div>
+        <div>
+            <sl-button title="Run button" id="run_btn" onclick="scope.execute()">Run</sl-button>
+            <sl-button title="copy code" id="copy_btn" onclick="navigator.clipboard.writeText(scope.getValue())" >Copy</sl-button>
+            <sl-button title="Run Full Screen" id="fullscrn_btn" onclick="scope.runFullscreen()" >Run Fullscreen</sl-button> 
+        </div>
+        <sl-split-panel vertical style="--divider-width: 20px;">
+            <div slot="start">
+                <div class="rounded-md border-2 min-h-full" id="editor_output">
+                    <slot name="output"></slot>
+                </div>
+            </div>
+            <sl-icon slot="divider" name="grip-vertical"></sl-icon>
+            <div slot="end" class="h-full max-w-full">
+                <div class="monaco min-h-full" id="monaco_el" class=""></div>
+            </div>
+          </sl-split-panel>
+    </div>
+</div>
+</template>
