@@ -40,7 +40,6 @@ export class AdvectView extends AdvectBase {
       this.render();
     });
     this.adv.plugins.component_connected(this);
-    this.render();
 
   }
   async renderTo(target: HTMLElement, data?: Record<string, any>) {

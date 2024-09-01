@@ -75,11 +75,11 @@ export default class Advect {
         // TODO maybe make upgrading components a thing
         const existingCustomElement = customElements.get(template.id);
         if (existingCustomElement) {
-          console.warn(`Template with id ${template.id} already exists`);
+          this.debug.warn(`Template with id ${template.id} already exists`);
           return;
         }
         if (template.tagName.toLocaleLowerCase() != "template") {
-          console.error("Template tag must be a template tag");
+          this.debug.error("Template tag must be a template tag");
           return;
         }
         //   console.log("Adding template", template.id);
@@ -103,7 +103,7 @@ export default class Advect {
     // shadow mode can be open or closed we prefer open
     const shadow_mode =
       template.getAttribute("shadow-mode") ?? settings.default_shadow_mode;
-    // use internals can be true or false
+    // use internals can be true or log
     //const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
     // get all the attributes except core to add to observedAttributes
     const attrs = [...template.attributes].filter(

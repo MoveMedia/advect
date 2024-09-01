@@ -1,5 +1,5 @@
 const AdvectDebug =  {
-    logging: true,
+    logging: import.meta.env.DEV,
     log: (message: string) => {
         if (AdvectDebug.logging) console.log(`[AdvDebug] ${message}`);
     },

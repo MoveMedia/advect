@@ -14,6 +14,7 @@ dist/components
 scratch.html
 scratch.js
 test.html
+scratch/*
 
 *.local
 
