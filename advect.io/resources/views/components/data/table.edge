@@ -1,0 +1,98 @@
+
+
+@layout.component()
+<div class="overflow-x-auto text-sm max-w-[1080px] mx-auto ">
+  <h2 class="capitalize">{{schema.table}}</h2>
+  <style>
+    @scope {
+      :scope {
+        .htmx-indicator {
+          opacity: 0;
+          width: 0;
+          overflow: hidden;
+          transition: opacity 500ms ease-in;
+        }
+
+        .htmx-request .htmx-indicator {
+          opacity: 1
+        }
+
+        .htmx-request.htmx-indicator {
+          opacity: 1
+        }
+
+        .htmx-indicator-alt {
+          opacity: 1;
+
+          transition: opacity 500ms ease-in;
+          & + .htmx-indicator {
+            opacity: 0;
+            width: 0;
+          overflow: hidden;
+
+          }
+        }
+      }
+    }
+  </style>
+
+  <table title="{{ title || 'Your default title' }}" class="min-w-full divide-y-2 divide-gray-200 bg-white  ">
+    <thead>
+      <tr>
+        @each(column in schema.columns )
+          <th>{{ column.model.column_name }}</th>
+        @endeach
+        <th class="sr-only">Edit</th>
+        <th class="sr-only">Delete</th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-gray-200  border-[2px_solid_black]">
+      @each(row in rows)
+      <tr>
+        @each(column in schema.columns) 
+        <td>
+          @data.input({column, row, schema}) 
+          @end
+        </td>
+        @endeach
+        <td class="whitespace-nowrap px-4 py-2">
+          <button title="Edit Record {{row.id}}"
+            class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+            Edit
+          </button>
+        </td>
+        <td class="whitespace-nowrap px-4 py-2">
+          <button 
+            class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+            <span class="htmx-indicator-alt">
+              Delete
+            </span>
+          </button>
+        </td>
+      </tr>
+      @endeach
+    </tbody>
+  </table>
+  <div>
+    <button class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+      New
+    </button>
+  </div>
+  <dialog id="new_dialog">
+    <form>
+      @each(column in schema.columns) 
+        <td>
+          @data.input({column, row, schema}) 
+          @end
+        </td>
+    </form>
+  </dialog>
+
+
+  <script type="application/json">
+        {{{ JSON.stringify(schema) }}}
+     </script>
+
+</div>
+@end

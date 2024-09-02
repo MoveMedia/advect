@@ -1,0 +1,7 @@
+
+@if (addScripts !== false)
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/shoelace-autoloader.js"></script>
+<script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@advect/advect"></script>
+ @endif
+  {{{ await $slots?.main() }}}
