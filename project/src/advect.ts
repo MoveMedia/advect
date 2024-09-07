@@ -41,6 +41,8 @@ export default class Advect {
       const result = await fetch(url, { method, headers })
         .then(async (res) => {
           if (res.ok) {
+            this.loaded.push(url);
+
             return {
               text: await res.text(),
               response: res,
@@ -57,7 +59,6 @@ export default class Advect {
         console.warn(`Loaded ${url} but no template found`);
         continue;
       }
-      this.loaded.push(url);
 
       const doc = parser.parseFromString(result?.text, "text/html");
       const src_scripts = doc.querySelectorAll(

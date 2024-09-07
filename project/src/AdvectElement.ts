@@ -43,7 +43,7 @@ export class AdvectElement extends AdvectBase{
    */
   get signature() { return `${this.nodeName.toLocaleLowerCase()}-${this.dataset["instance"]}`; }
   /**
-   * getter for the shadowRoot or the element itself
+   * getter for the shadowRoot or the element it$self
    */
 
 

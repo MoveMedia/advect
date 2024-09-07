@@ -46,7 +46,7 @@ export default class AdvectBase extends HTMLElement {
   $scopes_scripts: { id: string; script: string }[] = [];
 
   /**
-   * getter for the shadowRoot or the element itself
+   * getter for the shadowRoot or the element it$self
    */
   get refs(): Record<string, Element> {
     return this.allRefs.reduce((p, c) => {
@@ -132,7 +132,6 @@ export default class AdvectBase extends HTMLElement {
       },
       set: (_, name: string, value) => {
         this.dataset[name] = value;
-        this.render();
         return true;
       },
     }
@@ -181,7 +180,7 @@ export default class AdvectBase extends HTMLElement {
         const attr_val = this.getAttribute(name) ?? "";
         if (name.toLowerCase() === "onmutate") {
           this.onMutate = (_event) =>
-            new AsyncFunction("self", "event", "scope", attr_val)(
+            new AsyncFunction("$self", "event", "scope", attr_val)(
               this,
               _event,
               this.scope
@@ -190,7 +189,7 @@ export default class AdvectBase extends HTMLElement {
         }
         // @ts-expect-error assigning event handlers by name nothing to see here
         this[name] = (_event) =>
-          new AsyncFunction("self", "event", "scope", attr_val)(
+          new AsyncFunction("$self", "event", "scope", attr_val)(
             this,
             _event,
             this.scope
@@ -227,7 +226,7 @@ export default class AdvectBase extends HTMLElement {
           ref.addEventListener("adv:mutation", (_event) => {
             try {
               new AsyncFunction(
-                "self",
+                "$self",
                 "event",
                 "el",
                 "refs",
@@ -244,7 +243,7 @@ export default class AdvectBase extends HTMLElement {
             // @ts-expect-error assigning event handlers by name nothing to see here
             ref[name] = (_event) => {
               new AsyncFunction(
-                "self",
+                "$self",
                 "event",
                 "el",
                 "refs",
@@ -295,7 +294,7 @@ export default class AdvectBase extends HTMLElement {
       ({ script }) => {
         try {
 
-        return new AsyncFunction("self", "refs", "data", "istates", script)(
+        return new AsyncFunction("$self", "refs", "data", "istates", script)(
           // @ts-ignore Internals.states DOES exist
           this,
           this.refs,

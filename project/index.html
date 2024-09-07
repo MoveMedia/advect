@@ -145,8 +145,16 @@
         </adv-view>
       </section>
       <section class="container">
-        <adv-view data-name="john" render="markdown">
-          # hello {{it.name}} - a list - of items
+        <h2>This should be md</h2>
+        <adv-view id="view_1" data-name="john" render="md">
+          <template>
+            <script>
+              $self.render();
+            </script>
+          </template>
+          # hello {{= it.name}} 
+          - a list 
+          - of items
         </adv-view>
       </section>
       <section class="container">

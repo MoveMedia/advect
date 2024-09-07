@@ -23,7 +23,7 @@ export default function ({ template, ctx, view }:RenderDescriptor) {
         // that wieird error that happens when you use each
         console.log('that wierd error that happens when you use each');
       } else {
-        console.error(e, ctx, view);
+        console.warn(e, ctx, view);
       }
     }
     return rendered;

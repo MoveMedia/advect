@@ -22,6 +22,7 @@ export class AdvectView extends AdvectBase {
 
   main_script?: string;
 
+  firstRender = true;
 
   constructor() {
     super();
@@ -32,14 +33,32 @@ export class AdvectView extends AdvectBase {
    * must call super.connectedCallback() if overriden
    */
   connectedCallback() {
+
     super.connectedCallback();
     // @ts-ignore instance counter
     this.constructor.ic++;
     this.render = this.render.bind(this);
+    this.hookRefs = this.hookRefs.bind(this);
+    this.hookRefs();
     this.shadowRoot?.addEventListener(AdvectRenderEvent.Type, ( _ ) => {
       this.render();
     });
+ 
     this.adv.plugins.component_connected(this);
+
+
+    this.$scopes_scripts = [
+      ...(this
+        .querySelector("template")
+        ?.content.querySelectorAll("script:not([type]):not([ignore])") ?? []),
+    ].map((script) => {
+        script.remove();
+      return { id: script.id, script: script.textContent as string };
+    });
+
+        this.adv.plugins.view_rendered(this);
+    this.generateScope().then(this.hookRefs).then( () => this.adv.plugins.view_rendered(this))
+
 
   }
   async renderTo(target: HTMLElement, data?: Record<string, any>) {
@@ -56,6 +75,7 @@ export class AdvectView extends AdvectBase {
       ...this.dataset,
     }
     
+    console.log('rendering', renderer_name, ctx); 
 
     if (!renderFunc) {
       console.error(`No renderer found for ${renderer_name}`);
@@ -80,14 +100,9 @@ export class AdvectView extends AdvectBase {
       this.shadowRoot.removeChild(this.shadowRoot.firstChild);
     }
     this.shadowRoot?.appendChild(wrapper);
-    await this.generateScope()
-      .then(() => {
         this.hookRefs();
         this.adv.plugins.view_rendered(this);
-      })
-      .catch((err) => {
-        console.error('advect-view', err);
-      });;
+   
     return rendered
   }
 }

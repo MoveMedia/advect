@@ -11,6 +11,7 @@ import { setup, disconnect } from "twind/shim";
 import settings from "../settings";
 import eta from "./renderers/eta";
 import { Eta } from "eta";
+import md from "./renderers/md";
 
 
 // Render a template
@@ -88,25 +89,7 @@ const advectCorePlugin: AdvectPlugin = {
     el?.extras?.twind?.render();
   },
   renderers: {
-    markdown: function ({ template, ctx }) {
-      ctx = ctx ?? {};
-      const fields = Object.keys(ctx);
-      ctx.___fields = fields;
-      ctx.___hasFields = fields.length - 1 > 0;
-      const rendered = eta({template, ctx}) as string;
-      const parsed = rendered
-        .split("\n")
-        .map((line) => {
-          // remove leading whitespace, newlines, and tabs
-          line = line.replace(/^\s+/, "");
-          // remove trailing whitespace, newlines, and tabs
-          line = line.replace(/\s+$/, "");
-          return line;
-        })
-        .join("\n");
-
-      return snarkdown(parsed);
-    },
+    md,
     eta,
   },
 };
