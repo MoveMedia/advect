@@ -1,8 +1,7 @@
-import snarkdown from "snarkdown";
 import { RenderDescriptor } from "../../utils";
-import eta from "./eta";
 import { Eta } from "eta";
 import { AdvectView } from "../../AdvectView";
+import snarkdown from "snarkdown";
 
 export default function ({ template, ctx, view }:RenderDescriptor) {
     ctx = ctx ?? {};

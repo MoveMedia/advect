@@ -22,16 +22,16 @@
     </script>
     <script>
    /**
-         *  @var self {Scene3d} - the element that the component is mounted to 
+         *  @var $self {Scene3d} - the element that the component is mounted to 
          */
-            const BABYLON = self.BABYLON;
+            const BABYLON = $self.BABYLON;
             const { loader, canvas_wrapper } = refs;
             // we need to make the canvas in the "light" dom so the inspector works properly pr if this becomes problematic
             const canvas = document.createElement('canvas');
             canvas.style.width = '100%';
             canvas.style.height = '100%';
             canvas.slot = ''; // put the canvas in the default slot
-            self.appendChild(canvas);
+            $self.appendChild(canvas);
             const engine = new BABYLON.Engine(canvas, true);
             const scene = new BABYLON.Scene(engine);
             const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);

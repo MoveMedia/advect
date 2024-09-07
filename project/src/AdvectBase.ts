@@ -132,6 +132,7 @@ export default class AdvectBase extends HTMLElement {
       },
       set: (_, name: string, value) => {
         this.dataset[name] = value;
+        this.render();
         return true;
       },
     }
@@ -299,6 +300,7 @@ export default class AdvectBase extends HTMLElement {
           this,
           this.refs,
           this.data,
+          // @ts-ignore
           this.internals?.states
         );
     } catch (e) {

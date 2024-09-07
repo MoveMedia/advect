@@ -138,7 +138,7 @@
         />
       </section>
       <section class="container">
-        <adv-view>
+        <adv-view  onload="$self.render()">
           <button class="w-[200px] bg-[blue] hover:bg-[dodgerblue]">
             hello
           </button>
@@ -146,12 +146,12 @@
       </section>
       <section class="container">
         <h2>This should be md</h2>
-        <adv-view id="view_1" data-name="john" render="md">
-          <template>
+        <adv-view id="view_1" data-name="john" render="md" onload="$self.render()">
+          <!-- <template>
             <script>
               $self.render();
             </script>
-          </template>
+          </template> -->
           # hello {{= it.name}} 
           - a list 
           - of items

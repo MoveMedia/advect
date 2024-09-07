@@ -1,6 +1,5 @@
 import { AdvectView } from "../AdvectView";
 import { AdvectPlugin } from "../plugins";
-import snarkdown from "snarkdown";
 import { create, cssomSheet } from "twind";
 import AdvectBase from "../AdvectBase";
 // @ts-ignore

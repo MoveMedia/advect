@@ -8,7 +8,7 @@
 
     /** @type {Refs} */;
     const { todos_view } = refs 
-    const { getState, setState, subscribe } = self.createStore((set, get) => ({
+    const { getState, setState, subscribe } = $self.createStore((set, get) => ({
       name: "Todo List",
       todos: [],
       initiated: false,
@@ -39,7 +39,7 @@
     subscribe((state, prevState) => {
       //  changing complete
       if (state.todos.length !== prevState.todos.length || first_render) {
-        self.view_list.forEach((v) => v.render(state));
+        $self.view_list.forEach((v) => v.render(state));
         first_render = false;
       }
     },{

@@ -82,7 +82,6 @@ export class PluginSystem implements AdvectPlugin{
             console.error("Plugin must have a name");
             return;
         }
-        console.log(`Adding plugin ${plugin.name}`);
         this.plugins.set(plugin.name, plugin);
         this.plugin_discovered(plugin);
     }
