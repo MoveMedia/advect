@@ -4,9 +4,6 @@ import Auth from "@/views/pages/auth";
 import Editor from "@/views/pages/editor";
 import Docs from "@/views/pages/docs";
 
-
-
-
 const app = new Elysia()
   .use(Home)
   .use(Auth)
