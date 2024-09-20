@@ -34,7 +34,10 @@ export default class Advect {
     const url_queue = [url];
 
     if (this.loaded.includes(url)) {
-      url_queue.pop();
+      const index = this.loaded.indexOf(url);
+      if (index > -1) {
+        this.loaded.splice(index, 1);
+      }
     }
     while (url_queue.length > 0) {
       const url = url_queue.pop() as string;
@@ -76,7 +79,7 @@ export default class Advect {
         // TODO maybe make upgrading components a thing
         const existingCustomElement = customElements.get(template.id);
         if (existingCustomElement) {
-          this.debug.warn(`Template with id ${template.id} already exists`);
+          //this.debug.warn(`Template with id ${template.id} already exists`);
           return;
         }
         if (template.tagName.toLocaleLowerCase() != "template") {

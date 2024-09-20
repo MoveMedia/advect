@@ -75,7 +75,6 @@ export class AdvectView extends AdvectBase {
       ...this.dataset,
     }
     
-    console.log('rendering', renderer_name, ctx); 
 
     if (!renderFunc) {
       console.error(`No renderer found for ${renderer_name}`);

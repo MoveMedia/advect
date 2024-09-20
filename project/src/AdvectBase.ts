@@ -10,6 +10,8 @@ import Advect from "./advect";
  */
 export default class AdvectBase extends HTMLElement {
   extras: Record<string, any> = {};
+
+  loaded = false;
   /**
    *  Lib
    */
@@ -137,6 +139,7 @@ export default class AdvectBase extends HTMLElement {
       },
     }
   );
+  
 
   attr: Record<string, any> = new Proxy(
     {},
@@ -196,10 +199,6 @@ export default class AdvectBase extends HTMLElement {
             this.scope
           );
       });
-    if (!this.matches("[ref]"))
-      this.dispatchEvent(
-        new Event("load", { bubbles: false, cancelable: false })
-      );
 
     // refs
     this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
