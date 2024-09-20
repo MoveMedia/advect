@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" hidden>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  @if ($slots.head_assets)
+  {{{ await $slots.head_assets() }}}
+  @end
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@advect/advect@0.1.5/dist/advect.css" />
+  <script src="https://unpkg.com/htmx.org@2.0.2/dist/htmx.js"
+    integrity="sha384-yZq+5izaUBKcRgFbxgkRYwpHhHHCpp5nseXp0MEQ1A4MTWVMnqkmcuFez8x5qfxr"
+    crossorigin="anonymous"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/shoelace-autoloader.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/dark.css" />
+    <link rel="stylesheet" href="/assets/main.css" />
+    
+
+  <title>{{ title }}</title>
+</head>
+
+<body>
+  <header>
+    @if ($slots.header)
+      {{{ await $slots.header() }}}
+    @end
+  </header>
+
+  <main>
+    @if ($slots.content)
+    {{{ await $slots.content() }}}
+    @end
+  </main>
+
+  <footer>
+    @if ($slots.footer)
+    {{{ await $slots.footer() }}}
+    @end
+    @if ($slots.footer_assets)
+    {{{ await $slots.footer_assets() }}}
+    @end
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@advect/advect@0.1.5/dist/advect.js"></script>
+
+  </footer>
+  </div>
+</body>
+
+</html>

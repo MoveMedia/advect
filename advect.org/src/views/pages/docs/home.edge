@@ -1,0 +1,22 @@
+@layout.page({ title: `Editor ${ctx?.params?.id}` })
+
+
+@slot('header')
+  @layout.header()
+  @end
+@end
+
+@slot('content')
+<section class="bg-gray-50 text-black hero">
+    <adv-view>
+        
+    </adv-view>
+</section>
+@end
+
+  @slot('footer')
+    @layout.footer()
+    @end
+  @end
+
+@end

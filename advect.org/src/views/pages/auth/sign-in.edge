@@ -1,0 +1,93 @@
+@layout.page({ title: "register" })
+
+@slot('header')
+@layout.header()
+@end
+@end
+
+
+@slot('content')
+
+
+<adv-view>
+  <template>
+    <script>
+      $self.render();
+    </script>
+  </template>
+  <section class="bg-white">
+    <style>
+
+    </style>
+    <div class="flex justify-center lg:min-h-screen ">
+      <main class="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
+        <div class="max-w-xl lg:max-w-3xl">
+          <a class="block text-blue-600" href="#">
+            <span class="sr-only">Home</span>
+          </a>
+          <h1 class="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
+            Login to Advect
+          </h1>
+          <form id="signup_form" class="mt-8 grid grid-cols-6 gap-6" onsubmit="
+              event.preventDefault();
+              fetch('/auth/sign-in/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(new FormData(event.target)))
+              }).then( resp => resp.json() ).then( data =>{
+              
+                console.log(data)
+              })
+              
+              ;
+          ">
+            <div class="col-span-6">
+              <label for="Email" class="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+
+              <input type="email" id="Email" name="email"
+                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm" />
+            </div>
+
+            <div class="col-span-6 sm:col-span-3">
+              <label for="Password" class="block text-sm font-medium text-gray-700">
+
+                Password
+              </label>
+
+              <input type="password" id="Password" name="password"
+                class="mt-1 w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 shadow-sm" />
+            </div>
+
+            <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
+              <button
+                class="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500">
+               Login
+              </button>
+
+              <p class="mt-4 text-sm text-gray-500 sm:mt-0">
+                New Here?
+                <a href="/auth/sign-up" class="text-gray-700 underline">
+                  Register
+                </a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </section>
+</adv-view>
+
+@end
+
+@slot('footer')
+@layout.footer()
+@end
+@end
+
+@end

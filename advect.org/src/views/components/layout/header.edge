@@ -1,0 +1,81 @@
+<adv-view>
+  <template>
+    <script>
+      $self.render();
+      $self.shadowRoot.querySelectorAll('a').forEach((a) => {
+        if (window.location.pathname === a.getAttribute('href') 
+          || window.location.pathname.includes(a.getAttribute('href'))
+          && a.getAttribute('href') !== '/'
+        ) {
+          a.classList.add('text-red-600','font-bold');
+        }
+      });
+    </script>
+  </template>
+  <style>
+        nav {
+          max-height: var(--nav-height);
+
+          &:after {
+            content: '';
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-image:
+              animation-name: header-gradient;
+            animation-duration: 10s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+
+            @scope {
+              @keyframes header-gradient {
+                0% {
+                  background-position: 0% 50%;
+                }
+
+                50% {
+                  background-position: 100% 50%;
+                }
+
+                100% {
+                  background-position: 0% 50%;
+                }
+              }
+            }
+          }
+        }
+  </style>
+  <nav class="bg-white shadow h-[var(--nav-height)] py-2">
+    <div class="mx-auto max-w-screen-xl px-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="/" class="text-lg font-bold text-gray-800">
+            Advect
+          </a>
+        </div>
+
+        <div class="hidden lg:flex items-center space-x-4">
+          <a href="/" class="text-gray-800 hover:text-gray-900">
+            Home
+          </a>
+          <a href="/docs" class="text-gray-800 hover:text-gray-900">
+            Docs
+          </a>
+          <a href="/editor" class="text-gray-800 hover:text-gray-900">
+            Editor
+          </a>
+
+          <div class="bg-gray-200 flex gap-2 p-2 rounded">
+            <a href="/auth/sign-in" class="text-gray-800 hover:text-gray-900">
+              Login
+            </a>
+            <span class="pointer-none"> / </span>
+            <a href="/auth/sign-up" class="text-gray-800 hover:text-gray-900">
+              Register
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</adv-view>

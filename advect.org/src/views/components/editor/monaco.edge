@@ -1,0 +1,39 @@
+@assign(elId = `editor-${Math.random().toString(36).substring(7)}`)
+<div id="{{elId}}">
+    <style>
+        @scope {
+            :scope {
+                .wrapper{
+                    display:grid;
+                    grid-template-columns: 3fr 2fr;
+                }
+                .monaco {
+                    width: 100%;
+                    min-height: 500px;
+                    border: 1px solid #ccc;
+                }
+                .output{
+
+                }
+            }
+
+        }
+    </style>
+    {{--    --}}
+    <script type="module">
+        import * as monaco from 'https://cdn.jsdelivr.net/npm/monaco-editor@0.39.0/+esm';
+        setTimeout(() => {
+            monaco.editor.create(document.querySelector("#{{elId}} .monaco"),{
+                language: 'html',
+                theme:'vs-dark',
+                value: '{{{ value || `<adv-view></adv-view>`}}}'
+            })
+        }, 500);
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/vscode-codicons@0.0.17/dist/codicon.min.css" rel="stylesheet">
+    <div class="wrapper">
+        <div class="monaco"></div>
+        <div class="output"></div>
+    </div>
+
+</div>

@@ -1,0 +1,40 @@
+:root{
+  --nav-height: 60px;
+  --nav-border-bottom: linear-gradient(90deg, blue, gray, purple, yellow, green);
+  font-size: 16px;
+}
+
+
+.hero{
+    scroll-snap-align: start;
+    --grid-color: rgba(0, 0, 0, 0.1);
+    --grid-size: 20px;
+    background-attachment: fixed;
+    background-image: linear-gradient(
+        var(--grid-color) 0.1em,
+        transparent 0.1em
+      ),
+      linear-gradient(
+        90deg,
+        var(--grid-color) 0.1em,
+        transparent 0.1em
+      ),
+      linear-gradient(180deg, transparent, blue);
+    background-size: var(--grid-size) var(--grid-size),
+      var(--grid-size) var(--grid-size), cover;
+    background-repeat: repeat, repeat, no-repeat;
+    background-position: center, center center;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+}
+:root {
+  view-transition-name: root;
+}
+@view-transition {
+  navigation: auto;
+}
+
+
