@@ -3,7 +3,10 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/server.ts"
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "docker-build":"docker build --pull -t advect .",
+    "docker-run": "docker run -d -p 3000:3000 advect"
   },
   "dependencies": {
     "@directus/sdk": "^17.0.1",
