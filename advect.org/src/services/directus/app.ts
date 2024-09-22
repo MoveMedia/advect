@@ -1,18 +1,31 @@
-import { createDirectus, rest, registerUser,login, authentication, readItems, aggregate, readItem } from '@directus/sdk';
+import { createDirectus, rest, registerUser,login, authentication, readItems, aggregate, readItem, readSingleton } from '@directus/sdk';
 
 if (!process.env.DIRECTUS_URL) {
     throw new Error('DIRECTUS_URL is not defined');
 }
 const client = createDirectus<Schema>(process.env.DIRECTUS_URL).with(rest()).with(authentication())
 
-export interface Page {}
-export interface AdvectComponent{}
+export interface Globals {
+    site_name:string;
+    site_version:string;
+    site_tagline:string
+}
+export interface Page {
+    title:string;
+    description:string;
+    featured_image:string;
+    rich_content:string;
+    blocks: Record<string, any>
+}
+export interface AdvectComponent{
+    title:string;
+    description:string;
+    code?:string;
+    example?:string;
+    docs?:string;
+}
 export interface Schema {
-    SiteSettings:{
-        title:string
-        description:string
-        logo:string
-    }
+    Global:Globals
     Pages: Page[]
     AdvectComponents: AdvectComponent[]
 }
@@ -22,9 +35,17 @@ export const countItems = async (collection:string) => {
         aggregate: { count: '*' },
     }) ).then((res) => parseInt(res[0].count ?? '0'))
     .catch((e) => {
-        console.log(e)
-        return 0
+        console.log(`Directus Error: Collection ${collection}:`, e)
+        return -1
     });
+}
+
+export const getSingleton = async <T>(collection:string) =>{
+    return await client.request(readSingleton(collection as any,{
+        fields:["*"]
+    })).catch( e => {
+        return null;
+    }) 
 }
 
 export const queryItems = async <T>(

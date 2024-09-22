@@ -1,5 +1,5 @@
 import { Edge } from "edge.js";
-import Elysia, { Cookie, redirect, t } from "elysia";
+import Elysia, { Context, Cookie, redirect, t } from "elysia";
 import edge from "@/views/renderer";
 import { signIn, signUp } from "@/services/directus/app";
 import html from "@elysiajs/html";
@@ -9,8 +9,8 @@ export default new Elysia()
     return auth
     .use(html())
       .get("/", () => "Hi")
-      .get("/sign-up", async (ctx) => {
-        return await edge.render("pages/auth/sign-up", { ctx });
+      .get("/sign-up", async (ctx: Context & { edge: Edge}) => {
+        return await ctx.edge.render("pages/auth/sign-up", { ctx });
       })
       .post(
         "/sign-up",
@@ -69,9 +69,9 @@ export default new Elysia()
           }),
         }
       )
-      .get("/sign-in", async (ctx) => {
+      .get("/sign-in", async (ctx: Context & { edge: Edge}) => {
         ctx.set.headers["Content-Type"] = "text/html";
-        return await edge.render("pages/auth/sign-in", { ctx });
+        return await ctx.edge.render("pages/auth/sign-in", { ctx });
       })
       .post("/sign-in",async ({ body, query, cookie }) => {
         const returnUrl = query.return_url || "/";

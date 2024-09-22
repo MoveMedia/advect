@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
   @if ($slots.head_assets)
@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/dark.css" />
     <link rel="stylesheet" href="/assets/main.css" />
     
+    @each(meta in meta_fields)
+      <meta name="{{meta.name}}" content="{{meta.content}}">
+    @end
 
   <title>{{ title }}</title>
 </head>

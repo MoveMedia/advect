@@ -1,18 +1,78 @@
 <adv-view>
   <template>
     <script>
-      $self.render();
-      $self.shadowRoot.querySelectorAll('a').forEach((a) => {
-        if (window.location.pathname === a.getAttribute('href') 
-          || window.location.pathname.includes(a.getAttribute('href'))
-          && a.getAttribute('href') !== '/'
-        ) {
-          a.classList.add('text-red-600','font-bold');
+      function getScreenSize() {
+        return window.innerWidth > 1080 ? "desktop" : "mobile";
+      }
+      function toggleMobileNav(open) {
+        if (open) {
+
+
+        } else {
+          refs.mobile_diag.classList.add('contents');
+          refs.mobile_diag.hide()
         }
-      });
+      }
+
+      function toggleEditorNav(open) {
+        if (open) {
+          refs.editor_diag.show()
+        } else {
+          refs.editor_diag.hide()
+        }
+      }
+
+
+      $self.dataset.opened = false;
+      $self.data.screen = getScreenSize();
+
+      setTimeout(() => {
+        const newSize = getScreenSize();
+        if ($self.data.screen != newSize) {
+          $self.data.screen = newSize;
+        }
+      }, 1000);
+
+      const scope = {
+        getScreenSize,
+        toggleMobileNav,
+        toggleMobileNav
+      }
+
+      return scope;
+
     </script>
   </template>
   <style>
+    @scope {
+      :scope {
+        dialog {
+          &:not([open]) {
+            width: 0px;
+            & [ref="mobile_closer"] {
+              display:none;
+            }
+          }
+
+          &[open] {
+            left: 0;
+            position: absolute;
+            margin-inline: auto 0;
+            margin-block: 0;
+            top: 0;
+            height: 100dvh;
+            width: 300px;
+
+            & [ref="mobile_closer"] {
+              display: none;
+            }
+
+            &:not(.contents)>* {
+              display: flex !important;
+            }
+          }
+        }
+
         nav {
           max-height: var(--nav-height);
 
@@ -44,8 +104,20 @@
             }
           }
         }
+      }
+    }
   </style>
-  <nav class="bg-white shadow h-[var(--nav-height)] py-2">
+  <nav ref="nav" class="bg-white shadow h-[var(--nav-height)] py-2" onload="{
+        $self.shadowRoot.querySelectorAll('a').forEach((a) => {
+        if (window.location.pathname === a.getAttribute('href') 
+          || window.location.pathname.includes(a.getAttribute('href'))
+          && a.getAttribute('href') !== '/'
+        ) {
+          a.classList.add('text-red-600','font-bold');
+        }
+      });
+  
+  }">
     <div class="mx-auto max-w-screen-xl px-4">
       <div class="flex justify-between items-center">
         <div class="flex items-center">
@@ -53,29 +125,47 @@
             Advect
           </a>
         </div>
-
-        <div class="hidden lg:flex items-center space-x-4">
-          <a href="/" class="text-gray-800 hover:text-gray-900">
-            Home
-          </a>
-          <a href="/docs" class="text-gray-800 hover:text-gray-900">
-            Docs
-          </a>
-          <a href="/editor" class="text-gray-800 hover:text-gray-900">
-            Editor
-          </a>
-
-          <div class="bg-gray-200 flex gap-2 p-2 rounded">
-            <a href="/auth/sign-in" class="text-gray-800 hover:text-gray-900">
-              Login
+        <dialog ref="mobile_diag" class="contents">
+          <button ref="mobile_closer" class="lg:hidden" onclick="{
+            refs.mobile_diag.classList.add('contents');
+             refs.mobile_diag.hide()
+   }">
+            close
+          </button>
+          <div class="hidden flex-col lg:flex-row  lg:items-center space-x-4">
+            <a href="/" class="text-gray-800 hover:text-gray-900">
+              Home
             </a>
-            <span class="pointer-none"> / </span>
-            <a href="/auth/sign-up" class="text-gray-800 hover:text-gray-900">
-              Register
+            <a href="/docs" class="text-gray-800 hover:text-gray-900">
+              Docs
             </a>
+            <a ref="editor_btn" href="/editor" class="text-gray-800 hover:text-gray-900" onclick="{
+              event.preventDefault();
+          }">
+              Editor
+            </a>
+
+            <div class="bg-gray-200 flex gap-2 p-2 rounded">
+              <a href="/auth/sign-in" class="text-gray-800 hover:text-gray-900">
+                Login
+              </a>
+              <span class="pointer-none"> / </span>
+              <a href="/auth/sign-up" class="text-gray-800 hover:text-gray-900">
+                Register
+              </a>
+            </div>
           </div>
-        </div>
+        </dialog>
+        <button ref="mobile_toggle" class="lg:hidden" onclick="{
+                 refs.mobile_diag.classList.remove('contents');
+                  refs.mobile_diag.show()
+        }">
+          open
+        </button>
       </div>
     </div>
   </nav>
+  <dialog id="editor_diag">
+
+  </dialog>
 </adv-view>

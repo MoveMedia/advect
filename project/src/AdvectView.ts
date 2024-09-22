@@ -56,9 +56,7 @@ export class AdvectView extends AdvectBase {
       return { id: script.id, script: script.textContent as string };
     });
 
-        this.adv.plugins.view_rendered(this);
     this.generateScope().then(this.hookRefs).then( () => this.adv.plugins.view_rendered(this))
-
 
   }
   async renderTo(target: HTMLElement, data?: Record<string, any>) {
