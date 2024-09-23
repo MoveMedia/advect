@@ -7,7 +7,6 @@
       function toggleMobileNav(open) {
         if (open) {
 
-
         } else {
           refs.mobile_diag.classList.add('contents');
           refs.mobile_diag.hide()
@@ -30,6 +29,7 @@
         const newSize = getScreenSize();
         if ($self.data.screen != newSize) {
           $self.data.screen = newSize;
+          mobile_diag.close();
         }
       }, 1000);
 
@@ -47,8 +47,10 @@
     @scope {
       :scope {
         dialog {
+          transition:all 0.2s;
           &:not([open]) {
             width: 0px;
+            left:200px;
             & [ref="mobile_closer"] {
               display:none;
             }
@@ -125,7 +127,7 @@
             Advect
           </a>
         </div>
-        <dialog ref="mobile_diag" class="contents">
+        <div ref="mobile_diag" class="contents">
           <button ref="mobile_closer" class="lg:hidden" onclick="{
             refs.mobile_diag.classList.add('contents');
              refs.mobile_diag.hide()
@@ -155,7 +157,7 @@
               </a>
             </div>
           </div>
-        </dialog>
+        </div>
         <button ref="mobile_toggle" class="lg:hidden" onclick="{
                  refs.mobile_diag.classList.remove('contents');
                   refs.mobile_diag.show()

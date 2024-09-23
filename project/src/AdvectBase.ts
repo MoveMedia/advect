@@ -229,7 +229,7 @@ export default class AdvectBase extends HTMLElement {
               new AsyncFunction(
                 "$self",
                 "event",
-                "el",
+                "$this",
                 "refs",
                 "data",
                 "scope",
@@ -246,7 +246,7 @@ export default class AdvectBase extends HTMLElement {
               new AsyncFunction(
                 "$self",
                 "event",
-                "el",
+                "$this",
                 "refs",
                 "data",
                 "scope",
@@ -373,6 +373,22 @@ export default class AdvectBase extends HTMLElement {
       this.mergeStyles([css]);
     });
     this.adv.plugins.component_connected(this);
+
+  }
+
+  handleLoad(){
+    if (this.hasAttribute("onload")){
+      this.onload = (_event) => new AsyncFunction(
+        "$self",
+        "event",
+        "refs",
+        "data",
+        "scope",
+        this.getAttribute("onload")
+      )(this, _event, this.refs, this.data, this.scope);
+    
+    }
+      this.dispatchEvent( new Event("load", { bubbles: false, cancelable: false }) );
   }
 
   onMutate?: (mutation: MutationRecord) => void;

@@ -15,11 +15,6 @@ const app = new Elysia()
   .get("/assets/*", ({ set, error, params }) => {
     return Bun.file("./assets/" + params["*"]);
   })
-  .get("/.well-known/*", ({params}) => {
-    // for certing
-    return Bun.file("/usr/src/app/.well-known/" + params["*"]);
-  })
-
   .listen(process.env.PORT || 3000);
 
 console.log(

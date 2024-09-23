@@ -92,6 +92,7 @@ export class AdvectElement extends AdvectBase{
       if (this.onConnect) {
         this.onConnect();
       }
+      this.handleLoad()
       this.adv.plugins.component_connected(this);
 
     });

@@ -99,7 +99,7 @@
             type="text"
             name="title_input_{{=todo.id}}"
             value="{{=todo.title}}"
-            onchange="scope.updateTitle('{{=todo.id}}', el.value)"
+            onchange="scope.updateTitle('{{=todo.id}}', $this.value)"
           />
         </label>
 
@@ -109,14 +109,14 @@
             name="complete_{{=todo.id}}"
             type="checkbox"
             data-checked="{{=todo.complete}}"
-            onload="el.checked = el.dataset.checked === 'true'"
+            onload="$this.checked = $this.dataset.checked === 'true'"
             onchange="{
-              scope.updateComplete('{{=todo.id}}', el.checked);
+              scope.updateComplete('{{=todo.id}}', $this.checked);
             }"
           />
         </label>
         <button ref onclick="{
-              const wrapper = el.closest('[data-id]');
+              const wrapper = $this.closest('[data-id]');
               scope.removeTodo('{{=todo.id}}');
             }">
           X

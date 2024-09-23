@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc  && vite build",
+    "build-watch": "tsc  && vite build --watch",
     "preview": "vite preview",
     "publish-npm": "npm publish",
     "publish-jsr": "bunx jsr publish",
