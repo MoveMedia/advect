@@ -6,7 +6,6 @@ import Docs from "@/views/pages/docs";
 import Renderer from "@/views/renderer"
 
 
-
 const app = new Elysia()
   .use(Renderer)
   .use(Home)
