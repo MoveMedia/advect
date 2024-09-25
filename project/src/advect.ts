@@ -49,7 +49,10 @@ export default class Advect {
             };
           }
         })
-        .catch((e) => ({ error: e, text: null }));
+        .catch((e) => ({ error: e, text: null })).finally(() =>{
+      this.loaded.push(url);
+
+        });
       if (result?.error) {
         console.error(`Could not fetch template from ${url}`, result.error);
         return;
@@ -58,15 +61,17 @@ export default class Advect {
         console.warn(`Loaded ${url} but no template found`);
         return;
       }
-      this.loaded.push(url);
 
       const doc = parser.parseFromString(result?.text, "text/html");
      doc.querySelectorAll(
         `script[type='${settings.script_tag_type}']`
-      ).forEach((script) => {
+      ).forEach(async (script) => {
         const src = script.getAttribute("src");
-        if (src && !this.loaded.includes(src)) {
-
+        if (src && !this.loaded.find(l =>{ 
+            console.log(l, src)
+          return l.toLowerCase() == src.toLocaleLowerCase() || `/${l.toLocaleLowerCase()}` == src.toLocaleLowerCase() 
+        })) {
+          await this.load(src)
         }
       });
       [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
