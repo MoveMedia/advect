@@ -30,7 +30,6 @@ export class AdvectView extends AdvectBase {
 
   main_script?: string;
 
-  firstRender = true;
 
   constructor() {
     super();
@@ -78,22 +77,23 @@ export class AdvectView extends AdvectBase {
       this.getAttribute("render")?.valueOf() ?? settings.default_renderer;
     renderFunc = this.adv.plugins.getRenderer(renderer_name);
     // if new data is reactive pretty sure we dont want to just pass that to mustache
-    let ctx = {
-      ...(newData ?? {}),
-      ...this.dataset,
-    };
 
     if (!renderFunc) {
       console.error(`No renderer found for ${renderer_name}`);
       return `No renderer found for ${renderer_name}`;
     }
+    let ctx = {
+      ...(newData ?? {}),
+      ...this.dataset,
+      $self:this
+    };
 
     const desc: RenderDescriptor = {
       template: this.innerHTML,
       ctx,
       view: this,
     };
-    let rendered = renderFunc(desc);
+    const rendered = renderFunc(desc);
 
     if (markupOnly) {
       return rendered;

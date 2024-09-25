@@ -31,7 +31,6 @@ export default class Advect {
       accept: "text/html",
     }
   ) {
-    const url_queue = [url];
 
     if (this.loaded.includes(url)) {
       const index = this.loaded.indexOf(url);
@@ -39,12 +38,9 @@ export default class Advect {
         this.loaded.splice(index, 1);
       }
     }
-    while (url_queue.length > 0) {
-      const url = url_queue.pop() as string;
       const result = await fetch(url, { method, headers })
         .then(async (res) => {
           if (res.ok) {
-            this.loaded.push(url);
 
             return {
               text: await res.text(),
@@ -56,22 +52,21 @@ export default class Advect {
         .catch((e) => ({ error: e, text: null }));
       if (result?.error) {
         console.error(`Could not fetch template from ${url}`, result.error);
-        continue;
+        return;
       }
       if (!result?.text) {
         console.warn(`Loaded ${url} but no template found`);
-        continue;
+        return;
       }
+      this.loaded.push(url);
 
       const doc = parser.parseFromString(result?.text, "text/html");
-      const src_scripts = doc.querySelectorAll(
+     doc.querySelectorAll(
         `script[type='${settings.script_tag_type}']`
-      );
-      
-      src_scripts.forEach((script) => {
+      ).forEach((script) => {
         const src = script.getAttribute("src");
         if (src && !this.loaded.includes(src)) {
-          url_queue.push(src);
+
         }
       });
       [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
@@ -89,7 +84,6 @@ export default class Advect {
         //   console.log("Adding template", template.id);
         this.build(template);
       });
-    }
   }
   async build(_template: HTMLTemplateElement | string, register = true) {
     let template: HTMLTemplateElement | null = null;

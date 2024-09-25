@@ -91,7 +91,7 @@
     <button ref="cancel" onclick="refs.new_todo_diag.close()">Cancel</button>
   </dialog>
   <adv-view ref="todos_view">
-    <for data="it.todos" name="todo" index="todo_index">
+    <for data="todos" name="todo" index="todo_index">
       <div ref="todo_{{=todo.id}}" class="transition-[all 2s] relative">
         <label for="title_input_{{=todo.id}}">
           <input
@@ -123,10 +123,10 @@
         </button>
       </div>
     </for>
-    <if check="it.todos.length == 0 && it.initiated">
+    <if check="todos.length == 0 && initiated">
       <p>No todos</p>
       <else />
-      {{=it.todos.length}}
+      {{=todos.length}}
     </if>
   </adv-view>
 </template>

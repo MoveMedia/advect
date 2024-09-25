@@ -12,6 +12,11 @@ import eta from "./renderers/eta";
 import { Eta } from "eta";
 import md from "./renderers/md";
 
+const ETA = new Eta( {
+  tags: ["{{", "}}"],
+  useWith: true
+});
+
 
 // Render a template
 
@@ -50,9 +55,7 @@ const advectCorePlugin: AdvectPlugin = {
   },
   component_connected(el: AdvectBase) {
     if (el.nodeName === "ADV-VIEW") {
-      (el as AdvectView & {eta:Eta}).eta = new Eta( {
-        tags: [el.getAttribute("openTag") ?? "{{", el.getAttribute("closeTag") ?? "}}"],
-      });
+      (el as AdvectView & {eta:Eta}).eta = ETA
     }
     const sheet = cssomSheet({ target: el.$style });
     const { tw } = create({ sheet });
