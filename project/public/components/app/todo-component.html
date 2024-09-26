@@ -48,7 +48,7 @@
     // render all the views
 
     // we'll use the store state as the scope, but we can use anythign
-    const scope = getState();
+    let scope = getState();
     scope.init([
     { id: "1", title: "Todo 1", complete: true, tag: "fun" },
         { id: "2", title: "Todo 2", complete: false, tag: "work" },
@@ -92,36 +92,16 @@
   </dialog>
   <adv-view ref="todos_view">
     <for data="todos" name="todo" index="todo_index">
-      <div ref="todo_{{=todo.id}}" class="transition-[all 2s] relative">
-        <label for="title_input_{{=todo.id}}">
-          <input
-            ref="title_input_{{=todo.id}}"
-            type="text"
-            name="title_input_{{=todo.id}}"
-            value="{{=todo.title}}"
-            onchange="scope.updateTitle('{{=todo.id}}', $this.value)"
-          />
-        </label>
-
-        <label for="complete_{{=todo.id}}">
-          <input
-            ref="complete_{{=todo.id}}"
-            name="complete_{{=todo.id}}"
-            type="checkbox"
-            data-checked="{{=todo.complete}}"
-            onload="$this.checked = $this.dataset.checked === 'true'"
-            onchange="{
-              scope.updateComplete('{{=todo.id}}', $this.checked);
-            }"
-          />
-        </label>
-        <button ref onclick="{
-              const wrapper = $this.closest('[data-id]');
-              scope.removeTodo('{{=todo.id}}');
-            }">
-          X
-        </button>
-      </div>
+      <todo-item ref
+        todo-id="{{=todo.id}}" 
+        todo-title="{{=todo.title}}" 
+        todo-complete="{{=todo.complete}}"
+        onload="{
+          $this.onCompleteUpdate = scope.updateComplete
+          $this.onDelete = scope.removeTodo
+          $this.onTitleUpdate = scope.updateTitle
+        }"
+        />
     </for>
     <if check="todos.length == 0 && initiated">
       <p>No todos</p>
@@ -129,4 +109,44 @@
       {{=todos.length}}
     </if>
   </adv-view>
+</template>
+
+
+<template 
+  id="todo-item"
+  todo-id
+  todo-title 
+  todo-complete
+  adv>
+<script>
+  $self.onTitleUpdate = (title, id) =>{
+    
+  }
+  $self.onCompleteUpdate = (complete, id) =>{
+
+  }
+  $self.onDelete = (id) =>{
+
+  }
+
+</script>
+
+<div>
+    <label>
+      <input ref onload="{
+      $this.value = $self.attr['todo-title']
+      }" type="text" name="" id="">
+    </label>
+    <label>
+      <input
+      ref
+      onload="{
+        $this.checked = $self.attr['todo-complete'] == 'true'
+        }"
+      type="checkbox" name="complete" id="">
+    </label>
+    <button>
+      Delete
+    </button>
+</div>
 </template>

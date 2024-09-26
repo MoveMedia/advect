@@ -272,7 +272,7 @@ export default class AdvectBase extends HTMLElement {
    * and sets the parent of the view to this element
    */
   hookViews(): void {
-    this.shadowRoot?.querySelectorAll("adv-view").forEach((v) => {
+    this.shadowRoot?.querySelectorAll("adv-view,[inject]").forEach((v) => {
       const view = v as AdvectView;
       view?.mergeScope(this._scope);
       view?.mergeStyles(this.shadowRoot?.adoptedStyleSheets ?? []);
@@ -378,17 +378,16 @@ export default class AdvectBase extends HTMLElement {
 
   handleLoad(){
     if (this.hasAttribute("onload")){
-      this.onload = (_event) => new AsyncFunction(
+      let _onload = () => new AsyncFunction(
         "$self",
         "event",
         "refs",
         "data",
         "scope",
         this.getAttribute("onload")
-      )(this, _event, this.refs, this.data, this.scope);
-    
+      )(this, this.refs, this.data, this.scope);
+      _onload()
     }
-      this.dispatchEvent( new Event("load", { bubbles: false, cancelable: false }) );
   }
 
   onMutate?: (mutation: MutationRecord) => void;
