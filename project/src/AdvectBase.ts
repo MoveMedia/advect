@@ -178,6 +178,8 @@ export default class AdvectBase extends HTMLElement {
    * Sets up event listeners for refs (ie elements with ids)
    */
   hookRefs(): void {
+    const is_view = this.nodeName.toLocaleLowerCase() === 'adv-view';
+
     // light dom event handlers just 'this' element
     this.getAttributeNames()
       .filter((name) => name.startsWith("on"))
@@ -203,8 +205,16 @@ export default class AdvectBase extends HTMLElement {
 
     // refs
     this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
+      
+      const closest_view = ref.closest('adv-view')
+
+      if ((closest_view && closest_view != ref)){
+        console.log('skipping', ref, 'from base', this)
+        return;
+      }
       // @ts-ignore refs have a reference to this
-      this.adv.plugins.ref_found(ref);
+      this.adv.plugins.ref_found(ref, this);
+
       ref.addEventListener(AdvectMutationEvent.Type, (_event) => {
         this.mutate((_event as AdvectMutationEvent).detail);
       });

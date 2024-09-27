@@ -1,21 +1,20 @@
 <template id="todo-component" adv>
   <script>
-/**
- * A number, or a string containing a number.
- * @typedef {Record<string, HTMLElement>} Refs 
- */
+    /**
+     * A number, or a string containing a number.
+     * @typedef {Record<string, HTMLElement>} Refs
+     */
 
-
-    /** @type {Refs} */;
-    const { todos_view } = refs 
+    /** @type {Refs} */ const { todos_view } = refs;
     const { getState, setState, subscribe } = $self.createStore((set, get) => ({
       name: "Todo List",
       todos: [],
       initiated: false,
-      init:(data) => set({ todos: data, initiated: true }), 
+      init: (data) => set({ todos: data, initiated: true }),
       getTags: () => get().todos.map((todo) => todo.tag),
       addTodo: (todo) => set({ todos: [...get().todos, todo] }),
-      removeTodo: (id) => set({ todos: get().todos.filter((todo) => todo.id !== id) }),
+      removeTodo: (id) =>
+        set({ todos: get().todos.filter((todo) => todo.id !== id) }),
       updateTitle: (id, title) =>
         set({
           todos: get().todos.map((todo) =>
@@ -36,34 +35,37 @@
     }));
 
     let first_render = true;
-    subscribe((state, prevState) => {
-      //  changing complete
-      if (state.todos.length !== prevState.todos.length || first_render) {
-        $self.view_list.forEach((v) => v.render(state));
-        first_render = false;
+    subscribe(
+      (state, prevState) => {
+        //  changing complete
+        if (state.todos.length !== prevState.todos.length || first_render) {
+          $self.view_list.forEach((v) => v.render(state));
+          first_render = false;
+        }
+      },
+      {
+        fireImmediately: true,
       }
-    },{
-      fireImmediately: true
-    });
+    );
     // render all the views
 
     // we'll use the store state as the scope, but we can use anythign
     let scope = getState();
     scope.init([
-    { id: "1", title: "Todo 1", complete: true, tag: "fun" },
-        { id: "2", title: "Todo 2", complete: false, tag: "work" },
-        { id: "3", title: "Todo 3", complete: false, tag: "adulting" },
-        { id: "4", title: "Todo 4", complete: false, tag: "shopping" },
-        { id: "5", title: "Todo 5", complete: true, tag: "work" },
-        { id: "6", title: "Todo 6", complete: false, tag: "fun" },
-        { id: "7", title: "Todo 7", complete: true, tag: "adulting" },
-        { id: "8", title: "Todo 8", complete: false, tag: "work" },
-        { id: "9", title: "Todo 9", complete: false, tag: "fun" },
-        { id: "10", title: "Todo 10", complete: true, tag: "shopping" },
-        { id: "11", title: "Todo 11", complete: false, tag: "work" },
-        { id: "12", title: "Todo 12", complete: true, tag: "fun" },
-        { id: "13", title: "Todo 13", complete: false, tag: "adulting" },
-    ])
+      { id: "1", title: "Todo 1", complete: true, tag: "fun" },
+      { id: "2", title: "Todo 2", complete: false, tag: "work" },
+      { id: "3", title: "Todo 3", complete: false, tag: "adulting" },
+      { id: "4", title: "Todo 4", complete: false, tag: "shopping" },
+      { id: "5", title: "Todo 5", complete: true, tag: "work" },
+      { id: "6", title: "Todo 6", complete: false, tag: "fun" },
+      { id: "7", title: "Todo 7", complete: true, tag: "adulting" },
+      { id: "8", title: "Todo 8", complete: false, tag: "work" },
+      { id: "9", title: "Todo 9", complete: false, tag: "fun" },
+      { id: "10", title: "Todo 10", complete: true, tag: "shopping" },
+      { id: "11", title: "Todo 11", complete: false, tag: "work" },
+      { id: "12", title: "Todo 12", complete: true, tag: "fun" },
+      { id: "13", title: "Todo 13", complete: false, tag: "adulting" },
+    ]);
     return scope;
   </script>
   <h2>Todo List</h2>
@@ -92,16 +94,15 @@
   </dialog>
   <adv-view ref="todos_view">
     <for data="todos" name="todo" index="todo_index">
-      <todo-item ref
-        todo-id="{{=todo.id}}" 
-        todo-title="{{=todo.title}}" 
-        todo-complete="{{=todo.complete}}"
+      <todo-item
+        ref
         onload="{
-          $this.onCompleteUpdate = scope.updateComplete
-          $this.onDelete = scope.removeTodo
-          $this.onTitleUpdate = scope.updateTitle
+        
         }"
-        />
+        todo-id="{{=todo.id}}"
+        todo-title="{{=todo.title}}"
+        todo-complete="{{=todo.complete}}"
+      />
     </for>
     <if check="todos.length == 0 && initiated">
       <p>No todos</p>
@@ -111,42 +112,38 @@
   </adv-view>
 </template>
 
+<template id="todo-item" todo-id todo-title todo-complete adv>
+  <script>
+    $self.updateTitle = (title, id) => {};
+    $self.updateComplete = (complete, id) => {};
+    $self.removeTodo = (id) => {
+      console.log('removing ',id)
+    };
+  </script>
 
-<template 
-  id="todo-item"
-  todo-id
-  todo-title 
-  todo-complete
-  adv>
-<script>
-  $self.onTitleUpdate = (title, id) =>{
-    
-  }
-  $self.onCompleteUpdate = (complete, id) =>{
-
-  }
-  $self.onDelete = (id) =>{
-
-  }
-
-</script>
-
-<div>
+  <div>
     <label>
-      <input ref onload="{
-      $this.value = $self.attr['todo-title']
-      }" type="text" name="" id="">
+      <input
+        ref
+        id=""
+        name=""
+        type="text"
+        onload="{
+        $this.value = $self.attr['todo-title']
+      }"
+      />
     </label>
     <label>
       <input
-      ref
-      onload="{
-        $this.checked = $self.attr['todo-complete'] == 'true'
+        ref
+        id=""
+        type="checkbox"
+        name="complete"
+        onload="{
+          $this.checked = $self.attr['todo-complete'] == 'true'
         }"
-      type="checkbox" name="complete" id="">
+      />
     </label>
-    <button>
-      Delete
-    </button>
-</div>
+    <button ref onclick="$self.removeTodo($self.attr['todo-id'])">Delete</button>
+  </div>
 </template>

@@ -17,6 +17,7 @@ const ETA = new Eta( {
   useWith: true
 });
 
+$window.debug_refs = [];
 
 // Render a template
 
@@ -26,11 +27,10 @@ const advectCorePlugin: AdvectPlugin = {
   name: "advect.core",
   template_built(templateClass) {
     // add zustand store to the class`
+    // not available on adv-view
     templateClass.prototype.createStore = createStore;
     templateClass.prototype.useStore = useStore;
-
     templateClass.$Style = new CSSStyleSheet();
-
     return templateClass;
   },
   plugin_init() {
@@ -74,6 +74,11 @@ const advectCorePlugin: AdvectPlugin = {
       render,
     };
     el.extras.twind.render();
+  },
+  ref_found( ref, base ){
+    $window.debug_refs.push({
+        ref,base
+      })
   },
   component_mutated(el: AdvectBase, mutation: MutationRecord) {
     // @ts-ignore

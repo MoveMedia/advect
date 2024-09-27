@@ -48,7 +48,7 @@ export interface AdvectPlugin{
      * Called when a ref is hooked in the shadowDom
      * @param template 
      */
-    ref_found?(ref:HTMLElement): void;
+    ref_found?(ref:HTMLElement,base:AdvectBase): void;
 
 
     /**
@@ -170,9 +170,9 @@ export class PluginSystem implements AdvectPlugin{
     }
 
 
-    ref_found?(ref:HTMLElement){
+    ref_found?(ref:HTMLElement, base:AdvectBase){
         for (const plugin of this.unfoldPlugins()) {
-            if (plugin.ref_found) plugin.ref_found(ref);
+            if (plugin.ref_found) plugin.ref_found(ref,base);
         }
     };
 
