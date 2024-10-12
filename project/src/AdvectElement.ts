@@ -1,5 +1,6 @@
 import { $window } from "./utils";
 import AdvectBase from "./AdvectBase";
+import { AdvectConnectEvent } from "./events";
 
 /**
  * TODO weakrefs for refs
@@ -86,12 +87,11 @@ export class AdvectElement extends AdvectBase{
     if (!this.shadowRoot)  return;
     // @ts-ignore template defined in build
     this.shadowRoot.innerHTML = this.$template.innerHTML;
+    
     this.generateScope().then(() => {
       this.hookViews();
       this.hookRefs()
-      if (this.onConnect) {
-        this.onConnect();
-      }
+      this.dispatchEvent(new AdvectConnectEvent( this ))
       this.adv.plugins.component_connected(this);
 
     });

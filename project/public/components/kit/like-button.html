@@ -6,8 +6,11 @@
 
     buttons.forEach((button, index) => {
       button.onclick = () => {
-        buttons.forEach((b) => b.removeAttribute("selected"));
+        buttons.forEach((b,i) => {
+          b.removeAttribute("selected")
+      });
         button.setAttribute("selected", "");
+        b.style.zIndex = 100
       };
       button.style.setProperty("--delay", `${index * 0.125 + 0.05}s`);
       button.style.setProperty(
@@ -18,14 +21,12 @@
         "--y",
         `calc(${Math.sin((steps * index * Math.PI) / 180) * 50}px)`
       );
-      button.style.setProperty("--z", `calc(${1}px)`);
     });
     const scope = {
       selectReaction: function (reaction) {},
     };
   </script>
-  <div ref="container" class="container" onclick="{
-  }">
+  <div ref="container" class="container">
     <button class="reaction">😠</button>
     <button class="reaction">🤯</button>
     <button class="reaction">😉</button>
@@ -38,7 +39,7 @@
       :scope {
         cursor: pointer;
         position: relative;
-        display: block;
+        display: inline;
         width: 1em;
         height: 1em;
         margin-inline: 0.5em 0.75em;
@@ -52,9 +53,9 @@
           position: absolute;
           width: var(--bg-size);
           height: var(--bg-size);
-          transform: translate(calc(-50% + 0.65em), calc(-50% + 0.65em));
+          transform: translate(calc(-50% + 0.67em), calc(-50% + 0.67em));
           transform-style: preserve-3d;
-
+          aspect-ratio: 1 / 1;
           transform-origin: center;
           border-radius: 50%;
           background-color: var(--bg-color, #323232);
@@ -72,14 +73,16 @@
           position: absolute;
           transition: all 0.2s ease-in var(--delay);
         }
+        & .reaction[selected] {
+            z-index: 100;
+            transform: translate3d(0,0, 200px);
+
+          }
         &:hover {
           & .reaction:not([selected]) {
             transform: translate(var(--x), var(--y));
           }
 
-          & .reaction[selected] {
-            transform: translate(0, 0, 10px);
-          }
         }
       }
     }

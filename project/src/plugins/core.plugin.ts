@@ -7,14 +7,14 @@ import { $window } from "../utils";
 import { createStore } from "zustand/vanilla";
 import { useStore } from "zustand";
 import { setup, disconnect } from "twind/shim";
-import settings from "../settings";
+import config from "../config";
 import eta from "./renderers/eta";
 import { Eta } from "eta";
 import md from "./renderers/md";
 
-const ETA = new Eta( {
+const ETA = new Eta({
   tags: ["{{", "}}"],
-  useWith: true
+  useWith: true,
 });
 
 $window.debug_refs = [];
@@ -31,62 +31,83 @@ const advectCorePlugin: AdvectPlugin = {
     templateClass.prototype.createStore = createStore;
     templateClass.prototype.useStore = useStore;
     templateClass.$Style = new CSSStyleSheet();
+    // check if ""
     return templateClass;
   },
   plugin_init() {
-    AdvectView.$Style = new CSSStyleSheet();
-    if (settings.shim.useShim) {
+    // check if use shim
+    // check if the componet is no-tw, or style-target=
+    if (config.shim.useShim) {
       if ($window?.advect?.globals && !$window?.advect?.globals["twind"]) {
-        $window.advect.globals["twind"] = { setup, disconnect };
+        const styleSheet = new CSSStyleSheet();
+        AdvectView.$Style = styleSheet
+        const omSheet = cssomSheet({ target: styleSheet });
+        const twindInstance = create({ sheet: omSheet });
+        const shim =  { setup, disconnect }
+        document.adoptedStyleSheets.push(styleSheet)
+        $window.advect.globals["twind"] = {
+            styleSheet,
+            omSheet,
+            twindInstance,
+            shim
+        };
       }
       setup({
         // node element to shim/observe (default: document.documentElement)
         target:
-        settings?.shim?.selector && settings?.shim?.selector?.length > 0
-            ? (document.querySelector(settings.shim.selector) as HTMLElement)
+          config?.shim?.selector && config?.shim?.selector?.length > 0
+            ? (document.querySelector(config.shim.selector) as HTMLElement)
             : document.documentElement,
+
         // All other setup options are supported
       });
 
-      if (settings.shim.once) {
+      if (config.shim.once) {
         disconnect();
       }
+    }else{
+      AdvectView.$Style = new CSSStyleSheet();
     }
   },
   component_connected(el: AdvectBase) {
     if (el.nodeName === "ADV-VIEW") {
-      (el as AdvectView & {eta:Eta}).eta = ETA
+      (el as AdvectView & { eta: Eta }).eta = ETA;
     }
-    const sheet = cssomSheet({ target: el.$style });
-    const { tw } = create({ sheet });
+    if (el.matches('[]'))
+    el.mergeStyles([$window?.advect?.globals["twind"].styleSheet])
+    
+    //const sheet = cssomSheet({ target: el.$style });
+   // const { tw } = create({ sheet });
+    const tw = $window?.advect?.globals["twind"]?.twindInstance.tw
     const render = () => {
       tw(el.className);
-      el.shadowRoot?.querySelectorAll("[class]").forEach((_el) => {
+      el.shadowRoot?.querySelectorAll("[class]:not([no-tw])").forEach((_el) => {
         tw(_el.className);
       });
-      el.querySelectorAll("[class]").forEach((_el) => {
+      el.querySelectorAll("[class]:not([no-tw])").forEach((_el) => {
         tw(_el.className);
       });
     };
     el.extras.twind = {
-      sheet,
       tw,
       render,
     };
     el.extras.twind.render();
   },
-  ref_found( ref, base ){
+  ref_found(ref, base) {
     $window.debug_refs.push({
-        ref,base
-      })
+      ref,
+      base,
+    });
   },
   component_mutated(el: AdvectBase, mutation: MutationRecord) {
     // @ts-ignore
     if (mutation.attributeName === "class" && mutation.target === el) {
       el?.extras?.twind?.render();
     }
+    if (
     // @ts-ignore
-    if (mutation.target.matches &&
+      mutation.target.matches &&
       !(mutation.target as HTMLElement)?.matches("[no-tw]")
     ) {
       el?.extras?.twind?.render();
@@ -100,6 +121,5 @@ const advectCorePlugin: AdvectPlugin = {
     eta,
   },
 };
-
 
 export default advectCorePlugin;

@@ -1,4 +1,4 @@
-<adv-view>
+<adv-view >
   <template>
     <script>
       function getScreenSize() {
@@ -39,6 +39,7 @@
         toggleMobileNav
       }
 
+      $self.render();
       return scope;
 
     </script>
@@ -51,6 +52,7 @@
           &:not([open]) {
             width: 0px;
             left:200px;
+
             & [ref="mobile_closer"] {
               display:none;
             }
@@ -127,17 +129,11 @@
             Advect
           </a>
         </div>
-        <div ref="mobile_diag" class="contents">
-          <button ref="mobile_closer" class="lg:hidden" onclick="{
-            refs.mobile_diag.classList.add('contents');
-             refs.mobile_diag.hide()
-   }">
-            close
-          </button>
-          <div class="hidden flex-col lg:flex-row  lg:items-center space-x-4">
+          <div class="flex items-center space-x-4">
             <a href="/" class="text-gray-800 hover:text-gray-900">
               Home
             </a>
+
             <a href="/docs" class="text-gray-800 hover:text-gray-900">
               Docs
             </a>
@@ -157,13 +153,7 @@
               </a>
             </div>
           </div>
-        </div>
-        <button ref="mobile_toggle" class="lg:hidden" onclick="{
-                 refs.mobile_diag.classList.remove('contents');
-                  refs.mobile_diag.show()
-        }">
-          open
-        </button>
+
       </div>
     </div>
   </nav>

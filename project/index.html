@@ -4,14 +4,13 @@
     <meta charset="UTF-8" />
 
     <!-- <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script> -->
-    <script
-      src="https://unpkg.com/htmx.org@2.0.1/dist/htmx.js"
-      integrity="sha384-gpIh5aLQ0qmX8kZdyhsd6jA24uKLkqIr1WAGtantR4KsS97l/NRBvh8/8OYGThAf"
-      crossorigin="anonymous"
-    ></script>
+
     <!-- Include plugins after the script, -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="text/adv" src="components/app/todo-component.html"></script>
+    <script type="text/adv" src="components/app/hex-board.html"></script>
+    <script type="module" async src="/src/advect.ts"></script>
+
     <script type="text/adv" src="components/basic/tw-button.html"></script>
     <script type="text/adv" src="components/basic/pw-checker.html"></script>
     <script type="text/adv" src="components/basic/simple-counter.html"></script>
@@ -146,7 +145,7 @@
       <section class="container">
         <h2>This should be md</h2>
         <adv-view id="view_1" data-name="john" render="md" onload="$self.render()">
-          # hello {{= name}} 
+          # hello {{=name}} 
           - a list 
           - of items
         </adv-view>
@@ -155,16 +154,27 @@
         <eta-test> </eta-test>
       </section>
       <section class="container flex justify-center py-[100px]">
+        <span></span>
         this is some text before
         <like-button> </like-button>
         this is some text after
       </section>
- 
+      <section>
+        <h2>hex-board</h2>
+        <div class="flex justify-center">
+          <hex-board id="thing" rowCount="5" colCount="10" gap="0" hexSize="40"></hex-board>
+          <script>
+            window.thing.addEventListener('adv:connect',() =>{
+
+            })
+      
+          </script>
+        </div>
+      </section>
     </main>
     <footer class="container">
       <p class="text-center">Made with ❤️</p>
     </footer>
 
-    <script type="module" src="/src/advect.ts"></script>
   </body>
 </html>

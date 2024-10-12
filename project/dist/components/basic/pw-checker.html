@@ -67,7 +67,7 @@
         />
         <div ref="ratings" 
             class="flex gap-2 h-2 bg-gray-200 my-2"
-            onload="([...el.children]).forEach((child, index) => {
+            onload="([...$this.children]).forEach((child, index) => {
                 child.style.setProperty('--opacity', 0);
             })"
         >

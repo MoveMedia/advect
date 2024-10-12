@@ -1,28 +1,24 @@
 <template id="todo-component" adv>
   <script>
-/**
- * A number, or a string containing a number.
- * @typedef {Record<string, HTMLElement>} Refs 
- */
+    const channel_id = `todo-component-${Math.random() * 20000}`;
+    const channel = new BroadcastChannel(channel_id);
 
-
-    /** @type {Refs} */;
-    const { todos_view } = refs 
-    const { getState, setState, subscribe } = $self.createStore((set, get) => ({
+    const { todos_view } = refs;
+    const { getState, subscribe } = $self.createStore((set, get) => ({
+      channel_id,
       name: "Todo List",
       todos: [],
-      initiated: false,
-      init:(data) => set({ todos: data, initiated: true }), 
+      init: (data) => set({ todos: data, initiated: true }),
       getTags: () => get().todos.map((todo) => todo.tag),
       addTodo: (todo) => set({ todos: [...get().todos, todo] }),
-      removeTodo: (id) => set({ todos: get().todos.filter((todo) => todo.id !== id) }),
-      updateTitle: (id, title) =>
+      removeTodo: ({ id }) => set({ todos: get().todos.filter((todo) => todo.id !== id) }),
+      updateTitle: ({ id, title }) =>
         set({
           todos: get().todos.map((todo) =>
             todo.id === id ? { ...todo, title } : todo
           ),
         }),
-      updateComplete: (id, complete) =>
+      updateComplete: ({ id, complete }) =>
         set({
           todos: get().todos.map((todo) =>
             todo.id === id
@@ -36,45 +32,54 @@
     }));
 
     let first_render = true;
-    subscribe((state, prevState) => {
-      //  changing complete
-      if (state.todos.length !== prevState.todos.length || first_render) {
-        $self.view_list.forEach((v) => v.render(state));
-        first_render = false;
+    subscribe(
+      (state, prevState) => {
+        //  changing complete
+        if (state.todos.length !== prevState.todos.length || first_render) {
+          $self.view_list.forEach((v) => v.render(state));
+          first_render = false;
+        }
+      },
+      {
+        fireImmediately: true,
       }
-    },{
-      fireImmediately: true
-    });
+    );
     // render all the views
 
     // we'll use the store state as the scope, but we can use anythign
-    const scope = getState();
+    let scope = getState();
     scope.init([
-    { id: "1", title: "Todo 1", complete: true, tag: "fun" },
-        { id: "2", title: "Todo 2", complete: false, tag: "work" },
-        { id: "3", title: "Todo 3", complete: false, tag: "adulting" },
-        { id: "4", title: "Todo 4", complete: false, tag: "shopping" },
-        { id: "5", title: "Todo 5", complete: true, tag: "work" },
-        { id: "6", title: "Todo 6", complete: false, tag: "fun" },
-        { id: "7", title: "Todo 7", complete: true, tag: "adulting" },
-        { id: "8", title: "Todo 8", complete: false, tag: "work" },
-        { id: "9", title: "Todo 9", complete: false, tag: "fun" },
-        { id: "10", title: "Todo 10", complete: true, tag: "shopping" },
-        { id: "11", title: "Todo 11", complete: false, tag: "work" },
-        { id: "12", title: "Todo 12", complete: true, tag: "fun" },
-        { id: "13", title: "Todo 13", complete: false, tag: "adulting" },
-    ])
+      { id: "1", title: "Todo 1", complete: true, tag: "fun" },
+      { id: "2", title: "Todo 2", complete: false, tag: "work" },
+      { id: "3", title: "Todo 3", complete: false, tag: "adulting" },
+    ]);
+
+    channel.onmessage = function (ev) {
+      new Promise(() => scope[ev.data?.action](ev.data?.payload))
+        .catch((error) => {
+          console.warn(error);
+        })
+        .then((data) => {
+          //console.log( data )
+        });
+    };
+
     return scope;
   </script>
   <h2>Todo List</h2>
-  <button on ref="add_todo_button" onclick="refs.new_todo_diag.showModal()">
+  <button ref="add_todo_button" onclick="refs.new_todo_diag.showModal()">
     Add Todo
   </button>
-  <dialog ref="new_todo_diag">
-    <label for="new_todo_title">Title</label>
-    <input ref="new_todo_title" type="text" name="new_todo_title" />
-    <label for="new_todo_complete">Complete</label>
-    <input ref="new_todo_complete" type="checkbox" name="new_todo_complete" />
+  <dialog ref="new_todo_diag" class="max-w-[300px]">
+    <h2 class="text-lg">Add Todo</h2>
+    <label for="new_todo_title">
+      Todo Title
+      <input ref="new_todo_title" type="text" name="new_todo_title" />
+    </label>
+    <label for="new_todo_complete">
+      Complete
+      <input ref="new_todo_complete" type="checkbox" name="new_todo_complete" />
+    </label>
     <button
       ref="add_todo"
       onclick="
@@ -91,42 +96,92 @@
     <button ref="cancel" onclick="refs.new_todo_diag.close()">Cancel</button>
   </dialog>
   <adv-view ref="todos_view">
-    <for data="it.todos" name="todo" index="todo_index">
-      <div ref="todo_{{=todo.id}}" class="transition-[all 2s] relative">
-        <label for="title_input_{{=todo.id}}">
-          <input
-            ref="title_input_{{=todo.id}}"
-            type="text"
-            name="title_input_{{=todo.id}}"
-            value="{{=todo.title}}"
-            onchange="scope.updateTitle('{{=todo.id}}', el.value)"
-          />
-        </label>
-
-        <label for="complete_{{=todo.id}}">
-          <input
-            ref="complete_{{=todo.id}}"
-            name="complete_{{=todo.id}}"
-            type="checkbox"
-            data-checked="{{=todo.complete}}"
-            onload="el.checked = el.dataset.checked === 'true'"
-            onchange="{
-              scope.updateComplete('{{=todo.id}}', el.checked);
-            }"
-          />
-        </label>
-        <button ref onclick="{
-              const wrapper = el.closest('[data-id]');
-              scope.removeTodo('{{=todo.id}}');
-            }">
-          X
-        </button>
-      </div>
+    <for data="todos" name="todo" index="todo_index">
+      <todo-item
+        ref
+        data-channel="{{=channel_id}}"
+        todo-id="{{=todo.id}}"
+        todo-title="{{=todo.title}}"
+        todo-complete="{{=todo.complete}}"
+      />
     </for>
-    <if check="it.todos.length == 0 && it.initiated">
+    <if check="todos.length == 0 && initiated">
       <p>No todos</p>
       <else />
-      {{=it.todos.length}}
+      {{=todos.length}}
     </if>
   </adv-view>
+</template>
+
+<template id="todo-item" todo-id todo-title todo-complete adv>
+  <script>
+    $self.style.transition = "opacity 0.2s";
+    const channel = new BroadcastChannel(data.channel);
+    $self.onDisconnect = () => {
+      channel.close();
+    };
+    return {
+      updateTitle: ({ title, id }) => {
+        channel.postMessage({
+          action: "updateTitle",
+          payload: { title, id },
+        });
+      },
+      updateComplete: ({ complete, id }) => {
+        channel.postMessage({
+          action: "updateComplete",
+          payload: { complete, id },
+        });
+      },
+      removeTodo: ({ id }) => {
+        $self.classList.add("opacity-0");
+        $self.ontransitionend = () => {
+          channel.postMessage({
+            action: "removeTodo",
+            payload: { id },
+          });
+        };
+      },
+    };
+  </script>
+
+  <div>
+    <label>
+      <input
+        ref
+        id=""
+        name=""
+        type="text"
+        onload="{
+          $this.value = $self.attr['todo-title']
+        }"
+        oninput="{
+          scope.updateTitle({
+            id: $self.attr['todo-id'],
+            title: $this.value
+        });
+        }"
+      />
+    </label>
+    <label>
+      <input
+        ref
+        id=""
+        type="checkbox"
+        name="complete"
+        onload="{
+          $this.checked = $self.attr['todo-complete'] == 'true'
+        }"
+        oninput="{
+        scope.updateComplete({
+          id: $self.attr['todo-id'],
+          complete: $this.checked
+      });
+      }"
+      />
+    </label>
+    <button ref onclick="scope.removeTodo({id:$self.attr['todo-id']})">
+      Delete
+    </button>
+  </div>
 </template>

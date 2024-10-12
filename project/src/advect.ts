@@ -1,12 +1,12 @@
 import "./style.css";
-import { $window, toModule } from "./utils";
-import settings from "./settings";
+import { $window, toModule, Yield } from "./utils";
+import config from "./config";
 import { PluginSystem } from "./plugins";
 import advectCorePlugin from "./plugins/core.plugin";
 import { AdvectElement } from "./AdvectElement";
-import { AdvectView } from "./AdvectView";
 import AdvectDebug from "./debug";
-import { AdvectDisconnectEvent, AdvectMutationEvent } from "./events";
+import "./events";
+import { AdvectView } from "./AdvectView";
 
 /**
  * Single dom parser not sure if this is more efficient
@@ -51,6 +51,7 @@ export default class Advect {
         })
         .catch((e) => ({ error: e, text: null })).finally(() =>{
       this.loaded.push(url);
+      Yield()
 
         });
       if (result?.error) {
@@ -63,8 +64,10 @@ export default class Advect {
       }
 
       const doc = parser.parseFromString(result?.text, "text/html");
+      Yield()
+
      doc.querySelectorAll(
-        `script[type='${settings.script_tag_type}']`
+        `script[type='${config.script_tag_type}']`
       ).forEach(async (script) => {
         const src = script.getAttribute("src");
         if (src && !this.loaded.find(l =>{ 
@@ -72,6 +75,8 @@ export default class Advect {
           return l.toLowerCase() == src.toLocaleLowerCase() || `/${l.toLocaleLowerCase()}` == src.toLocaleLowerCase() 
         })) {
           await this.load(src)
+            Yield()
+
         }
       });
       [...doc.querySelectorAll("template[id]")].forEach((_template: Node) => {
@@ -88,8 +93,16 @@ export default class Advect {
         }
         //   console.log("Adding template", template.id);
         this.build(template);
+    Yield()
+
       });
   }
+  /**
+   * 
+   * @param _template 
+   * @param register 
+   * @returns 
+   */
   async build(_template: HTMLTemplateElement | string, register = true) {
     let template: HTMLTemplateElement | null = null;
     let doc: Document;
@@ -105,9 +118,9 @@ export default class Advect {
 
     // shadow mode can be open or closed we prefer open
     const shadow_mode =
-      template.getAttribute("shadow-mode") ?? settings.default_shadow_mode;
+      template.getAttribute("shadow-mode") ?? config.default_shadow_mode;
     // use internals can be true or log
-    //const use_internals = template.getAttribute('use-internals') == "true" || settings.default_use_internals;
+    //const use_internals = template.getAttribute('use-internals') == "true" || config.default_use_internals;
     // get all the attributes except core to add to observedAttributes
     const attrs = [...template.attributes].filter(
       (attr) =>
@@ -157,34 +170,37 @@ export default class Advect {
       // @ts-ignore valid custom element name
       customElements.define(template.id, PostPlugin);
     }
-    return TemplateClass;
+    return PostPlugin;
   }
-
-  start() {
+  /**
+   * 
+   */
+  async start() {
     adv.plugins.addPlugin(advectCorePlugin);
-    settings.plugins.forEach((plugin) => adv.plugins.addPlugin(plugin));
+    config.plugins.forEach((plugin) => adv.plugins.addPlugin(plugin));
+    Yield()
     // register all templates with adv attribute
     document
-      .querySelectorAll(`template[id][${settings.load_tag_type}]`)
+      .querySelectorAll(`template[id][${config.load_tag_type}]`)
       .forEach((template) => {
         this.build(template as HTMLTemplateElement);
+        Yield()
       });
+ 
     document
-      .querySelectorAll(`script[type="${settings.script_tag_type}"][src]`)
+      .querySelectorAll(`script[type="${config.script_tag_type}"][src]`)
       .forEach((script) => {
         const src = script.getAttribute("src");
         if (src) {
           this.load(src);
+          Yield()
         }
       });
   }
 }
 
 const adv = ($window.advect = new Advect());
-$window.AdvectElement = AdvectElement;
-$window.AdvectView = AdvectView;
-$window.AdvectMutationEvent = AdvectMutationEvent;
-$window.AdvectDisconnectEvent = AdvectDisconnectEvent;
 adv.start();
-
 customElements.define("adv-view", AdvectView);
+
+

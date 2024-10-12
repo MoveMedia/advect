@@ -7,7 +7,7 @@ import { AdvectView } from "./AdvectView";
  * Reference to the window object without type checking
  */
 export const $window = (window as (Record<string, any> & Window & {
-    adv_settings?: Record<string, any>;
+    adv_config?: Record<string, any>;
     advect?: Advect
 }));
 
@@ -71,3 +71,11 @@ export type RenderDescriptor = {
     options?: Record<string, any>;
 }
 export type AdvectRenderFunction = (desc:RenderDescriptor) => string;
+
+
+export async function Yield(){
+    if ("scheduler" in globalThis) {
+        // @ts-ignore
+        await scheduler.yield();
+      }
+}

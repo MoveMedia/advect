@@ -10,7 +10,22 @@ export class AdvectMutationEvent extends CustomEvent<MutationRecord>{
         detail: mutation
       });
     }
+    
   }
+
+  export class AdvectConnectEvent extends CustomEvent<HTMLElement>{
+    static Type = "adv:connect";
+    get type(){ return AdvectDisconnectEvent.Type; }
+    constructor(el: HTMLElement){
+      super("adv:connect", {
+        bubbles: false,
+        composed: false,
+        cancelable: false,
+        detail: el
+      });
+    }
+  }
+
   export class AdvectDisconnectEvent extends CustomEvent<HTMLElement>{
     static Type = "adv:disconnect";
     get type(){ return AdvectDisconnectEvent.Type; }
@@ -24,7 +39,7 @@ export class AdvectMutationEvent extends CustomEvent<MutationRecord>{
     }
   }
 
-  export class AdvectRenderEvent extends CustomEvent<HTMLElement>{
+  export class AdvectRenderEvent extends CustomEvent<HTMLElement> {
     static Type = "adv:render";
     get type(){ return AdvectRenderEvent.Type; }
     constructor(el: HTMLElement){

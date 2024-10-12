@@ -1,6 +1,6 @@
-import { AdvectDisconnectEvent, AdvectMutationEvent } from "./events";
+import { AdvectConnectEvent, AdvectDisconnectEvent, AdvectMutationEvent } from "./events";
 import { AdvectView } from "./AdvectView";
-import settings from "./settings";
+import config from "./config";
 import { $window, AsyncFunction } from "./utils";
 import Advect from "./advect";
 
@@ -10,7 +10,7 @@ import Advect from "./advect";
  */
 export default class AdvectBase extends HTMLElement {
   extras: Record<string, any> = {};
-
+  
   loaded = false;
   /**
    *  Lib
@@ -74,7 +74,7 @@ export default class AdvectBase extends HTMLElement {
   get allRefs() {
     return [
       ...(this.shadowRoot?.querySelectorAll(`[ref]`) ?? []),
-    ] as HTMLElement[];
+    ];
   }
 
   /**
@@ -178,7 +178,7 @@ export default class AdvectBase extends HTMLElement {
    * Sets up event listeners for refs (ie elements with ids)
    */
   hookRefs(): void {
-    const is_view = this.nodeName.toLocaleLowerCase() === 'adv-view';
+    //const is_view = this.nodeName.toLocaleLowerCase() === 'adv-view';
 
     // light dom event handlers just 'this' element
     this.getAttributeNames()
@@ -205,11 +205,8 @@ export default class AdvectBase extends HTMLElement {
 
     // refs
     this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
-      
       const closest_view = ref.closest('adv-view')
-
       if ((closest_view && closest_view != ref)){
-        console.log('skipping', ref, 'from base', this)
         return;
       }
       // @ts-ignore refs have a reference to this
@@ -269,7 +266,7 @@ export default class AdvectBase extends HTMLElement {
         }
       });
 
-      if (!ref.matches(settings.refs_no_inital_load.join(","))) {
+      if (!ref.matches(config.refs_no_inital_load.join(","))) {
         ref.dispatchEvent(
           new Event("load", { bubbles: false, cancelable: false })
         );
@@ -350,21 +347,26 @@ export default class AdvectBase extends HTMLElement {
     // @ts-ignore
     this.#internals = this.attachInternals();
     this.generateScope = this.generateScope.bind(this);
-    this.addEventListener("adv:mutation", (event) => {
+    this.addEventListener(AdvectMutationEvent.Type, (event) => {
       const mutation = (event as AdvectMutationEvent).detail;
       this.mutate(mutation);
     });
-    this.style.display = "block";
+    this.addEventListener(AdvectConnectEvent.Type, () => {
+        if (this.onConnect) this.onConnect();
+    });
+
+    this.addEventListener(AdvectDisconnectEvent.Type, () => {
+      if (this.onDisconnect) this.onDisconnect();
+  });
+
   }
 
   onConnect?: () => void;
   connectedCallback() {
     //@ts-ignore
-    this.constructor.ic++;
-
+    this.constructor.ic++
     this.initalContent = this.cloneNode(true);
     this.attachShadow({ mode: "open" });
-    this.mergeStyles([this.$style]);
 
     // observe all changes on the light dom
     this.observer?.observe(this, {
@@ -383,7 +385,7 @@ export default class AdvectBase extends HTMLElement {
       this.mergeStyles([css]);
     });
     this.adv.plugins.component_connected(this);
-
+    this.dispatchEvent(new AdvectConnectEvent(this));
   }
 
   handleLoad(){
@@ -410,31 +412,9 @@ export default class AdvectBase extends HTMLElement {
   onDisconnect?: () => void;
   disconnectdCallback() {
     this.dispatchEvent(new AdvectDisconnectEvent(this));
-    if (this.onDisconnect) {
-      this.onDisconnect();
-    }
-  }
-  /**
-   *
-   * @param selector
-   * @param base
-   * @param __Closest
-   * @returns
-   */
-  closestElement(
-    selector: string, // selector like in .closest()
-    base = this, // extra functionality to skip a parent
-    // @ts-ignore
-    __Closest = (el, found = el && el.closest(selector)) =>
-      !el || el === document || el === window
-        ? null // standard .closest() returns null for non-found selectors also
-        : found
-        ? found // found a selector INside this element
-        : __Closest(el.getRootNode().host) // recursion!! break out to parent DOM
-  ) {
-    return __Closest(base);
   }
 
+  
   onPluginDiscovered() {
     // TODO onPluginDiscovered
   }

@@ -1,7 +1,7 @@
 import { AdvectPlugin } from "./plugins";
 import { $window } from "./utils";
 
-export type AdvectSettings = typeof defaultSettings;
+export type AdvectConfig = typeof defaultSettings;
 const defaultSettings = {
     default_shadow_mode: "open" as const,
     // this tag is used to load additional scripts
@@ -30,11 +30,11 @@ const defaultSettings = {
 } as const;
 
 const settings = new Proxy(defaultSettings, {
-    get: (target:AdvectSettings & Record<string, any>, prop:string) => {
-        if (!$window.adv_settings){
+    get: (target:AdvectConfig & Record<string, any>, prop:string) => {
+        if (!$window.adv_config){
             return target[prop];
         }
-        return $window.adv_settings?.[prop] ?? target[prop];
+        return $window.adv_config?.[prop] ?? target[prop];
     }
 });
 

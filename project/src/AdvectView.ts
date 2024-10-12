@@ -1,6 +1,6 @@
 import { $window, AdvectRenderFunction, RenderDescriptor } from "./utils";
 import AdvectBase from "./AdvectBase";
-import settings from "./settings";
+import config from "./config";
 import { AdvectRenderEvent } from "./events";
 /**
  * A Utility element for rendering  templates
@@ -67,14 +67,18 @@ export class AdvectView extends AdvectBase {
         this.adv.plugins.view_rendered(this);
       });
   }
-  async renderTo(target: HTMLElement, data?: Record<string, any>) {
+  async renderTo(target: HTMLElement, data?: Record<string, any>, inner = true) {
     const markup = await this.render(data, true);
-    target.innerHTML = markup;
+    if (inner){
+      target.innerHTML = markup;
+    }else{
+      target.outerHTML = markup
+    }
   }
   async render(newData?: Record<string, any>, markupOnly = false) {
     let renderFunc: AdvectRenderFunction | undefined;
     const renderer_name =
-      this.getAttribute("render")?.valueOf() ?? settings.default_renderer;
+      this.getAttribute("render")?.valueOf() ?? config.default_renderer;
     renderFunc = this.adv.plugins.getRenderer(renderer_name);
     // if new data is reactive pretty sure we dont want to just pass that to mustache
 
