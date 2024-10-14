@@ -6,14 +6,7 @@ import Docs from "@/views/pages/docs";
 import Renderer from "@/views/renderer"
 
 
-const app = new Elysia({
-	serve: {
-		tls: {
-			cert: Bun.file(process.env.CERT_LOCATION || 'cert.crt'),
-			key: Bun.file(process.env.CERT_KEY_LOCATION || 'key.key'),
-		}
-	}
-})
+const app = new Elysia()
   .use(Renderer)
   .use(Home)
   .use(Auth)
