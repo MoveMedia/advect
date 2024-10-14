@@ -39,9 +39,12 @@ export class AdvectView extends AdvectBase {
    * must call super.connectedCallback() if overriden
    */
   connectedCallback() {
-    super.connectedCallback();
     // @ts-ignore instance counter
     this.constructor.ic++;
+    // Attach shadow before super plox
+    this.attachShadow({ mode:'open' });
+    super.connectedCallback();
+
     this.render = this.render.bind(this);
     this.hookRefs = this.hookRefs.bind(this);
     this.hookRefs();

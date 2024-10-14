@@ -21,7 +21,7 @@ export default class AdvectBase extends HTMLElement {
   }
 
   static $shadow_mode: "open" | "close";
-
+  
   /**
    *
    */
@@ -374,8 +374,8 @@ export default class AdvectBase extends HTMLElement {
     //@ts-ignore
     this.constructor.ic++
     this.initalContent = this.cloneNode(true);
-    // @ts-ignore
-    this.attachShadow({ mode: this.constructor.$shadow_mode ?? 'open' });
+
+  
 
     // observe all changes on the light dom
     this.observer?.observe(this, {
@@ -384,10 +384,13 @@ export default class AdvectBase extends HTMLElement {
       childList: true,
       subtree: true,
     });
-    this.observer?.observe(this.shadowRoot, {
-      childList: true,
-      subtree: true,
-    });
+    if ( this.shadowRoot ){
+
+      this.observer?.observe(this.shadowRoot, {
+        childList: true,
+        subtree: true,
+      });
+    }
     this.shadowRoot?.querySelectorAll("style").forEach((style) => {
       const css = new CSSStyleSheet();
       css.replaceSync(style.textContent ?? "");

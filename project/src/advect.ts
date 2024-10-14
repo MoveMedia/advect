@@ -116,6 +116,9 @@ export default class Advect {
 
     doc = this.plugins.template_loaded(doc);
 
+    const dom_mode = template.hasAttribute('dom-mode')
+      ? template.getAttribute('dom-mode')
+      : config.default_dom_mode;
     // shadow mode can be open or closed we prefer open
     const shadow_mode =
       template.getAttribute("shadow-mode") ?? config.default_shadow_mode;
@@ -160,6 +163,7 @@ export default class Advect {
       $slots_names: string[] = slots_names;
       $template: HTMLTemplateElement = template as HTMLTemplateElement;
       static $shadow_mode = shadow_mode;
+      static $dom_mode = dom_mode;
       $scopes_scripts = $scope_scripts;
       $Style = new CSSStyleSheet();
       static observedAttributes = attrs.map((attr) =>

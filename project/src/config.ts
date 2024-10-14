@@ -4,6 +4,8 @@ import { $window } from "./utils";
 export type AdvectConfig = typeof defaultSettings;
 const defaultSettings = {
     default_shadow_mode: "open" as const,
+    default_dom_mode: 'shadow' as const,
+
     // this tag is used to load additional scripts
     script_tag_type: "text/adv" as const,
     // this tag needs to be added to individual template elements to be compiled, not reqired for templates loaded with script_tag_type

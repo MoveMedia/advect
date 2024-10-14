@@ -24,11 +24,18 @@ export class AdvectElement extends AdvectBase{
    */
   // @ts-ignore shadow mode
   static $shadow_mode: "open" | "close";
+  // @ts-ignore shadow mode
+  get shadow_mode() { return this.constructor.$shadow_mode }
+
+  static $dom_mode:boolean;
+
+    // @ts-ignore shadow mode
+  get dom_mode() { return this.constructor.$dom_mode}
   /**
    * getter for *.constructor.shadow_mode
    */
-  // @ts-ignore shadow mode
-  get shadow_mode() { return this.constructor.$shadow_mode }
+
+
   /**
    * instance counter
    */
@@ -84,9 +91,23 @@ export class AdvectElement extends AdvectBase{
     super.connectedCallback();
     // @ts-ignore instance counter
     /// TODO validate use shadow at somepoint
-    if (!this.shadowRoot)  return;
-    // @ts-ignore template defined in build
-    this.shadowRoot.innerHTML = this.$template.innerHTML;
+
+    switch (this.dom_mode){
+      case 'none':
+        break;
+      case 'light':
+        // @ts-ignore template defined in build
+        this.innerHTML = this.$template.innerHTML;
+        break;
+      default:
+      case 'shadow':
+   // @ts-ignore
+        this.attachShadow({ mode: this.constructor.$shadow_mode ?? 'open' });
+        // @ts-ignore template defined in build
+        this.shadowRoot.innerHTML = this.$template.innerHTML;
+        break;
+ 
+    }
     
     this.generateScope().then(() => {
       this.hookViews();
