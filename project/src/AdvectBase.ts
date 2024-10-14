@@ -75,6 +75,7 @@ export default class AdvectBase extends HTMLElement {
   get allRefs() {
     return [
       ...(this.shadowRoot?.querySelectorAll(`[ref]`) ?? []),
+      ...this.querySelectorAll(`[ref]`) 
     ];
   }
 
@@ -205,7 +206,76 @@ export default class AdvectBase extends HTMLElement {
       });
 
     // refs
-    this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
+    this?.querySelectorAll("[ref]").forEach((ref) => {
+      const closest_view = ref.closest('adv-view')
+      if ((closest_view && closest_view != ref)){
+        return;
+      }
+      // @ts-ignore refs have a reference to this
+      this.adv.plugins.ref_found(ref, this);
+
+      ref.addEventListener(AdvectMutationEvent.Type, (_event) => {
+        this.mutate((_event as AdvectMutationEvent).detail);
+      });
+
+      this.observer.observe(ref, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+
+      const event_attrs = ref
+        .getAttributeNames()
+        .filter((name) => name.startsWith("on"));
+      // todo maybe make this a setting, I could see this causing unnecessary rendering
+
+      event_attrs.forEach((name) => {
+        const attr_val = ref.getAttribute(name) ?? "";
+
+        if (name.toLowerCase() === "onmutate") {
+          ref.addEventListener("adv:mutation", (_event) => {
+            try {
+              new AsyncFunction(
+                "$self",
+                "event",
+                "$this",
+                "refs",
+                "data",
+                "scope",
+                attr_val
+              )(this, _event, ref, this.refs, this.data, this.scope);
+            } catch (e) {
+              console.error(e, attr_val, this);
+            }
+          });
+        } else {
+          try {
+            // @ts-expect-error assigning event handlers by name nothing to see here
+            ref[name] = (_event) => {
+              new AsyncFunction(
+                "$self",
+                "event",
+                "$this",
+                "refs",
+                "data",
+                "scope",
+                attr_val
+              )(this, _event, ref, this.refs, this.data, this.scope);
+            };
+          } catch (e) {
+            console.error(e, attr_val, this);
+          }
+        }
+      });
+
+      if (!ref.matches(config.refs_no_inital_load.join(","))) {
+        ref.dispatchEvent(
+          new Event("load", { bubbles: false, cancelable: false })
+        );
+      }
+    });
+     // refs
+     this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
       const closest_view = ref.closest('adv-view')
       if ((closest_view && closest_view != ref)){
         return;
