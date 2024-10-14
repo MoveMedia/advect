@@ -76,7 +76,6 @@ export default new Elysia()
       .post("/sign-in",async ({ body, query, cookie }) => {
         const returnUrl = query.return_url || "/";
         const result = await signIn(body.email, body.password);
-        console.log(result);
         return result;
       }, {
        

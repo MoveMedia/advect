@@ -12,6 +12,7 @@ export default class AdvectBase extends HTMLElement {
   extras: Record<string, any> = {};
   
   loaded = false;
+  ready = false;
   /**
    *  Lib
    */
@@ -274,6 +275,12 @@ export default class AdvectBase extends HTMLElement {
     });
   }
 
+  addEventListener(type: string, listener: EventListener, options?: boolean | AddEventListenerOptions ): void {
+    super.addEventListener(type, listener, options)
+    if (type ==  AdvectConnectEvent.Type && this.ready){
+      this.dispatchEvent(new AdvectConnectEvent(this));
+    }
+  }
   /**
    * Merges the scope and styles of the views in the shadowRoot
    * and sets the parent of the view to this element
@@ -352,6 +359,7 @@ export default class AdvectBase extends HTMLElement {
       this.mutate(mutation);
     });
     this.addEventListener(AdvectConnectEvent.Type, () => {
+        if (this.ready) return;
         if (this.onConnect) this.onConnect();
     });
 
@@ -366,7 +374,8 @@ export default class AdvectBase extends HTMLElement {
     //@ts-ignore
     this.constructor.ic++
     this.initalContent = this.cloneNode(true);
-    this.attachShadow({ mode: "open" });
+    // @ts-ignore
+    this.attachShadow({ mode: this.constructor.$shadow_mode ?? 'open' });
 
     // observe all changes on the light dom
     this.observer?.observe(this, {

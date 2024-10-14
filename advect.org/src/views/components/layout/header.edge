@@ -1,163 +1,49 @@
-<adv-view >
-  <template>
-    <script>
-      function getScreenSize() {
-        return window.innerWidth > 1080 ? "desktop" : "mobile";
-      }
-      function toggleMobileNav(open) {
-        if (open) {
-
-        } else {
-          refs.mobile_diag.classList.add('contents');
-          refs.mobile_diag.hide()
-        }
-      }
-
-      function toggleEditorNav(open) {
-        if (open) {
-          refs.editor_diag.show()
-        } else {
-          refs.editor_diag.hide()
-        }
-      }
-
-
-      $self.dataset.opened = false;
-      $self.data.screen = getScreenSize();
-
-      setTimeout(() => {
-        const newSize = getScreenSize();
-        if ($self.data.screen != newSize) {
-          $self.data.screen = newSize;
-          mobile_diag.close();
-        }
-      }, 1000);
-
-      const scope = {
-        getScreenSize,
-        toggleMobileNav,
-        toggleMobileNav
-      }
-
-      $self.render();
-      return scope;
-
-    </script>
-  </template>
+<nav class="flex gap-2 justify-between p-2 items-center">
   <style>
     @scope {
       :scope {
-        dialog {
-          transition:all 0.2s;
-          &:not([open]) {
-            width: 0px;
-            left:200px;
-
-            & [ref="mobile_closer"] {
-              display:none;
-            }
-          }
-
-          &[open] {
-            left: 0;
-            position: absolute;
-            margin-inline: auto 0;
-            margin-block: 0;
-            top: 0;
-            height: 100dvh;
-            width: 300px;
-
-            & [ref="mobile_closer"] {
-              display: none;
-            }
-
-            &:not(.contents)>* {
-              display: flex !important;
-            }
-          }
+        [for="nav-closer"]{
+            display:none;
         }
+        @media (max-width: 768px) {
+          [for="nav-closer"]{
+            display:block;
+          }
+          &:has(#nav-closer:checked) {
 
-        nav {
-          max-height: var(--nav-height);
+          }
 
-          &:after {
-            content: '';
-            display: block;
-            height: 2px;
-            width: 100%;
-            background-image:
-              animation-name: header-gradient;
-            animation-duration: 10s;
-            animation-iteration-count: infinite;
-            animation-timing-function: linear;
-
-            @scope {
-              @keyframes header-gradient {
-                0% {
-                  background-position: 0% 50%;
-                }
-
-                50% {
-                  background-position: 100% 50%;
-                }
-
-                100% {
-                  background-position: 0% 50%;
-                }
-              }
+          &:not(:has(#nav-closer:checked)) {
+            #nav-items {
+              display: none;
             }
           }
         }
       }
     }
   </style>
-  <nav ref="nav" class="bg-white shadow h-[var(--nav-height)] py-2" onload="{
-        $self.shadowRoot.querySelectorAll('a').forEach((a) => {
-        if (window.location.pathname === a.getAttribute('href') 
-          || window.location.pathname.includes(a.getAttribute('href'))
-          && a.getAttribute('href') !== '/'
-        ) {
-          a.classList.add('text-red-600','font-bold');
-        }
-      });
-  
-  }">
-    <div class="mx-auto max-w-screen-xl px-4">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center">
-          <a href="/" class="text-lg font-bold text-gray-800">
-            Advect
-          </a>
+  <a href="/" class="block">
+    <img src="/assets/logo.svg" width="20" height="20" alt="">
+  </a>
+  <ul id="nav-items" class="flex gap-4 items-center">
+    <li>About</li>
+    <li>Blog</li>
+    <li>Editor</li>
+    <li>
+      <adv-auth>
+        <div class="flex gap-1" slot="invalid">
+          <a href="/auth/sign-in">Sign In</a>
+          <span> / </span>
+          <a href="/auth/sign-up">Register</a>
         </div>
-          <div class="flex items-center space-x-4">
-            <a href="/" class="text-gray-800 hover:text-gray-900">
-              Home
-            </a>
-
-            <a href="/docs" class="text-gray-800 hover:text-gray-900">
-              Docs
-            </a>
-            <a ref="editor_btn" href="/editor" class="text-gray-800 hover:text-gray-900" onclick="{
-              event.preventDefault();
-          }">
-              Editor
-            </a>
-
-            <div class="bg-gray-200 flex gap-2 p-2 rounded">
-              <a href="/auth/sign-in" class="text-gray-800 hover:text-gray-900">
-                Login
-              </a>
-              <span class="pointer-none"> / </span>
-              <a href="/auth/sign-up" class="text-gray-800 hover:text-gray-900">
-                Register
-              </a>
-            </div>
-          </div>
-
-      </div>
-    </div>
-  </nav>
-  <dialog id="editor_diag">
-
-  </dialog>
-</adv-view>
+        <div slot="valid">
+            <a href="/profile/">My profile</a>
+        </div>
+      </adv-auth>
+    </li>
+  </ul>
+  <label for="nav-closer" class="">
+    <span class="cursor-pointer"> X </span>
+    <input id="nav-closer" type="checkbox" class="hidden" />
+  </label>
+</nav>

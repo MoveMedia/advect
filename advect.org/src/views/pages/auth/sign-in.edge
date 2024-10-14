@@ -1,14 +1,12 @@
 @layout.page({ title: "register" })
 
 @slot('header')
-@layout.header()
-@end
+  @layout.header()
+  @end
 @end
 
 
 @slot('content')
-
-
 <adv-view>
   <template>
     <script>
@@ -38,7 +36,6 @@
                 },
                 body: JSON.stringify(Object.fromEntries(new FormData(event.target)))
               }).then( resp => resp.json() ).then( data =>{
-              
                 console.log(data)
               })
               
@@ -82,12 +79,11 @@
     </div>
   </section>
 </adv-view>
-
 @end
 
-@slot('footer')
-@layout.footer()
-@end
-@end
+  @slot('footer')
+    @layout.footer()
+    @end
+  @end
 
 @end

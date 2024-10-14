@@ -1,0 +1,41 @@
+<template id="adv-auth" adv>
+  <script>
+        $self.style.filter = 'blur(10px)'
+
+    const scope = {
+      async checkAuth() {
+        let isSignedIn = true;
+        if (isSignedIn) {
+          refs.valid_slot.style.display = "initial";
+          refs.invalid_slot.style.display = "none";
+        } else {
+          refs.valid_slot.style.display = "none";
+          refs.invalid_slot.style.display = "initial";
+        }
+        return isSignedIn;
+      },
+    };
+    scope.checkAuth().then(() =>{
+        $self.style.filter = 'blur(0)'
+    });
+    return scope;
+  </script>
+  <style>
+    @scope {
+      :scope {
+        transition: all 0.2s;
+        @starting-style {
+          [slot] {
+            display: none;
+          }
+        }
+        [slot] {
+          display: content;
+        }
+      }
+    }
+  </style>
+
+  <slot name="valid" ref="valid_slot"> </slot>
+  <slot name="invalid" ref="invalid_slot"> </slot>
+</template>

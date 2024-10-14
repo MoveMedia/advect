@@ -15,7 +15,6 @@
   navigation: auto;
 }
 
-
 :not(:defined) {
   opacity: 0;
 }
@@ -39,27 +38,36 @@ body,html{
   height:100dvh;
   margin:0;
   padding: 0;
-  overflow:hidden;
 }
 
 body{
+  position:relative;
   &[ready]{
    & main{
-      overflow:scroll;
     }
   }
 }
 header{
-  height: 60px;
+  min-height: 60px;
   position:sticky;
   top: 0;
 }
 main {
   max-height:100dvh;
-  overflow:hidden;
 }
 
 main > section:not(.cover){
   margin-block: 20px;
 }
 
+adv-org-hero{
+  min-height: 100dvh;
+
+  &:not(:defined) {
+  }
+  &:defined {
+    transition: opacity 0.2s ease-in-out;
+    transition-delay:0.5s;
+  }
+
+}

@@ -19,6 +19,22 @@ const ETA = new Eta({
 
 $window.debug_refs = [];
 
+function createTwindManager(sheet?:CSSStyleSheet){
+  const styleSheet = sheet ?? new CSSStyleSheet();
+  const omSheet = cssomSheet({ target: styleSheet });
+  const instance = create({ sheet: omSheet });
+  const shim =  { setup, disconnect }
+  return  {
+    styleSheet,
+    omSheet,
+    instance,
+    shim
+  };
+  
+}
+
+
+const twindManager = createTwindManager();
 // Render a template
 
 const advectCorePlugin: AdvectPlugin = {
@@ -30,7 +46,6 @@ const advectCorePlugin: AdvectPlugin = {
     // not available on adv-view
     templateClass.prototype.createStore = createStore;
     templateClass.prototype.useStore = useStore;
-    templateClass.$Style = new CSSStyleSheet();
     // check if ""
     return templateClass;
   },
@@ -39,18 +54,8 @@ const advectCorePlugin: AdvectPlugin = {
     // check if the componet is no-tw, or style-target=
     if (config.shim.useShim) {
       if ($window?.advect?.globals && !$window?.advect?.globals["twind"]) {
-        const styleSheet = new CSSStyleSheet();
-        AdvectView.$Style = styleSheet
-        const omSheet = cssomSheet({ target: styleSheet });
-        const twindInstance = create({ sheet: omSheet });
-        const shim =  { setup, disconnect }
-        document.adoptedStyleSheets.push(styleSheet)
-        $window.advect.globals["twind"] = {
-            styleSheet,
-            omSheet,
-            twindInstance,
-            shim
-        };
+        document.adoptedStyleSheets.push(twindManager.styleSheet)
+        $window.advect.globals["twind"] = twindManager;
       }
       setup({
         // node element to shim/observe (default: document.documentElement)
@@ -66,19 +71,18 @@ const advectCorePlugin: AdvectPlugin = {
         disconnect();
       }
     }else{
-      AdvectView.$Style = new CSSStyleSheet();
     }
   },
   component_connected(el: AdvectBase) {
     if (el.nodeName === "ADV-VIEW") {
       (el as AdvectView & { eta: Eta }).eta = ETA;
     }
-    if (el.matches('[]'))
-    el.mergeStyles([$window?.advect?.globals["twind"].styleSheet])
-    
+    if (el.matches(':not([no-tw])')){
+      el.mergeStyles([twindManager.styleSheet])
+    }
     //const sheet = cssomSheet({ target: el.$style });
    // const { tw } = create({ sheet });
-    const tw = $window?.advect?.globals["twind"]?.twindInstance.tw
+    const { tw } = twindManager.instance
     const render = () => {
       tw(el.className);
       el.shadowRoot?.querySelectorAll("[class]:not([no-tw])").forEach((_el) => {

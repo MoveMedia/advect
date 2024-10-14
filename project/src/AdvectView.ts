@@ -6,7 +6,7 @@ import { AdvectRenderEvent } from "./events";
  * A Utility element for rendering  templates
  */
 export class AdvectView extends AdvectBase {
-  static $Style: CSSStyleSheet;
+  static $Style: CSSStyleSheet = new CSSStyleSheet();
   /**
    * instance counter
    */

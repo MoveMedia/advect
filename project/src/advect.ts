@@ -161,6 +161,7 @@ export default class Advect {
       $template: HTMLTemplateElement = template as HTMLTemplateElement;
       static $shadow_mode = shadow_mode;
       $scopes_scripts = $scope_scripts;
+      $Style = new CSSStyleSheet();
       static observedAttributes = attrs.map((attr) =>
         attr.name.toLocaleLowerCase()
       );
@@ -200,7 +201,8 @@ export default class Advect {
 }
 
 const adv = ($window.advect = new Advect());
-adv.start();
-customElements.define("adv-view", AdvectView);
+adv.start().then(()=>{
+  customElements.define("adv-view", AdvectView);
+});
 
 

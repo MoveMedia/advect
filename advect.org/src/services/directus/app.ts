@@ -114,9 +114,6 @@ const signIn = async (email:string, pass:string) => {
     return result;
 }
 
-
-
-
 export {
     client,
     signUp,

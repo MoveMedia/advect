@@ -5,7 +5,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
-    "docker-build":"docker build --pull -t advect .",
+    "docker-build": "docker build --pull -t advect .",
     "docker-run": "docker run -d -p 3000:3000 advect"
   },
   "dependencies": {
@@ -13,7 +13,8 @@
     "@elysiajs/html": "^1.1.1",
     "edge.js": "^6.0.2",
     "editorjs-html": "^3.4.3",
-    "elysia": "latest"
+    "elysia": "latest",
+    "eta": "^3.5.0"
   },
   "devDependencies": {
     "bun-types": "latest"

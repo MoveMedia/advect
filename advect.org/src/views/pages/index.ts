@@ -8,7 +8,7 @@ export default new Elysia()
   .get("/", async (ctx: Context & { edge: Edge}) => {
       return await ctx.edge.render("pages/home", { ctx })
       .catch( async (e) => {
-        return await ctx.edge.render("pages/error", { ctx, error: e });
+        return await ctx.edge.render("pages/error", { ctx, error: e, errorFile:await Bun.file(e.filename).text() });
       });
   })
   .get("/404", async (ctx: Context & { edge: Edge}) => {
