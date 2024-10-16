@@ -25,14 +25,12 @@
 
   <title>{{ title }}</title>
 </head>
-
 <body>
   <header>
     @if ($slots.header)
       {{{ await $slots.header() }}}
     @end
   </header>
-
   <main>
     @if ($slots.content)
     {{{ await $slots.content() }}}
@@ -46,7 +44,6 @@
       @end
       <script type="module" async src="/assets/advect.js"></script>
       <script type="module" src="/assets/advect.org.js"></script>
-  
     </footer>
   </main>
   </div>

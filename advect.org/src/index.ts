@@ -4,6 +4,7 @@ import Auth from "@/views/pages/auth";
 import Editor from "@/views/pages/editor";
 import Docs from "@/views/pages/docs";
 import Renderer from "@/views/renderer"
+import cors from "@elysiajs/cors";
 
 
 const app = new Elysia()
@@ -12,6 +13,7 @@ const app = new Elysia()
   .use(Auth)
   .use(Editor)
   .use(Docs)
+  .use(cors())
   .get("/assets/*", ({ set, error, params }) => {
     return Bun.file("./assets/" + params["*"]);
   })
