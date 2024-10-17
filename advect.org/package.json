@@ -15,7 +15,8 @@
     "edge.js": "^6.0.2",
     "editorjs-html": "^3.4.3",
     "elysia": "latest",
-    "eta": "^3.5.0"
+    "eta": "^3.5.0",
+    "twind": "^0.16.19"
   },
   "devDependencies": {
     "bun-types": "latest"

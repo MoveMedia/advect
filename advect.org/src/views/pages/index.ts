@@ -2,16 +2,21 @@ import Elysia, { Context, error } from "elysia";
 import edge from "@/views/renderer";
 import html from "@elysiajs/html";
 import { Edge } from "edge.js";
+import { SiteContext } from "@/lib";
 
 export default new Elysia()
   .use(html())
-  .get("/", async (ctx: Context & { edge: Edge}) => {
-      return await ctx.edge.render("pages/home", { ctx })
-      .catch( async (e) => {
-        return await ctx.edge.render("pages/error", { ctx, error: e, errorFile:await Bun.file(e.filename).text() });
-      });
+  .get("/", async (ctx: SiteContext) => {
+      return await ctx.view.render("pages/home", ctx, {});
   })
-  .get("/404", async (ctx: Context & { edge: Edge}) => {
+  .get("/404", async (ctx: SiteContext) => {
     ctx.set.status = 404;
-    return await ctx?.edge.render("pages/404", { ctx });
-  });
+    return await ctx?.view.render("pages/404", ctx, {});
+  })
+   // @ts-ignore
+   .onError(async (ctx: SiteContext) => {
+    return await ctx.view.render("pages/error", ctx, {});
+  })
+  ;
+
+ 

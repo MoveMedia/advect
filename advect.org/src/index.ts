@@ -15,10 +15,12 @@ const app = new Elysia()
   .use(Docs)
   .use(cors())
   .get("/assets/*", ({ set, error, params }) => {
-    return Bun.file("./assets/" + params["*"]);
-  })
+    return Bun.file("./assets/" + params["*"])
+  })  
   .listen(process.env.PORT || 3000);
 
+
+  
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`
 );

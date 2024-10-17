@@ -3,14 +3,15 @@ import Elysia, { Context, Cookie, redirect, t } from "elysia";
 import edge from "@/views/renderer";
 import { signIn, signUp } from "@/services/directus/app";
 import html from "@elysiajs/html";
+import { SiteContext } from "@/lib";
 
 export default new Elysia()
   .group("/auth", (auth) => {
     return auth
     .use(html())
       .get("/", () => "Hi")
-      .get("/sign-up", async (ctx: Context & { edge: Edge}) => {
-        return await ctx.edge.render("pages/auth/sign-up", { ctx });
+      .get("/sign-up", async (ctx: SiteContext) => {
+        return await ctx.view.render("pages/auth/sign-up", ctx, {})
       })
       .post(
         "/sign-up",
@@ -42,14 +43,12 @@ export default new Elysia()
           context.set.status = 200;
           
           await signUp(context.body.email, context.body.password);
-
           const token = "user-key"
           return {
             token
           };
         },
         {
-
           body: t.Object({
             first_name: t.String(),
             last_name: t.String(),
@@ -69,9 +68,9 @@ export default new Elysia()
           }),
         }
       )
-      .get("/sign-in", async (ctx: Context & { edge: Edge}) => {
+      .get("/sign-in", async (ctx: SiteContext) => {
         ctx.set.headers["Content-Type"] = "text/html";
-        return await ctx.edge.render("pages/auth/sign-in", { ctx });
+        return await ctx.view.render("pages/auth/sign-in",ctx, {});
       })
       .post("/sign-in",async ({ body, query, cookie }) => {
         const returnUrl = query.return_url || "/";
@@ -89,5 +88,10 @@ export default new Elysia()
             pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])",
           }),
         }),
-      });
+      })
+          // @ts-ignore
+    .onError(async (ctx: SiteContext) => {
+      return await ctx.view.render("pages/error", ctx, {});
+  });
+
   });

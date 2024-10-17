@@ -1,51 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="prefetch" href="/assets/advect.js" />
-  <link rel="prefetch" href="/assets/main.css" />
-  <link rel="stylesheet" href="/assets/main.css" />
   <script type="text/adv" src="/assets/components/adv-auth.html"></script>
-<script>
-  window.adv_config = {
-    shim :{
-      useShim:false;
-    } 
-  }
-</script>
+  <script>
+    window.adv_config = {
+      shim: {
+        useShim: false;
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      view-transition-name: root;
+      --nav-height: 60px;
+      --nav-border-bottom: linear-gradient(90deg, blue, gray, purple, yellow, green);
+      font-size: 12px;
+      @view-transition {
+        navigation: auto;
+      }
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 0.5s;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+    
+    }
+    @media (prefers-reduced-motion: no-preference) {
+
+    }
+    body,
+    html {
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      position: relative;
+    }
+
+    header {
+    }
+
+    main {
+      max-height: 100dvh;
+    }
+
+    main>section:not(.cover) {
+      margin-block: 20px;
+    }
+  </style>
+
   @if ($slots.head_assets)
   {{{ await $slots.head_assets() }}}
   @end
-    
-    @each(meta in meta_fields)
-      <meta name="{{meta.name}}" content="{{meta.content}}">
-    @end
+
+  @each(meta in meta_fields)
+  <meta name="{{meta.name}}" content="{{meta.content}}">
+  @end
 
   <title>{{ title }}</title>
 </head>
+
 <body>
+
   <header>
     @if ($slots.header)
-      {{{ await $slots.header() }}}
+    {{{ await $slots.header() }}}
     @end
   </header>
+  <aside>
+    @if ($slots.sidebar)
+    {{{ await $slots.sidebar() }}}
+    @end
+  </aside>
   <main>
     @if ($slots.content)
     {{{ await $slots.content() }}}
     @end
-    <footer>
-      @if ($slots.footer)
-      {{{ await $slots.footer() }}}
-      @end
-      @if ($slots.footer_assets)
-      {{{ await $slots.footer_assets() }}}
-      @end
-      <script type="module" async src="/assets/advect.js"></script>
-      <script type="module" src="/assets/advect.org.js"></script>
-    </footer>
   </main>
-  </div>
+  <footer>
+    @if ($slots.footer)
+    {{{ await $slots.footer() }}}
+    @end
+    @if ($slots.footer_assets)
+    {{{ await $slots.footer_assets() }}}
+    @end
+    <script type="module" src="/assets/advect.org.js"></script>
+  </footer>
 </body>
+
 </html>

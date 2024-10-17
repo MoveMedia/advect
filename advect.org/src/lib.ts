@@ -1,7 +1,7 @@
-/**
- *
- * @returns
- */
+import { Context } from "elysia";
+import { RenderView } from "./views/renderer";
+
+
 export function generateGuid() {
     var result, i, j;
     result = "";
@@ -15,3 +15,4 @@ export function generateGuid() {
     return result;
   }
   
+  export type SiteContext = Context & { view: RenderView };
