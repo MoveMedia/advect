@@ -3,7 +3,7 @@ import Elysia, { Context, error, redirect } from "elysia";
 import edge from "@/views/renderer";
 import html from "@elysiajs/html";
 import { AdvectComponent, queryItem } from "@/services/directus/app";
-import {generateGuid} from "@/lib";
+import {generateGuid, SiteContext} from "@/lib";
 
 export default new Elysia().group("/editor", (editor) => {
   return editor
@@ -18,13 +18,13 @@ export default new Elysia().group("/editor", (editor) => {
           "AdvectComponents",
           componetId
         ).then(async (adv_component) => {
-          return await ctx.view.render("pages/editor/index", { ctx, adv_component });
+          return await ctx.view.render("pages/editor/index",  ctx, { adv_component });
         })
     })
     .post("/:id", async (ctx) => {})
      // @ts-ignore
-  .onError(async (ctx: Context & { edge: Edge }) => {
-    return await ctx.view.render("pages/error", { ctx });
+  .onError(async (ctx: SiteContext) => {
+    return await ctx.view.render("pages/error", ctx, { });
   });
 ;
 });

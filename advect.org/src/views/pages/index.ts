@@ -1,7 +1,6 @@
 import Elysia, { Context, error } from "elysia";
 import edge from "@/views/renderer";
 import html from "@elysiajs/html";
-import { Edge } from "edge.js";
 import { SiteContext } from "@/lib";
 
 export default new Elysia()

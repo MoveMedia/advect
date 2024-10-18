@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" hidden>
 
 <head>
   <meta charset="UTF-8">
@@ -7,10 +7,12 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="prefetch" href="/assets/advect.js" />
   <script type="text/adv" src="/assets/components/adv-auth.html"></script>
+  <script type="text/adv" src="/assets/components/adv-search.html"></script>
+
   <script>
     window.adv_config = {
       shim: {
-        useShim: false;
+        useShim: true
       }
     }
   </script>
@@ -21,41 +23,38 @@
       --nav-height: 60px;
       --nav-border-bottom: linear-gradient(90deg, blue, gray, purple, yellow, green);
       font-size: 12px;
+
       @view-transition {
         navigation: auto;
       }
+
       ::view-transition-old(root),
       ::view-transition-new(root) {
         animation-duration: 0.5s;
       }
     }
-    @media (prefers-reduced-motion: reduce) {
-    
+    :not(:defined) {
+      opacity: 0;
+      min-height: 100%;
     }
-    @media (prefers-reduced-motion: no-preference) {
+    :defined {
+      transition: opacity 0.2s ease-in-out;
+      opacity: 1;
+    }
 
-    }
+    @media (prefers-reduced-motion: reduce) {}
+    @media (prefers-reduced-motion: no-preference) {}
+
     body,
     html {
-      height: 100dvh;
       margin: 0;
       padding: 0;
+      max-width: 99vw;
+      overflow-x: hidden;
     }
 
-    body {
-      position: relative;
-    }
 
-    header {
-    }
-
-    main {
-      max-height: 100dvh;
-    }
-
-    main>section:not(.cover) {
-      margin-block: 20px;
-    }
+ 
   </style>
 
   @if ($slots.head_assets)
@@ -71,7 +70,7 @@
 
 <body>
 
-  <header>
+  <header class="sticky top-0">
     @if ($slots.header)
     {{{ await $slots.header() }}}
     @end
@@ -93,6 +92,7 @@
     @if ($slots.footer_assets)
     {{{ await $slots.footer_assets() }}}
     @end
+    <script type="module" async src="/assets/advect.js"></script>
     <script type="module" src="/assets/advect.org.js"></script>
   </footer>
 </body>

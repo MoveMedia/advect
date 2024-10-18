@@ -21,7 +21,6 @@ const defaultSettings = {
      * Set the default renderer
      */
     default_renderer: "eta" as const,
-    include_twind: true as const,
     shim:{
         useShim: false as const,
         selector: null as string | null,

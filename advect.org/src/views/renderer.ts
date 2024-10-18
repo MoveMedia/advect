@@ -4,7 +4,7 @@ import edjsHTML  from 'editorjs-html'
 import Elysia, { Context } from "elysia";
 import { setup, tw } from 'twind'
 import { virtualSheet, getStyleTag,  } from 'twind/sheets'
-
+import theme from "@/views/twind.config";
 // edge setup 
 const edge = Edge.create({ cache: process.env.NODE_ENV === "production" });
 const BASE_URL = new URL("./", import.meta.url);
@@ -20,15 +20,13 @@ export function edjs (htmlJson:any) {
 
 // HTMLRewriter setup for twind
 const sheet = virtualSheet()
-setup({ sheet })
-// 1. Reset the sheet for a new rendering
+setup({ sheet, mode: 'silent', theme })
 sheet.reset()
 
 const rewriter = new HTMLRewriter();
 rewriter.on("*[class]", {
     element(e){
-        const classes = e.getAttribute("class")?.split(" ") ?? []
-        tw(classes)
+        tw(e.getAttribute("class")?.split(" ") ?? [])
     },
 })
 
@@ -43,11 +41,11 @@ const view = {
     async render( view:string, context : Context, data: any ){
         const domString = await edge.render(view, {ctx:context , ...data})
         rewriter.transform(domString); // calls tw
-        const domTwindInjected = domString.replace("</head>", getStyleTag(sheet) + "</head>")
+        const domTwindInjected = domString.replace("</head>", [getStyleTag(sheet),
+            "</head>"].join("\n"))
         return domTwindInjected
     }
 }
-
 
 // Twind setup
 export default new Elysia<"view">().decorate("view", view)

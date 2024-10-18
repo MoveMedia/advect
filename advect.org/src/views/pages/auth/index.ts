@@ -5,13 +5,12 @@ import { signIn, signUp } from "@/services/directus/app";
 import html from "@elysiajs/html";
 import { SiteContext } from "@/lib";
 
-export default new Elysia()
-  .group("/auth", (auth) => {
-    return auth
-    .use(html())
-      .get("/", () => "Hi")
+export default new Elysia().group("/auth", (auth) => {
+  return (
+    auth
+      .use(html())
       .get("/sign-up", async (ctx: SiteContext) => {
-        return await ctx.view.render("pages/auth/sign-up", ctx, {})
+        return await ctx.view.render("pages/auth/sign-up", ctx, {});
       })
       .post(
         "/sign-up",
@@ -41,11 +40,11 @@ export default new Elysia()
             return { errors: errors };
           }
           context.set.status = 200;
-          
+
           await signUp(context.body.email, context.body.password);
-          const token = "user-key"
+          const token = "user-key";
           return {
-            token
+            token,
           };
         },
         {
@@ -70,28 +69,31 @@ export default new Elysia()
       )
       .get("/sign-in", async (ctx: SiteContext) => {
         ctx.set.headers["Content-Type"] = "text/html";
-        return await ctx.view.render("pages/auth/sign-in",ctx, {});
+        return await ctx.view.render("pages/auth/sign-in", ctx, {});
       })
-      .post("/sign-in",async ({ body, query, cookie }) => {
-        const returnUrl = query.return_url || "/";
-        const result = await signIn(body.email, body.password);
-        return result;
-      }, {
-       
-        body: t.Object({
-          email: t.String({
-            format: "email",
+      .post(
+        "/sign-in",
+        async ({ body, query, cookie }) => {
+          const returnUrl = query.return_url || "/";
+          const result = await signIn(body.email, body.password);
+          return result;
+        },
+        {
+          body: t.Object({
+            email: t.String({
+              format: "email",
+            }),
+            password: t.String({
+              minLength: 8,
+              maxLength: 40,
+              pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])",
+            }),
           }),
-          password: t.String({
-            minLength: 8,
-            maxLength: 40,
-            pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])",
-          }),
-        }),
+        }
+      )
+      // @ts-ignore
+      .onError(async (ctx: SiteContext) => {
+        return await ctx.view.render("pages/error", ctx, {});
       })
-          // @ts-ignore
-    .onError(async (ctx: SiteContext) => {
-      return await ctx.view.render("pages/error", ctx, {});
-  });
-
-  });
+  );
+});
