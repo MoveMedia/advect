@@ -1,4 +1,6 @@
 @assign(page = await app.queryItem("Pages", { slug: "/" }))
+@assign(content = app.injectDataIntoContent(page.editor_nodes, page.content))
+
 @layout.page({
     title: page.title,
     description: page?.description,
@@ -12,6 +14,7 @@
   <script type="application/json">
     {{{ JSON.stringify(page) }}}
   </script>
+
   <script type="text/adv" src="/assets/components/adv-org-hero.html"></script>
   <script type="text/adv" src="/assets/components/adv-org-card.html"></script>
   <section >
@@ -43,7 +46,7 @@
   </section>
 
   <section class="max-w-4xl mx-auto">
-  
+      @!component('components/editor_nodes/tiptap', { content:content.content })
   </section>
   @end
   @slot('footer')

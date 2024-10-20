@@ -1,4 +1,6 @@
-import { createDirectus, rest, registerUser,login, authentication, readItems, aggregate, readItem, readSingleton } from '@directus/sdk';
+import { createDirectus, rest, registerUser,login, authentication, readItems, aggregate, readItem, readSingleton, readRelation, readRelations, RelationalFields } from '@directus/sdk';
+import { injectDataIntoContent } from "directus-extension-flexible-editor/content";
+import { JSONContent } from '@tiptap/core/src/types';
 
 if (!process.env.DIRECTUS_URL) {
     throw new Error('DIRECTUS_URL is not defined');
@@ -14,8 +16,8 @@ export interface Page {
     title:string;
     description:string;
     featured_image:string;
-    rich_content:string;
-    blocks: Record<string, any>
+    editor_nodes: Record<string, any>[];
+    content: JSONContent;
 }
 export interface AdvectComponent{
     title:string;
@@ -43,6 +45,7 @@ export const countItems = async (collection:string) => {
 export const getSingleton = async <T>(collection:string) =>{
     return await client.request(readSingleton(collection as any,{
         fields:["*"]
+
     })).catch( e => {
         return null;
     }) 
@@ -67,6 +70,7 @@ export const queryItems = async <T>(
                 page,
                 filter,
                 sort,
+                
             })
         );
     }
@@ -93,6 +97,7 @@ export const getItemById = async <T>(collection:string, id:string) => {
     return await client.request(readItem(collection as any, id)).then((res) => res as T);
 }
 
+
 export const getAllItems = async <T>(collection:string, fields = ["*"]) => {
     const result = await client.request(
         readItems(collection as any, {
@@ -102,6 +107,14 @@ export const getAllItems = async <T>(collection:string, fields = ["*"]) => {
     return result as T[];
 }
 
+
+
+export const getRelation = async <T>(collection:string, field:string) => {
+    return await client.request(readRelation(collection, field));
+}
+export const getRelations = async <T>(collection:string, field:string) => {
+    return  await client.request(readRelations());
+}
 const signUp = async (email:string, pass:string) => {
     const result = await client.request(registerUser(email, pass)).catch((e) => {
         console.log(e)
@@ -114,8 +127,11 @@ const signIn = async (email:string, pass:string) => {
     return result;
 }
 
+
+
 export {
     client,
     signUp,
-    signIn
+    signIn,
+    injectDataIntoContent
 }

@@ -18,11 +18,11 @@
     <span slot="h1">
       Error
       <strong class="font-extrabold text-red-700 sm:block">
-        {{ctx.error.code}}
+        {{ctx?.error?.code}}
       </strong>
     </span>
     <span slot="blurb">
-    {{ctx.error.message}}
+    {{ctx?.error?.message}}
 
     </span>
     <div slot="content" class="bg-white w-full p-4">
@@ -36,7 +36,7 @@
 
 <section class="max-w-2xl mx-auto">
   <code>
-    {{ctx.error.stack.toString()}}
+    {{ctx?.error?.stack?.toString()}}
   </code>
 </section>
 @end

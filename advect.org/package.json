@@ -12,6 +12,7 @@
     "@directus/sdk": "^17.0.1",
     "@elysiajs/cors": "^1.1.1",
     "@elysiajs/html": "^1.1.1",
+    "directus-extension-flexible-editor": "^1.8.1",
     "edge.js": "^6.0.2",
     "editorjs-html": "^3.4.3",
     "elysia": "latest",

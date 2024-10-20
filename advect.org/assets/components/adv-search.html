@@ -8,8 +8,9 @@
         // let search_url = new URL(window.location.href);
         // search_url.searchParams.set('search', search);
         // window.location.href = search_url;
-
+        refs.search_diag.classList.add('opened');
         refs.search_diag.showModal();
+    
     }">
         <label for="site-search">
             <span class="sr-only">Search</span>
@@ -18,12 +19,36 @@
         <button  type="submit">Search</button>
     </form>
     <dialog ref="search_diag" class="max-w-[800px] h-[80dvh] border-2 rounded-lg relative">
+        <style>
+            @scope{
+                :scope{
+                    opacity:0;
+                    transition: all 0.2s;
+                    &[open]{
+                        opacity:1;
+                        top:-200vh;
+                    }
+                    &.opened{
+                        opacity:1;
+                        top:0;
+                    }
+                    &.closing{
+                        opacity:0;
+                        top:100vh;
+                    }                 
+                }
+            }
+        </style>
         <div class="bg-white sticky top-[-12px] flex gap-2 justify-between p-2">
             <div>
                 <h2>Search Results</h2>
             </div>
             <button type="submit" ref onclick="{
-                 refs.search_diag.close();
+                refs.search_diag.classList.add('closing');
+                 setTimeout(() => {
+                     refs.search_diag.classList.remove('closing');
+                     refs.search_diag.close();
+                 }, 200);
             }">
                 <span class="cursor-pointer" > 
                     <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

@@ -10,6 +10,7 @@ const edge = Edge.create({ cache: process.env.NODE_ENV === "production" });
 const BASE_URL = new URL("./", import.meta.url);
 edge.mount(new URL("./", BASE_URL));
 
+
 const globals = await app.getSingleton<app.Globals>("Globals")
 
 // EditorJS setup
@@ -33,7 +34,14 @@ rewriter.on("*[class]", {
 edge.use((e)=>{
     e.global("globals", globals);
     e.global('app', app )
-    e.global('edjs', edjs) 
+    e.global('edjs', edjs)
+    e.global('templateExists',  async (template_path:string) => {
+        const real_path =`${import.meta.dir}/${template_path}.edge`
+        const template_file =  Bun.file(real_path)
+        const templateExists = await template_file.exists()
+        console.log(real_path, templateExists)
+        return templateExists
+    });
 })
 
 export type RenderView = typeof view;
