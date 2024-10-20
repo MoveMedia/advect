@@ -1,1 +1,6 @@
-{{ JSON.stringify(block) }}
+<div>
+    <script type="application/json">
+        {{{ JSON.stringify(block) }}}
+    </script>
+    {{{ block.content }}}
+</div>

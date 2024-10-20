@@ -1,20 +1,12 @@
 @assign(el_id = `flexible-content-${Math.random().toString(36).substring(7)}`)
 
-<div id="{{el_id}}">
-    <style>
-        @scope{
-            :scope{
-                display:contents;
-            }
-        }
-    </style>
+<div id="{{el_id}}" class="contents">
     @each(node in $props.content)
         @if(node.type === 'relation-block')
             @assign(block = await app.queryItem(node.attrs.collection, { id: node.id }) )
             @assign(has_template = await templateExists('components/editor_nodes/' + node.attrs.collection) )
             @if ( has_template == true )
                 @!component(`components/editor_nodes/${node.attrs.collection}`, { block: block })
-                this should render
             @end
             @if ( has_template == false )
                 <div>
