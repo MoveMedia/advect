@@ -41,13 +41,7 @@
       </div>
     </adv-org-hero>
   </section>
-  <section>
-    <my-ting></my-ting>
-  </section>
-
-  <section class="max-w-4xl mx-auto">
-      @!component('components/editor_nodes/tiptap', { content:content.content })
-  </section>
+  @!component('components/editor_nodes/tiptap', { content:content.content })
   @end
   @slot('footer')
     @layout.footer()

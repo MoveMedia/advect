@@ -6,7 +6,7 @@
             @assign(block = await app.queryItem(node.attrs.collection, { id: node.id }) )
             @assign(has_template = await templateExists('components/editor_nodes/' + node.attrs.collection) )
             @if ( has_template == true )
-                @!component(`components/editor_nodes/${node.attrs.collection}`, { block: block })
+                @!component(`components/editor_nodes/${node.attrs.collection}`, { block: block, collection:node.attrs.collection })
             @end
             @if ( has_template == false )
                 <div>
