@@ -1,33 +1,36 @@
-<section
-    class="w-full min-h-[300px] flex justify-center items-center border-6 bg-[gray]"    
-    data-id="{{block.id}}" 
-    data-collection="{{collection}}">
-    <script type="application/json" >
+<section class="w-full min-h-[300px] flex justify-center items-center border-6 bg-[gray]" data-id="{{block.id}}"
+  data-collection="{{collection}}">
+  <style>
+    @scope {
+      :scope {
+        --grid-color: rgba(0, 0, 0, 0.1);
+        --grid-size: 20px;
+        scroll-snap-align: start;
+        background-attachment: fixed;
+        background-image: linear-gradient(var(--grid-color) 0.1em,
+            transparent 0.1em),
+          linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
+          linear-gradient(180deg, red, indigo);
+        background-size: var(--grid-size) var(--grid-size),
+          var(--grid-size) var(--grid-size), cover;
+        background-repeat: repeat, repeat, no-repeat;
+        background-position: center, center center;
+      }
+    }
+  </style>
+  <script type="application/json">
         {{{ JSON.stringify(block) }}}
     </script>
-    <div>
-       <!--
-  Heads up! 👋
 
-  This component comes with some `rtl` classes. Please remove them if they are not needed in your project.
--->
-
-<section
-class="overflow-hidden bg-[url(https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=2670&auto=format&fit=crop)] bg-cover bg-top bg-no-repeat"
->
-<div class="bg-black/50 p-8 md:p-12 lg:px-16 lg:py-24">
-  <div class="text-center ltr:sm:text-left rtl:sm:text-right">
-    {{{block.content}}}
-    <div class="mt-4 sm:mt-8">
-      <a
-        href="#"
-        class="inline-block rounded-full bg-indigo-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-yellow-400"
-      >
-        Get Yours Today
-      </a>
+  <div class="bg-black/50 p-8 md:p-12 lg:px-16 lg:py-24">
+    <div class="text-center ltr:sm:text-left rtl:sm:text-right text-white">
+      {{{block.content}}}
+      <div class="mt-4 sm:mt-8">
+        <a href="#"
+          class="inline-block rounded-full bg-indigo-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-yellow-400">
+          Get Yours Today
+        </a>
+      </div>
     </div>
   </div>
-</div>
-</section>
-    </div>
 </section>

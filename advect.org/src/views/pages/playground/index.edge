@@ -1,0 +1,25 @@
+@layout.page({ title: `Editor ${ctx?.params?.id}` })
+
+  @slot('header')
+    @layout.header()
+    @end
+  @end
+  @slot('content')
+    <div class="flex" ref="wrapper">
+      <button title="Play Button">
+        Play
+      </button>
+      <button title="Play Button">
+        Save
+      </button>
+    </div>
+  <section class="bg-gray-50">
+    @playground.monaco()
+    @end
+  </section>
+  @end
+  @slot('footer')
+    @layout.footer()
+    @end
+  @end
+@end

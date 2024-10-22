@@ -17,10 +17,14 @@
 
   <script type="text/adv" src="/assets/components/adv-org-hero.html"></script>
   <script type="text/adv" src="/assets/components/adv-org-card.html"></script>
+
+
   <section >
     <adv-org-hero class="xl:h-screen block">
       <span slot="h1">
-        Advect
+        <span class="advect-effect">
+          Advect
+          </span>
         <strong class="font-extrabold text-red-700 sm:block">
           Web Components
         </strong>
@@ -41,9 +45,12 @@
       </div>
     </adv-org-hero>
   </section>
-  @!component('components/editor_nodes/tiptap', { content:content.content })
+    @!component('components/editor_nodes/tiptap', { content:content.content })
   @end
   @slot('footer')
+  
+    @layout.newsLetter()
+    @end
     @layout.footer()
     @end
   @end

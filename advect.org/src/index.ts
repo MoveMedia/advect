@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import Home from "@/views/pages";
 import Auth from "@/views/pages/auth";
-import Editor from "@/views/pages/editor";
+import Editor from "@/views/pages/playground";
 import Docs from "@/views/pages/docs";
 import Renderer from "@/views/renderer"
 import cors from "@elysiajs/cors";

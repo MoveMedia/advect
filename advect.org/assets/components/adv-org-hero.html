@@ -1,6 +1,8 @@
 <template  id="adv-org-hero" adv>
   <style>
     .hero {
+      height: 100%;
+
       --grid-color: rgba(0, 0, 0, 0.1);
       --grid-size: 20px;
       scroll-snap-align: start;
@@ -17,12 +19,12 @@
       background-position: center, center center;
     }
   </style>
-  <section class="bg-gray-50 text-black hero">
+  <section class="bg-gray-50 text-black hero flex items-center">
     <div
-      class="mx-auto max-w-screen-xl px-4 py-32 lg:flex lg:h-screen lg:items-center"
+      class="mx-auto  px-4 py-32 lg:flex lg:items-center"
     >
       <div class="mx-auto max-w-xl text-center">
-        <h1 class="text-3xl font-extrabold sm:text-5xl">
+        <h1 class="text-6xl font-extrabold ">
           <slot name="h1"> My H1 </slot>
         </h1>
 

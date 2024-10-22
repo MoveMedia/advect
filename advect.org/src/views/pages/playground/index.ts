@@ -2,24 +2,16 @@ import { Edge } from "edge.js";
 import Elysia, { Context, error, redirect } from "elysia";
 import edge from "@/views/renderer";
 import html from "@elysiajs/html";
-import { AdvectComponent, queryItem } from "@/services/directus/app";
 import {generateGuid, SiteContext} from "@/lib";
 
-export default new Elysia().group("/editor", (editor) => {
+export default new Elysia().group("/playground", (editor) => {
   return editor
     .use(html())
     .get("/", async (ctx: SiteContext) => {
-      return redirect(`/editor/${generateGuid()}`);
+      return redirect(`/playground/${generateGuid()}`);
     })
     .get("/:id", async (ctx: SiteContext) => {
-      // @ts-ignore
-        const componetId = ctx.params.id;
-        return await queryItem<AdvectComponent>(
-          "AdvectComponents",
-          componetId
-        ).then(async (adv_component) => {
-          return await ctx.view.render("pages/editor/index",  ctx, { adv_component });
-        })
+      return await ctx.view.render("pages/playground/index",  ctx, { });
     })
     .post("/:id", async (ctx) => {})
      // @ts-ignore

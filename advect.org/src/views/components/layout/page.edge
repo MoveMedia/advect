@@ -53,7 +53,7 @@
       overflow-x: hidden;
     }
     body {
-
+      position: relative;
     h1, .h1{
       font-size: 2.25rem;
       line-height: 2.5rem;
@@ -83,6 +83,12 @@
       font-size: 1rem;
       line-height: 1.5rem;
       font-weight: 400;
+      &[data-current]{
+        background-clip: text;
+        color: transparent;
+        background-image:linear-gradient(90deg,  #010020,#7d0000);
+        font-weight: 900;
+      }
     }
     ul, .ul{
       font-size: 1rem;
@@ -103,8 +109,20 @@
 
   }
 
- 
+  .advect-effect {
+      background-clip: text;
+      color: transparent;
+      background-image:linear-gradient(90deg,  #010020,#7d0000);
+    }
+
+    .advect-effect-2 {
+      background-clip: text;
+      color: transparent;
+        background-image:linear-gradient(0deg,  #010020, white,  white, #010020);
+      }
   </style>
+
+  
 
   @if ($slots.head_assets)
   {{{ await $slots.head_assets() }}}
@@ -117,9 +135,9 @@
   <title>{{ title }}</title>
 </head>
 
-<body>
+<body class="relative">
 
-  <header class="sticky top-0">
+  <header class="fixed w-[99vw] top-0 z-[100]">
     @if ($slots.header)
     {{{ await $slots.header() }}}
     @end
