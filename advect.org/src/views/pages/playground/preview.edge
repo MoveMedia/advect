@@ -1,0 +1,10 @@
+<script type="module" async src="/assets/advect.js"></script>
+@assign(ctx.set.headers['content-type'] = 'text/html')
+{{{ ctx.query.view }}}
+<script>
+    setTimeout(() => {
+        console.log('Hello from the playground', window.advect) 
+        
+    }, 2000);
+
+</script>

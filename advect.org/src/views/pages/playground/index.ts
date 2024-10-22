@@ -13,6 +13,9 @@ export default new Elysia().group("/playground", (editor) => {
     .get("/:id", async (ctx: SiteContext) => {
       return await ctx.view.render("pages/playground/index",  ctx, { });
     })
+    .get("/preview", async (ctx:SiteContext) => {
+      return await ctx.view.render("pages/playground/preview",  ctx, { });
+    })
     .post("/:id", async (ctx) => {})
      // @ts-ignore
   .onError(async (ctx: SiteContext) => {

@@ -1,25 +1,48 @@
 @layout.page({ title: `Editor ${ctx?.params?.id}` })
 
-  @slot('header')
-    @layout.header()
-    @end
+@slot('header')
+@layout.header()
+@end
+@end
+@slot('content')
+
+<section class="bg-gray-50 mt-[50px]">
+  <div class="flex">
+    <button title="Play Button" class="p-4 bg-red" id="run_btn">
+      Play
+    </button>
+    <button title="Play Button" id="save_btn">
+      Save
+    </button>
+  </div>
+  @playground.monaco()
+  @slot('output')
+  <adv-view onload="{
+              const { run_btn, save_btn } = window
+              function update(){
+                    $self.data.view = editor_instance.getValue();
+                    $self.render();
+              }
+
+              run_btn.onclick = () => {
+                  update()
+}
+               setTimeout(() => {
+                  const { output_frame } = refs;
+                    const { editor_instance } = window;
+                  update()
+                    
+                    }, 2000);
+          }">
+
+    <iframe ref="output_frame" width="200" height="200" src="/playground/preview?view=@{{=view}}"></iframe>
+  </adv-view>
   @end
-  @slot('content')
-    <div class="flex" ref="wrapper">
-      <button title="Play Button">
-        Play
-      </button>
-      <button title="Play Button">
-        Save
-      </button>
-    </div>
-  <section class="bg-gray-50">
-    @playground.monaco()
-    @end
-  </section>
   @end
-  @slot('footer')
-    @layout.footer()
-    @end
-  @end
+</section>
+@end
+@slot('footer')
+@layout.footer()
+@end
+@end
 @end
