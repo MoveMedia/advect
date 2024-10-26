@@ -1,0 +1,169 @@
+@property --motion-scale {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --primary-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: red;
+}
+@property --secondary-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #010020;
+}
+@property --tertiary-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: indigo;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0.5;
+  }
+}
+@media (prefers-reduced-motion: none) {
+  :root {
+    --motion-scale: 0;
+  }
+}
+
+:root {
+  view-transition-name: root;
+  --nav-height: 60px;
+  --nav-border-bottom: linear-gradient(
+    90deg,
+    blue,
+    gray,
+    purple,
+    yellow,
+    green
+  );
+  font-size: 12px;
+
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.5s;
+  }
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  max-width: 99vw;
+  overflow-x: hidden;
+}
+body {
+  position: relative;
+  h1,
+  .h1 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+  }
+  h2,
+  .h2 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
+  }
+  h3,
+  .h3 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+  }
+  h4,
+  .h4 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+  }
+  p,
+  .p {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+  a,
+  .a {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+    &[data-current] {
+      background-clip: text;
+      color: transparent;
+      background-image: linear-gradient(
+        90deg,
+        var(--secondary-color),
+        var(--primary-color)
+      );
+      font-weight: 900;
+    }
+    
+  }
+  .btn{
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    &:hover{
+        background-color: var(--secondary-color);
+    }
+}
+  ul,
+  .ul {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+  ol,
+  .ol {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+  li,
+  .li {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+  }
+}
+
+.signature-effect {
+  background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+  animation
+}
+
+/**
+    * Grid effect
+    variables: --grid-size, --grid-color, --top-color, --bottom-color
+*/
+.grid-effect {
+    /* 
+     */
+    background-attachment: fixed;
+    background-image: linear-gradient(
+        var(--grid-color) 0.1em,
+        transparent 0.1em
+      ),
+      linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
+      linear-gradient(180deg, var(--top-color), var(--bottom-color));
+    background-size: var(--grid-size) var(--grid-size),
+      var(--grid-size) var(--grid-size), cover;
+    background-repeat: repeat, repeat, no-repeat;
+    background-position: center, center center;
+}
+

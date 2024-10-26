@@ -39,9 +39,14 @@ edge.use((e)=>{
         const real_path =`${import.meta.dir}/${template_path}.edge`
         const template_file =  Bun.file(real_path)
         const templateExists = await template_file.exists()
-        console.log(real_path, templateExists)
         return templateExists
     });
+    e.global('file', async (file_path:string) => {
+        const real_path =`./${file_path}`
+        const file =  Bun.file(real_path).text();
+    
+        return file
+    })
 })
 
 export type RenderView = typeof view;

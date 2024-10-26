@@ -1,25 +1,15 @@
 <template  id="adv-org-hero" adv>
   <style>
+    @import url('/assets/main.css');
     .hero {
       height: 100%;
-
       --grid-color: rgba(0, 0, 0, 0.1);
       --grid-size: 20px;
-      scroll-snap-align: start;
-      background-attachment: fixed;
-      background-image: linear-gradient(
-          var(--grid-color) 0.1em,
-          transparent 0.1em
-        ),
-        linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
-        linear-gradient(180deg, transparent, blue);
-      background-size: var(--grid-size) var(--grid-size),
-        var(--grid-size) var(--grid-size), cover;
-      background-repeat: repeat, repeat, no-repeat;
-      background-position: center, center center;
+      --top-color: transparent;
+      --bottom-color: blue;
     }
   </style>
-  <section class="bg-gray-50 text-black hero flex items-center">
+  <section class="bg-gray-50 text-black hero flex items-center grid-effect">
     <div
       class="mx-auto  px-4 py-32 lg:flex lg:items-center"
     >

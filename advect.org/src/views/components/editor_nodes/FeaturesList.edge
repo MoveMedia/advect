@@ -1,19 +1,11 @@
-<section>
+<section class="grid-effect">
   <style>
     @scope {
       :scope {
         --grid-color: rgba(0, 0, 0, 0.1);
         --grid-size: 40px;
-        scroll-snap-align: start;
-        background-attachment: fixed;
-        background-image: linear-gradient(var(--grid-color) 0.1em,
-            transparent 0.1em),
-          linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
-          linear-gradient(180deg, red, indigo);
-        background-size: var(--grid-size) var(--grid-size),
-          var(--grid-size) var(--grid-size), cover;
-        background-repeat: repeat, repeat, no-repeat;
-        background-position: center, center center;
+        --top-color: red;
+        --bottom-color: indigo;
 
         .feature {
           box-shadow: 14px 15px 28px -9px rgba(255, 255, 255, 0.2);
@@ -22,16 +14,8 @@
           backdrop-filter: blur(2px);
           --grid-color: rgba(0, 0, 0, 0.1);
           --grid-size: 40px;
-          scroll-snap-align: start;
-          background-attachment: fixed;
-          background-image: linear-gradient(var(--grid-color) 0.1em,
-              transparent 0.1em),
-            linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
-            radial-gradient(white, transparent);
-          background-size: var(--grid-size) var(--grid-size),
-            var(--grid-size) var(--grid-size), cover;
-          background-repeat: repeat, repeat, no-repeat;
-          background-position: center, center center;
+          --top-color: transparent;
+          --bottom-color: transparent;
         }
       }
     }
@@ -52,9 +36,9 @@
 
     <dl class=" grid grid-cols-1 gap-4  grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
       @each(feature in block.features)
-      <div class="flex flex-col rounded-2xl px-4 py-8 text-center feature justify-center">
+      <div class="flex flex-col rounded-2xl px-4 py-8 text-center feature justify-center grid-effect">
         <dt class="order-last text-lg font-bold italic">{{{feature.content}}}</dt>
-        <dd class="text-3xl font-extrabold advect-effect md:text-4xl">{{feature.title}}</dd>
+        <dd class="text-3xl font-extrabold signature-effect md:text-4xl">{{feature.title}}</dd>
       </div>
       @end
     </dl>

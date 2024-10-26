@@ -6,8 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="prefetch" href="/assets/advect.js" />
-  <script type="text/adv" src="/assets/components/adv-auth.html"></script>
-  <script type="text/adv" src="/assets/components/adv-search.html"></script>
+  <link rel="stylesheet" href="/assets/main.css" />
+  
+    @file.embed({ src: './assets/components/adv-auth.html' }) 
+    @end
+    @file.embed({ src: './assets/components/adv-search.html' }) 
+    @end
+  
   <link rel="icon" type="image/x-icon" href="/assets/logo.svg">
   <script>
     window.adv_config = {
@@ -16,117 +21,6 @@
       }
     }
   </script>
-
-  <style>
-    :root {
-      view-transition-name: root;
-      --nav-height: 60px;
-      --nav-border-bottom: linear-gradient(90deg, blue, gray, purple, yellow, green);
-      font-size: 12px;
-
-      @view-transition {
-        navigation: auto;
-      }
-
-      ::view-transition-old(root),
-      ::view-transition-new(root) {
-        animation-duration: 0.5s;
-      }
-    }
-    :not(:defined) {
-      opacity: 0;
-      min-height: 100%;
-    }
-    :defined {
-      transition: opacity 0.2s ease-in-out;
-      opacity: 1;
-    }
-
-    @media (prefers-reduced-motion: reduce) {}
-    @media (prefers-reduced-motion: no-preference) {}
-
-    body,
-    html {
-      margin: 0;
-      padding: 0;
-      max-width: 99vw;
-      overflow-x: hidden;
-    }
-    body {
-      position: relative;
-    h1, .h1{
-      font-size: 2.25rem;
-      line-height: 2.5rem;
-      font-weight: 700;
-    }
-    h2, .h2{
-      font-size: 1.875rem;
-      line-height: 2.25rem;
-      font-weight: 700;
-    }
-    h3, .h3{
-      font-size: 1.5rem;
-      line-height: 2rem;
-      font-weight: 700;
-    }
-    h4, .h4{
-      font-size: 1.25rem;
-      line-height: 1.75rem;
-      font-weight: 700;
-    }
-    p, .p{
-      font-size: 1rem;
-      line-height: 1.5rem;
-      font-weight: 400;
-    }
-    a, .a{
-      font-size: 1rem;
-      line-height: 1.5rem;
-      font-weight: 400;
-      &[data-current]{
-        background-clip: text;
-        color: transparent;
-        background-image:linear-gradient(90deg,  #010020,#7d0000);
-        font-weight: 900;
-      }
-    }
-    ul, .ul{
-      font-size: 1rem;
-      line-height: 1.5rem;
-      font-weight: 400;
-    }
-    ol, .ol{
-      font-size: 1rem;
-      line-height: 1.5rem;
-      font-weight: 400;
-
-    }
-    li, .li{
-      font-size: 1rem;
-      line-height: 1.5rem;
-      font-weight: 400;
-    }
-
-  }
-
-  .advect-effect {
-      background-clip: text;
-      color: transparent;
-      background-image:linear-gradient(90deg,  #010020,#7d0000);
-    }
-
-    .advect-effect-2 {
-      background-clip: text;
-      color: transparent;
-        background-image:linear-gradient(0deg,  #010020, white,  white, #010020);
-        background-attachment: fixed;
-      
-      }
-
-
-
- 
-  </style>
 
   
 
@@ -166,7 +60,6 @@
     {{{ await $slots.footer_assets() }}}
     @end
     <script type="module" async src="/assets/advect.js"></script>
-    <script type="module" src="/assets/advect.org.js"></script>
   </footer>
 </body>
 

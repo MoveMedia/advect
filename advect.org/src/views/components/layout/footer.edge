@@ -8,22 +8,14 @@
 -->
 
 
-<section class="px-4 py-16 sm:px-6 lg:px-8 border-top-black border-2 text-white">
+<section class="px-4 py-16 sm:px-6 lg:px-8 border-top-black border-2 text-white grid-effect">
   <style>
     @scope {
       :scope {
         --grid-color: rgba(0, 0, 0, 0.1);
         --grid-size: 20px;
-        scroll-snap-align: start;
-        background-attachment: fixed;
-        background-image: linear-gradient(var(--grid-color) 0.1em,
-            transparent 0.1em),
-          linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
-          linear-gradient(180deg, red, indigo);
-        background-size: var(--grid-size) var(--grid-size),
-          var(--grid-size) var(--grid-size), cover;
-        background-repeat: repeat, repeat, no-repeat;
-        background-position: center, center center;
+        --top-color: red;
+        --bottom-color: indigo;
       }
     }
   </style>

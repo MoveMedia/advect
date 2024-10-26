@@ -3,25 +3,12 @@
       .newsletter-section {
         --grid-color: rgba(0, 0, 0, 0.1);
         --grid-size: 20px;
-        scroll-snap-align: start;
-        background-attachment: fixed;
-        background-image: linear-gradient(
-            var(--grid-color) 0.1em,
-            transparent 0.1em
-          ),
-          linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
-          linear-gradient(180deg, red, indigo);
-        background-size: var(--grid-size) var(--grid-size),
-          var(--grid-size) var(--grid-size), cover;
-        background-repeat: repeat, repeat, no-repeat;
-        background-position: center, center center;
-        box-shadow: 14px 15px 28px -9px rgba(0,0,0,0.75);
-
+        --top-color : red;
+        --bottom-color : indigo;
       }
 
-      
     </style>
-    <div class="p-8 md:p-12 lg:px-16 lg:py-24 newsletter-section max-w-[800px] mx-auto rounded-xl">
+    <div class="p-8 md:p-12 lg:px-16 lg:py-24 newsletter-section grid-effect max-w-[800px] mx-auto rounded-xl">
       <div class="mx-auto max-w-lg text-center">
         <h2 class="text-2xl font-bold md:text-3xl text-white">
           Check out our newsletter
@@ -42,7 +29,7 @@
           </div>
   
           <button type="submit"
-            class="group max-w-[20ch] inline-flex w-full items-center justify-center gap-2 rounded-md bg-[red] px-5 py-3 text-white transition focus:outline-none focus:ring focus:ring-yellow-400 sm:mt-0 sm:w-auto">
+            class="group btn whitespace-nowrap flex align-center">
             <span class="text-sm font-medium whitespace-nowrap"> Sign Up </span>
             <svg class="w-5 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
