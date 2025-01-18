@@ -1,30 +1,23 @@
 {
   "name": "@advect/advect",
   "private": false,
-  "version": "0.1.6",
+  "version": "2.0.0",
   "type": "module",
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc  && vite build",
-    "build-watch": "tsc  && vite build --watch",
-    "preview": "vite preview",
-    "publish-npm": "npm publish",
-    "publish-jsr": "bunx jsr publish",
-    "publish": "bun run build && bun run publish-npm || bun run publish-jsr"
+    "build": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ./dist --target browser  --minify",
+    "debug": "bun run build --watch"
   },
   "devDependencies": {
-    "@types/mustache": "^4.2.5",
-    "typedoc": "^0.26.5",
-    "typescript": "^5.4.5",
-    "vite": "^5.1.4"
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "eta": "^3.5.0",
-    "snarkdown": "^2.0.0",
-    "twind": "^0.16.19",
-    "zustand": "^4.5.4"
+    "zustand": "^5.0.1"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
   "main": "dist/advect.js",

@@ -1,26 +1,14 @@
 {
-  "name": "app",
-  "version": "1.0.50",
+  "name": "advect.org",
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts",
-    "docker-build": "docker build --pull -t advect .",
-    "docker-run": "docker run -d -p 3000:3000 advect"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "@directus/sdk": "^17.0.1",
-    "@elysiajs/cors": "^1.1.1",
-    "@elysiajs/html": "^1.1.1",
-    "directus-extension-flexible-editor": "^1.8.1",
-    "edge.js": "^6.0.2",
-    "editorjs-html": "^3.4.3",
-    "elysia": "latest",
-    "eta": "^3.5.0",
-    "twind": "^0.16.19"
-  },
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "module": "src/index.js"
+    "astro": "^5.1.7"
+  }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@advect/advect",
-    "version": "0.1.6",
+    "version": "2.0.0",
     "exports": "./mod.ts",
     "license": "MIT",
     "publish": {
@@ -9,7 +9,7 @@
           "README.md",
           "mod.ts",
           "src/**/*.ts",
-          "project/dist/advect.js"
+          "project/dist/*.js"
         ],
         "exclude": [
           "src/vite-env.d.ts",
