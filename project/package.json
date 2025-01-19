@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "eta": "^3.5.0",
+    "happy-dom": "^16.6.0",
     "zustand": "^5.0.1"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",

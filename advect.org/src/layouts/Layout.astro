@@ -1,22 +1,105 @@
+---
+import Footer from "./Footer.astro";
+import Header from "./Header.astro";
+---
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    />
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <title>Advect Web Components</title>
+  </head>
+  <body>
+    <Header />
+    <slot />
+    <Footer />
+  </body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+<style is:global>
+  @property --motion-scale {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+  }
+  @property --primary-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: rgb(255, 113, 113);
+  }
+  @property --secondary-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #010020;
+  }
+  @property --tertiary-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: rgb(57, 0, 97);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-scale: 0.5;
+    }
+  }
+  @media (prefers-reduced-motion: none) {
+    :root {
+      --motion-scale: 0;
+    }
+  }
+  :root {
+    view-transition-name: root;
+    font-size: 16px;
+  }
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .signature-effect {
+    background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(
+      90deg,
+      var(--secondary-color),
+      var(--primary-color)
+    );
+  }
+
+  .grid-effect {
+    /* 
+     */
+    background-attachment: fixed;
+    background-image: linear-gradient(
+        var(--grid-color) 0.1em,
+        transparent 0.1em
+      ),
+      linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
+      linear-gradient(180deg, var(--top-color), var(--bottom-color));
+    background-size:
+      var(--grid-size) var(--grid-size),
+      var(--grid-size) var(--grid-size),
+      cover;
+    background-repeat: repeat, repeat, no-repeat;
+    background-position:
+      center,
+      center center;
+  }
 </style>
