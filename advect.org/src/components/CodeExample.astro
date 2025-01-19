@@ -1,14 +1,49 @@
 ---
-import {generateGUID, runHighlighter } from "../lib"
-const lang = Astro.props.lang ?? 'xml';
+import { generateGUID, runHighlighter } from "../lib";
+const lang = Astro.props.lang ?? "xml";
 const id = generateGUID();
-
-
 ---
 
 <figure class="highlight my-4" id={id}>
-<pre class="columns"><code class={`language-${lang} is-rounded column`}><slot></slot></code>
-  <button class="button bd-copy column is-1 is-small">Copy</button>
+  <pre
+    class="columns"><code class={`language-${lang} is-rounded column`}><slot /></code>
+  <button popovertarget={`${id}-popover`} class="button bd-copy column is-1 is-small">
+    <div>Copy</div>
+    <div class="notification is-info" id={`${id}-popover`} popover>Copied!</div>
+  </button>
 </pre>
 </figure>
+<style>
+  [popover] {
+    border: 1px solid;
+    padding: 1rem;
+    --p-width: 16ch;
+    --p-height: 7ch;
+    overflow: hidden;
+    width: var(--p-width);
+    height: var(--p-height);
+    top: calc(
+      calc(anchor(top) - var(--p-height)) - calc(var(--p-height) * 1.2)
+    );
+    left: calc(anchor(left) - var(--p-width));
+    bottom: anchor(bottom);
+  }
+</style>
+<script define:vars={{ id }}>
+  const figure = document.getElementById(id);
+  const codeEl = figure.querySelector('code');
+  const copyBtn = figure.querySelector("button");
+  const copyBtnPopOver = copyBtn.querySelector("[popover]");
+  copyBtn.style.anchorName = `--${id}-anchor`;
+  copyBtnPopOver.style.positionAnchor = `--${id}-anchor`;
 
+  copyBtn.onclick = () => {
+    const codeTxt = codeEl.innerText;
+    navigator.clipboard
+    .writeText(codeTxt)
+
+    setTimeout(() => {
+        copyBtn.hidePopover();
+    }, 1000);
+  }
+</script>

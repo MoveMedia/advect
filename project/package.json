@@ -9,7 +9,10 @@
     "build": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ./dist --target browser  --minify",
     "build-site": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ../advect.org/public --target browser --minify",
     "debug": "bun run build --watch",
-    "debug-site": "bun run build-site --watch"
+    "debug-site": "bun run build-site --watch",
+    "publish-npm": "npm publish",
+    "publish-jsr": "bunx jsr publish",
+    "publish": "bun run build && bun run publish-npm || bun run publish-jsr"
   },
   "devDependencies": {
     "@types/bun": "latest"
