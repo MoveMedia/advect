@@ -7,7 +7,9 @@
   "license": "MIT",
   "scripts": {
     "build": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ./dist --target browser  --minify",
-    "debug": "bun run build --watch"
+    "build-site": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ../advect.org/public --target browser --minify",
+    "debug": "bun run build --watch",
+    "debug-site": "bun run build-site --watch"
   },
   "devDependencies": {
     "@types/bun": "latest"

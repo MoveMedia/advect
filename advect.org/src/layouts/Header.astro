@@ -1,4 +1,4 @@
-<nav class="navbar" role="navigation" aria-label="main navigation">
+<nav id="main-nav" class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item" href="/">
         <img src="logo.svg" alt="advect logo" width="80" height="80" />
@@ -21,7 +21,9 @@
         <a class="navbar-item" href="/docs">
           Documentation
         </a>
-  
+        <a class="navbar-item" href="/blog">
+          Blog
+        </a>
         <!-- <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link">
             More
@@ -54,5 +56,35 @@
       </div>
     </div>
   </nav>
+  <script>
+    const nav = document.getElementById('main-nav');
+    document.addEventListener('DOMContentLoaded', () => {
+    // Function to highlight the current route link
+    function highlightCurrentRoute() {
+        const currentRoute = window.location.pathname;
+        const navLinks = document.querySelectorAll('#main-nav a');
+
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentRoute) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    }
+
+    // Run the function on page load
+    highlightCurrentRoute();
+
+    // Optional: Update the highlight when the route changes
+    window.addEventListener('popstate', highlightCurrentRoute);
+});
+
+  </script>
+  <style>
+    #main-nav a.active{
+      font-weight: bold;
+    }
+  </style>
 
   

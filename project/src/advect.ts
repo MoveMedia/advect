@@ -123,10 +123,7 @@ const createAdvect = () => {
   };
 
 
-  const log_channel = new BroadcastChannel('advect:log');
-  log_channel.onmessage = (event) =>{
-    console.log(event.data)
-  }
+
 
   /**
    * Loads a webcomponent from a url or list of urls
@@ -136,8 +133,6 @@ const createAdvect = () => {
 const load  = async (urls:string|string[]) =>{
   const buildMsg = await messagePromise("load", { urls }) as MessageEvent<{result: CustomElementSettings[], id:string, action:ActionKey}>;
   const buildSettings = buildMsg.data.result;
-
-  console.log('got my build settings', buildSettings)
   return createCustomElementClasses(buildSettings)
 }
 
@@ -155,7 +150,6 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
     const $settings = settings;
     toModule(settings.module, []).then((module:any) => {
       const moduleClass = module?.default;
-      console.log(settings.tagName, settings)
       const newClass = class extends (moduleClass || AdvectElement) {
         static observedAttributes = Object.keys($settings.watched_attrs);
         static settings = $settings;
@@ -195,7 +189,6 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
         templateScriptUrls.push( e.getAttribute('src') ?? '')
       }
     })
-    console.log('loading', templateScriptUrls)
     load(templateScriptUrls)
 
     document.removeEventListener("DOMContentLoaded", onContent);
@@ -214,6 +207,10 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
  */
 export class AdvectBase extends HTMLElement {
   anyAttrChanged (_:string, __:string){}
+  /**
+   * Helper for getting and setting attributes on this element
+   * when setting will call this.anyAttrChanged
+   */
   attr = new Proxy(
     {},
     {
@@ -233,6 +230,10 @@ export class AdvectBase extends HTMLElement {
       },
     }
   );
+  /**
+   * Object for accessing a components dataset variables.
+   * When setting will call this.anyAttrChanged
+   */
   data = new Proxy(
     {},
     {
@@ -253,8 +254,13 @@ export class AdvectBase extends HTMLElement {
     }
   );
 
-
+  /**
+   * Element iternals
+   */
   #internals?: ElementInternals;
+  /**
+   * Getter for internals
+   */
   get internals() {
     return this.#internals;
   }
@@ -262,8 +268,13 @@ export class AdvectBase extends HTMLElement {
   constructor() {
     super();
   }
-
+  /**
+   *  Function to call when the component is adopted (ie moved between html documents)
+   */
   onAdopt = () => {};
+  /**
+   *  Custom web element connected callbacked
+   */
   adoptedCallback() {
     this?.onAdopt();
   }
@@ -273,8 +284,13 @@ export class AdvectBase extends HTMLElement {
     this?.onAttributeChange(name, oldValue, newValue);
   }
 
-
+  /**
+   *  Function to call when the component is connected
+   */
   onConnect = () => {};
+  /**
+   * Custom web element connect callback
+   */
   connectedCallback() {
     this.#internals = this.attachInternals();
     this.dispatchEvent(new CustomEvent("connect"));
@@ -291,7 +307,13 @@ export class AdvectBase extends HTMLElement {
       listener(new Event("connect", {}));
     }
   }
+  /**
+   * Function to call when this component is disconnected
+   */
   onDisconnect = () => {};
+  /**
+   * Custom Web Element disconnect function
+   */
   disconnectedCallback() {
     this?.onDisconnect();
   }
@@ -308,7 +330,6 @@ export function refHandle(el:HTMLElement):Promise<HTMLElement|null>{
   return new Promise((resolve, reject) =>{
     if (!el.isConnected) {
       resolve(null)
-      console.log(el,'is not connected to the dom and cannot be a ref')
       return;
     }
     const isCustom = el.tagName.indexOf('-') != -1;
@@ -330,15 +351,24 @@ export function refHandle(el:HTMLElement):Promise<HTMLElement|null>{
 }
 
 /**
- * Base class for 
+ * Base class for custom web elements
  */
 export class AdvectElement extends AdvectBase {
+  /**
+   * The original markup for the custom web element
+   */
   get html() {
     return this.$settings.template;
   }
+  /**
+   * The original list of refs in the component
+   */
   get refs_list() {
     return this.$settings.refs;
   }
+  /**
+   * 
+   */
   refs = new Proxy({},
     {
       get: (_, key) => {
@@ -350,6 +380,9 @@ export class AdvectElement extends AdvectBase {
       },
     }
   );
+  /**
+   * 
+   */
   get $settings() {
     // @ts-ignore
     return this.constructor.settings as CustomElementSettings;
@@ -361,14 +394,14 @@ export class AdvectElement extends AdvectBase {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setupInitialDom()
+    this.#setupInitialDom()
    // this.createIntersectObserver()
    // this.createMutationObserver();
-    this.hookRefs();
+    this.#hookRefs();
     this?.onConnect();
   }
   
-  setupInitialDom(){
+  #setupInitialDom(){
     switch (this.$settings?.root) {
       case "shadow":
           this.attachShadow( {mode: this.$settings.shadow })
@@ -380,7 +413,7 @@ export class AdvectElement extends AdvectBase {
         break;
     }
   }
-  hookRefsShadow(){
+  #hookRefsShadow(){
     this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
 
       this.mutationObserver?.observe(ref, {
@@ -433,7 +466,7 @@ export class AdvectElement extends AdvectBase {
 
     });
   }
-  hookRefsLight(){
+  #hookRefsLight(){
     // refs
     this?.querySelectorAll("[ref]").forEach((ref) => {
     
@@ -469,7 +502,7 @@ export class AdvectElement extends AdvectBase {
     });
      // refs
   }
-  hookRefsSelf(){
+  #hookRefsSelf(){
     // light dom event handlers just 'this' element
     this.getAttributeNames()
       .filter((name) => name.startsWith("on"))
@@ -491,11 +524,11 @@ export class AdvectElement extends AdvectBase {
           );
       });
   }
-  hookRefs(): void {
+  #hookRefs(): void {
     //const is_view = this.nodeName.toLocaleLowerCase() === 'adv-view';
-    this.hookRefsSelf();
-    this.hookRefsLight();
-    this.hookRefsShadow();
+    this.#hookRefsSelf();
+    this.#hookRefsLight();
+    this.#hookRefsShadow();
     
   }
   /**
@@ -544,7 +577,7 @@ export class AdvectElement extends AdvectBase {
 }
 
 /**
- * 
+ * A component for interacting with the ETA templating library
  */
 export class AdvectView extends AdvectBase {
   override anyAttrChanged(_: string, __: string): void {
@@ -583,9 +616,9 @@ export class AdvectView extends AdvectBase {
 
   render(){
     const clean = cleanTemplate(this.innerHTML, this.#eta.config)
-    const rendered = `<div style="display:contents;" part="root">` + this.eta.renderString(clean, {
-      self:this
-    }) + `</div>`;
+    const rendered = `<div style="display:contents;" part="root">
+      ${this.eta.renderString(clean, { $self:this })}</div>`;
+
     if (this.shadowRoot){
       this.shadowRoot.innerHTML = rendered;
     }
@@ -597,10 +630,8 @@ if (!customElements.get('adv-view')){
   customElements.define('adv-view', AdvectView);
 }
 
-// This is necessary so that elements have data
+// This is necessary so that elements can
 (window as any).AdvectElement = AdvectElement
-
-
 
 export const advect = createAdvect();
 

@@ -9,13 +9,9 @@ import {
   type CustomElementSettings,
   isValidAttrType,
   toModule,
+  adv_log
 } from "./lib";
 
-
-const log_channel = new BroadcastChannel("advect:log");
-function log(msg:any){
-    log_channel.postMessage(msg)
-}
 
 /**
  * List of actions available in advect
@@ -25,7 +21,7 @@ export const Actions = {
     template: string;
     state: Record<string, any>;
   }): Promise<string> {
-    log({ renderDesc });
+    adv_log({ renderDesc });
     return "";
   },
   /**
@@ -38,7 +34,7 @@ export const Actions = {
   }: {
     urls: string | string[];
   }): Promise<CustomElementSettings[]> {
-    log({
+    adv_log({
       message: "starting my loading",
       urls,
     });
@@ -56,7 +52,7 @@ export const Actions = {
       const data = await fetch(url)
         .then((r) => r.text())
         .then(async (t) => await this.build({ template: t }));
-      log({
+      adv_log({
         msg: "wow loading some stuff",
         url,
         data,
@@ -64,7 +60,7 @@ export const Actions = {
       settingResults.push(...data);
     }
 
-    log({
+    adv_log({
       message: "done loading",
       urls,
     });
@@ -84,14 +80,14 @@ export const Actions = {
     const root_nodes = HTMLNode.create(String.raw`${template}`);
     const results: CustomElementSettings[] = [];
 
-    log({
+    adv_log({
       message: "building",
       template,
       root_nodes,
     });
 
     for (let root_node of root_nodes) {
-      log({
+      adv_log({
         message: "Adding",
         root_node: root_node.attributes.id,
       });
@@ -120,14 +116,14 @@ export const Actions = {
       };
       if (root_node.tagName.toLowerCase() === "template") {
         if (!root_node.attributes["id"]) {
-          log(
+          adv_log(
             "advect Template must have an id that will become the tag name"
           );
           continue;
         }
         const tagName = root_node.attributes["id"];
         if (tagName.indexOf("-") === -1) {
-          log("advect Template tag name must contain a hyphen");
+          adv_log("advect Template tag name must contain a hyphen");
           continue;
         }
 
