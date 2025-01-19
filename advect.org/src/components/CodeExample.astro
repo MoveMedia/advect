@@ -1,0 +1,14 @@
+---
+import {generateGUID, runHighlighter } from "../lib"
+const lang = Astro.props.lang ?? 'xml';
+const id = generateGUID();
+
+
+---
+
+<figure class="highlight my-4" id={id}>
+<pre class="columns"><code class={`language-${lang} is-rounded column`}><slot></slot></code>
+  <button class="button bd-copy column is-1 is-small">Copy</button>
+</pre>
+</figure>
+

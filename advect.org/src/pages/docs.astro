@@ -1,5 +1,9 @@
 ---
+import CodeExample from "../components/CodeExample.astro";
 import Layout from "../layouts/Layout.astro";
+import InstallLibrary from "../snippets/InstallLibrary.astro";
+import background from "../assets/background.svg";
+
 ---
 
 <Layout>
@@ -9,11 +13,13 @@ import Layout from "../layouts/Layout.astro";
         <p class="title">Advect Documentation</p>
       </div>
     </section>
+
     <section class="block">
       <div class="content is-normal">
         <h2>Getting Started</h2>
         <p>You will find what you need</p>
         <h2>Installation</h2>
+        <InstallLibrary></InstallLibrary>
         <p>
           Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit.
           Quisque condimentum maximus mi, sit amet commodo arcu rutrum id. Proin
