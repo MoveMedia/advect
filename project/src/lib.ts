@@ -19,15 +19,52 @@ const FormatTypes = {
     hex:{}
 }
 
-
+/**
+ * The description Object for a custom web element
+ */
 export interface CustomElementSettings{
+    /**
+     * The tag name of the custom component
+     * uses the "id" attribute of the component
+     */
     tagName:string,
+    /**
+     * The JS module of the component
+     * will be the first <script type="module"> with no "src" atttribute
+     */
     module: string,
+    /**
+     * The markup for the component
+     * Will be placed in the "light" dom by default controlled by the "root" attribute on the template tag
+     */
     template:string,
+    /**
+     * Reference to the HTMLNode interface.
+     * This can be used to reference the original component markup without needing access the the browser APIs
+     */
     templateNode:HTMLNodeInterface |null,
+    /**
+     * References in the template.
+     * all html elements with a "ref attribute"
+     */
     refs: HTMLNodeInterface[],
+    /**
+     * Shadow Mode for the component
+     */
     shadow: 'open' | 'closed',
+    /**
+     * Where the initial markup for the component will be placed
+     * light for the light dom, shadow for the shadow dom
+     */
     root: 'light' | 'shadow'
+    /**
+     * An object containing the watched attributes
+     * Watched attributes are defined inside the 
+     * <settings>
+     * <attr name="ting" type="string" />
+     * </settings> tags
+     * these are not added to the mark up
+     */
     watched_attrs: {
         [key:string]: {
             type: AttrTypeKey
@@ -35,6 +72,11 @@ export interface CustomElementSettings{
            // storage: 'css-var' | 'store'
         }
     },
+    /**
+     * Mutation observer settings set inside 
+     * <setting>
+     * </setting>
+     */
     mutation?: {
         attributes?: boolean,
         characterData?: boolean,
@@ -55,9 +97,17 @@ export function isValidAttrType( attr:string ) {
     return Object.keys(AttrTypes).find( t => t.toLowerCase() == attr.toLocaleLowerCase() ) != null
 }
 
-
+/**
+ * Constructor for an async function.
+ */
 export const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
+/**
+ * Given a string creates a module
+ * @param script the text of the module
+ * @param inject strings to be added before the rest of the module script
+ * @returns a module
+ */
 export function toModule(script: string, inject: string[]) {
     const encoded_uri =
       "data:text/javascript;charset=utf-8," +

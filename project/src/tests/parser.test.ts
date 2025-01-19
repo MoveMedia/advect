@@ -11,7 +11,7 @@ import shadowDomBasic from "./components/shadow-dom-basic.html" with { type: "te
  * with default settings for root, and shadow
  */
 test("light-dom-basic", async () => {
-    const componentSettings =  await Actions.build({
+    const componentSettings = await Actions.build({
         template: lightDomBasic
     });
     expect(componentSettings.length).toBe(1);
@@ -21,6 +21,10 @@ test("light-dom-basic", async () => {
     expect(onlyComponent.shadow).toBe("closed");
 });
 
+/**
+ * Test that basic component is a valid component
+ * with "root" set to "shadow" and shadow set to open
+ */
 test("shadow-dom-basic", async () => {
   const componentSettings =  await Actions.build({
       template: shadowDomBasic

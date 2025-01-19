@@ -11,7 +11,10 @@ import { createStore } from "zustand/vanilla";
 import type { StoreApi } from "zustand";
 
 
-
+/**
+ * Creates a shared worker for running advect
+ * @returns a shared worker for running advect
+ */
 const createAdvectSharedWorker = () => {
   const openPromises = new Map<
     string,
@@ -49,6 +52,11 @@ const createAdvectSharedWorker = () => {
   };
 };
 
+
+/**
+ * Creates a dedicated worker for running advect
+ * @returns a dedicated worker for running advect
+ */
 const createAdvectDedicatedWorker = () => {
   const openPromises = new Map<
     string,
@@ -83,6 +91,10 @@ const createAdvectDedicatedWorker = () => {
   };
 };
 
+/**
+ * Creates a no worker for running advect
+ * @returns a shared worker for running advect
+ */
 const createAdvectNoWorker = () => {
   const messagePromise = async (
     action: ActionKey,
@@ -158,6 +170,11 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
   return buildClasses;
 }
 
+/**
+ * 
+ * @param template 
+ * @returns 
+ */
   const build = async (template: string) => {
     const buildMsg = await messagePromise("build", { template }) as MessageEvent<{result: CustomElementSettings[], id:string, action:ActionKey}>;
     const buildSettings = buildMsg.data.result;
@@ -312,6 +329,9 @@ export function refHandle(el:HTMLElement):Promise<HTMLElement|null>{
   
 }
 
+/**
+ * Base class for 
+ */
 export class AdvectElement extends AdvectBase {
   get html() {
     return this.$settings.template;
@@ -523,6 +543,9 @@ export class AdvectElement extends AdvectBase {
   }
 }
 
+/**
+ * 
+ */
 export class AdvectView extends AdvectBase {
   override anyAttrChanged(_: string, __: string): void {
     this.render();
