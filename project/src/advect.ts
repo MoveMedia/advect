@@ -1,8 +1,8 @@
 /**
  * Advect web component library. 
- * 
  */
-
+// @ts-ignore There are no TS definitions for this lib
+import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
 import { AsyncFunction, type CustomElementSettings,toModule } from "./lib";
 import { Eta } from "eta";
@@ -15,13 +15,13 @@ import type { StoreApi } from "zustand";
  * Creates a shared worker for running advect
  * @returns a shared worker for running advect
  */
-const createAdvectSharedWorker = () => {
+const createAdvectSharedWorker = async () => {
   const openPromises = new Map<
     string,
     { resolve: Function; reject: Function }
   >();
-
-  const worker = new SharedWorker(new URL("advect.sharedworker.js", import.meta.url).href, { type: "module" });
+  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.sharedworker.js", import.meta.url).href);
+  const worker = new SharedWorker(workerUrl, { type: "module" });
   worker.onerror = (e) => {
     console.warn("error", e);
   };
@@ -57,13 +57,14 @@ const createAdvectSharedWorker = () => {
  * Creates a dedicated worker for running advect
  * @returns a dedicated worker for running advect
  */
-const createAdvectDedicatedWorker = () => {
+const createAdvectDedicatedWorker = async () => {
   const openPromises = new Map<
     string,
     { resolve: Function; reject: Function }
   >();
 
-  const worker = new Worker(new URL('advect.worker.js',import.meta.url), { type: "module" });
+  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.sharedworker.js", import.meta.url).href);
+  const worker = new Worker(workerUrl, { type: "module" });
   worker.onerror = (e) => {
     console.error("error", e);
   };
@@ -110,12 +111,12 @@ const createAdvectNoWorker = () => {
   };
 };
 
-const createAdvect = () => {
+const createAdvect = async () => {
   const { messagePromise } =
     typeof SharedWorker !== "undefined"
-      ? createAdvectSharedWorker()
+      ? await createAdvectSharedWorker()
       : typeof Worker !== "undefined"
-      ? createAdvectDedicatedWorker()
+      ? await createAdvectDedicatedWorker()
       : createAdvectNoWorker();
 
   const render = async (data: Record<string, any>) => {
@@ -616,8 +617,14 @@ export class AdvectView extends AdvectBase {
 
   render(){
     const clean = cleanTemplate(this.innerHTML, this.#eta.config)
-    const rendered = `<div style="display:contents;" part="root">
-      ${this.eta.renderString(clean, { $self:this })}</div>`;
+    let etaRendered = ""
+    try{
+      etaRendered = this.eta.renderString(clean, { $self:this })
+    }
+    catch(e){
+
+    }
+    const rendered = `<div style="display:contents;" part="root">${etaRendered}</div>`;
 
     if (this.shadowRoot){
       this.shadowRoot.innerHTML = rendered;
@@ -633,7 +640,7 @@ if (!customElements.get('adv-view')){
 // This is necessary so that elements can
 (window as any).AdvectElement = AdvectElement
 
-export const advect = createAdvect();
+export const advect = await createAdvect();
 
 
 

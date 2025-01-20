@@ -1,7 +1,7 @@
 {
   "name": "@advect/advect",
   "private": false,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "type": "module",
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
@@ -21,6 +21,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "crossoriginworker": "^1.1.0",
     "eta": "^3.5.0",
     "happy-dom": "^16.6.0",
     "zustand": "^5.0.1"
