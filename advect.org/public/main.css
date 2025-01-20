@@ -1,0 +1,74 @@
+@property --motion-scale {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+  }
+  @property --primary-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: rgb(255, 113, 113);
+  }
+  @property --secondary-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #010020;
+  }
+  @property --tertiary-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: rgb(57, 0, 97);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-scale: 0.5;
+    }
+  }
+  @media (prefers-reduced-motion: none) {
+    :root {
+      --motion-scale: 0;
+    }
+  }
+  :root {
+    view-transition-name: root;
+    font-size: 16px;
+  }
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  main{
+    padding-inline: 10px;
+  }
+  .signature-effect {
+    background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(
+      90deg,
+      var(--secondary-color),
+      var(--primary-color)
+    );
+  }
+
+  .grid-effect {
+    /* 
+     */
+    background-attachment: fixed;
+    background-image: linear-gradient(
+        var(--grid-color) 0.1em,
+        transparent 0.1em
+      ),
+      linear-gradient(90deg, var(--grid-color) 0.1em, transparent 0.1em),
+      linear-gradient(180deg, var(--top-color), var(--bottom-color));
+    background-size:
+      var(--grid-size) var(--grid-size),
+      var(--grid-size) var(--grid-size),
+      cover;
+    background-repeat: repeat, repeat, no-repeat;
+    background-position:
+      center,
+      center center;
+  }

@@ -1,0 +1,163 @@
+---
+import FeatureCard from "../components/FeatureCard.astro";
+import {advectFeatures} from "../data/feature"
+---
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+/>
+
+
+<script is:inline src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<section class="block content is-relative has-background-darker p-5 has-text-center">   
+    <div class="has-text-centered">
+        <h2 class="my-4 signature-effect ">Features</h2>
+    </div>
+<!-- Slider main container -->
+<div class="carousel-component">
+    <div class="swiper-button-next">
+       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="28" viewBox="0 0 32 28" fill="none">
+         <path d="M2 14H30M30 14L18 26M30 14L18 2" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+       </svg>
+     </div>
+   <div class="swiper jobs">
+     <!-- Additional required wrapper -->
+     <div class="swiper-wrapper">
+       <!-- Slides -->
+       {advectFeatures.map(feat => 
+            <div class="swiper-slide">
+                <div class="slide-content">
+                    <FeatureCard {...feat} /> 
+                </div>
+            </div>
+        )}
+  
+     </div>
+     <!-- If we need pagination -->
+     <!--   <div class="swiper-pagination"></div> -->
+ 
+     <!-- If we need navigation buttons -->
+  
+ 
+     <!-- If we need scrollbar -->
+     <!--   <div class="swiper-scrollbar"></div> -->
+   </div>
+ </div>
+</section>
+
+ <script is:inline>
+    document.addEventListener("DOMContentLoaded", (e) => {
+  const swiper = new Swiper(".swiper", {
+    // Optional parameters
+    loop: true,
+    slidesCentered: true,
+    loopAddBlankSlides: true,
+    slidesPerView:'auto',
+    autoplay: {
+    delay: 3000,
+  },
+    // If we need pagination
+    // pagination: {
+    //   el: ".swiper-pagination"
+    // },
+
+    // Navigation arrows
+    navigation: {
+      nextEl: ".swiper-button-next"
+    }
+  });
+});
+
+ </script>
+
+ <style>
+    .carousel-component {
+  @media (min-width:676px){
+    
+  padding-right: 40px;
+  }
+  
+}
+.swiper.jobs {
+  .slide-content {
+    max-width: 390px;
+    display: grid;
+
+    margin: 20px;
+    -webkit-box-shadow: 10px 10px 16px -4px rgb(103, 0, 172);
+    -moz-box-shadow: 10px 10px 16px -4px rgb(103, 0, 172);
+    box-shadow: 10px 10px 16px -4px rgb(103, 0, 172);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    min-width: 294px;
+    .slide-image {
+      background-image: var(--bg);
+      width: 100%;
+      min-height: 180px;
+      background-size: cover;
+      background-repeat: norepeat;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    
+    .quote-el{
+      color: rgba(204, 51, 51, 0.25);
+      font-size: 72px;
+      font-style: italic;
+      font-weight: 700;
+      line-height: normal;
+      position:absolute;
+      left:-0.7rem;
+      top:1rem;
+      
+    }
+    
+    .slide-copy {
+      padding: 24px;
+      position:relative;
+    }
+
+    .employee-name {
+      font-weight: 900;
+      font-size: 20px;
+      margin-top: 30px;
+    }
+  }
+
+  .swiper-slide {
+    max-width: 410px;
+    opacity:0.5;
+    transition: all 0.2s;
+    &.swiper-slide-active{
+      opacity:1;
+    }
+  }
+}
+
+.swiper-button-next {
+  &:after{
+    content:'';
+  }
+  background-color:#49154e;
+  border-radius: 100%;
+  width: 60px;
+  height:60px;
+  padding: 5px;
+  display:flex;
+  justify-items:center;
+  align-items:center;
+  transform: translateY(36px);
+  svg{
+    width: 24px;
+    height: 24px;
+    
+  }
+  @media (max-width: 676px) {
+    display: none;
+  }
+  
+}
+
+ </style>

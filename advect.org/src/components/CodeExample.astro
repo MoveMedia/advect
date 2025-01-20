@@ -3,16 +3,13 @@ import { generateGUID, runHighlighter } from "../lib";
 const lang = Astro.props.lang ?? "xml";
 const id = generateGUID();
 ---
-
 <figure class="highlight my-4" id={id}>
-  <pre
-    class="columns"><code class={`language-${lang} is-rounded column`}><slot /></code>
-  <button popovertarget={`${id}-popover`} class="button bd-copy column is-1 is-small">
-    <div>Copy</div>
+  <pre class="is-flex p-0 is-mobile"><code class={`language-${lang} is-flex-grow-1 is-rounded`}><slot /></code>
+  <button popovertarget={`${id}-popover`} class="button is-small" style="max-height: fit-content;">
+    <ion-icon size="small" name="copy-outline"></ion-icon>
     <div class="notification is-info" id={`${id}-popover`} popover>Copied!</div>
   </button>
 </pre>
-</figure>
 <style>
   [popover] {
     border: 1px solid;
@@ -26,9 +23,12 @@ const id = generateGUID();
       calc(anchor(top) - var(--p-height)) - calc(var(--p-height) * 1.2)
     );
     left: calc(anchor(left) - var(--p-width));
+    right: anchor(right);
     bottom: anchor(bottom);
   }
 </style>
+</figure>
+
 <script define:vars={{ id }}>
   const figure = document.getElementById(id);
   const codeEl = figure.querySelector('code');
@@ -43,7 +43,7 @@ const id = generateGUID();
     .writeText(codeTxt)
 
     setTimeout(() => {
-        copyBtn.hidePopover();
+        copyBtnPopOver.hidePopover();
     }, 1000);
   }
 </script>

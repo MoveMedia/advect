@@ -4,7 +4,7 @@
 // @ts-ignore There are no TS definitions for this lib
 import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
-import { AsyncFunction, type CustomElementSettings,toModule } from "./lib";
+import { adv_warn, AsyncFunction, type CustomElementSettings,toModule } from "./lib";
 import { Eta } from "eta";
 import { cleanTemplate } from "./advect.render";
 import { createStore } from "zustand/vanilla";
@@ -404,6 +404,9 @@ export class AdvectElement extends AdvectBase {
   
   #setupInitialDom(){
     switch (this.$settings?.root) {
+      // this component doesnt have initial markup
+      case "none":
+        break;
       case "shadow":
           this.attachShadow( {mode: this.$settings.shadow })
           if(this.shadowRoot) this.shadowRoot.innerHTML = `<div style="display:contents;" part="root">` + this.html + `</div>`;
@@ -622,7 +625,7 @@ export class AdvectView extends AdvectBase {
       etaRendered = this.eta.renderString(clean, { $self:this })
     }
     catch(e){
-
+      adv_warn(e);
     }
     const rendered = `<div style="display:contents;" part="root">${etaRendered}</div>`;
 

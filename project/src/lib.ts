@@ -60,7 +60,7 @@ export interface CustomElementSettings {
    * Where the initial markup for the component will be placed
    * light for the light dom, shadow for the shadow dom
    */
-  root: "light" | "shadow";
+  root: "light" | "shadow" | "none";
   /**
    * An object containing the watched attributes
    * Watched attributes are defined inside the
