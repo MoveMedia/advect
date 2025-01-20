@@ -182,7 +182,7 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
    */
   const onContent = (_: Event|null) => {
     document.querySelectorAll("template[id][adv]")
-      .forEach((template) => advect.build(template.outerHTML));
+      .forEach((template) => build(template.outerHTML));
 
     let templateScriptUrls:string[] = []
     document.querySelectorAll('script[type="text/adv"][src]').forEach( e =>{
@@ -649,6 +649,8 @@ if (!customElements.get('adv-view')){
 (window as any).AdvectElement = AdvectElement
 
 export const advect = await createAdvect();
+
+
 
 
 
