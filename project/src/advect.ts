@@ -180,7 +180,7 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
    * Loads Elements that are inlined in the document
    * @param _ the DOMContentLoaded Event
    */
-  const onContent = (_: Event) => {
+  const onContent = (_: Event|null) => {
     document.querySelectorAll("template[id][adv]")
       .forEach((template) => advect.build(template.outerHTML));
 
@@ -194,7 +194,12 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
 
     document.removeEventListener("DOMContentLoaded", onContent);
   };
-  document.addEventListener("DOMContentLoaded", onContent);
+
+  if (document.readyState !== 'loading') {
+    onContent(null)
+  }else{
+    document.addEventListener("DOMContentLoaded", onContent);
+  }
 
   return {
     render,
