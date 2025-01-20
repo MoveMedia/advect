@@ -3,8 +3,8 @@ import { generateGUID, runHighlighter } from "../lib";
 const lang = Astro.props.lang ?? "xml";
 const id = generateGUID();
 ---
-<figure class="highlight my-4" id={id}>
-  <pre class="is-flex p-0 is-mobile"><code class={`language-${lang} is-flex-grow-1 is-rounded`}><slot /></code>
+<figure class="highlight  my-4" id={id}>
+  <pre class="is-flex p-0 is-mobile"><code class={`language-${lang} is-flex-grow-1 `}><slot /></code>
   <button popovertarget={`${id}-popover`} class="button is-small" style="max-height: fit-content;">
     <ion-icon size="small" name="copy-outline"></ion-icon>
     <div class="notification is-info" id={`${id}-popover`} popover>Copied!</div>

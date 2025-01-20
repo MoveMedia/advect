@@ -1,0 +1,41 @@
+---
+import FirstComponent from "../FirstComponent.astro";
+---
+
+<section class="section">
+    <div class="content">
+        <h2 id="creating-a-component">Creating a Component</h2>
+        <FirstComponent></FirstComponent>
+
+        <p>Creating a component is easy with the declarative syntax. All you need is a <code>&lt;template&gt;</code> with the following attributes:</p>
+        <ul>
+            <li>An <code>id</code> attribute <strong>(required)</strong>. This will be used as the tag of your custom web element. This value will need to be valid for a custom web element.</li>
+            <li>An <code>adv</code> attribute <strong>(required)</strong>. This does NOT need a value, this just tells the system that the template is indeed an element that needs to be registered and is not just another template you have inside your document. </li>
+            <li>
+                The <code>root</code> attribute <strong>(optional)</strong> declares where in the component the markup will be added to. The options are <code>light</code> | <code>shadow</code> | <code>none</code>.
+                <br>
+                <ul>
+                    <li>
+                        <code>light</code> markup will added to the regular dom when component is connected. (default when <i>root</i> is not present)
+                    </li>
+                    <li>
+                        <code>shadow</code> markup will added to the shadow-dom when component is connected.
+                    </li>
+                    <li>
+                        <code>none</code> no markup will added to component when connected.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                The <code>shadow</code>  attribute <strong>(optional)</strong> is passed to the <i>mode</i> of <code>this.attachShadow</code> call. The options are <code>open</code>| <code>closed</code> (default is <code>closed</code>)
+            </li>
+        </ul>
+        <br>
+        <p>
+            Inside Template <code>&lt;template&gt;</code> Is where
+        </p>
+        <p>
+            The <code> &lt;script type="text/adv"&gt;</code> tag is <i>optional*</i>
+        </p>
+    </div>
+</section>

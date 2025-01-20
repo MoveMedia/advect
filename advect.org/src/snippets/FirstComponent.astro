@@ -1,12 +1,15 @@
 ---
 import CodeExample from "../components/CodeExample.astro";
+const title = Astro.props.title ?? ""
 ---
 <div class="container">
     <div class="content">
-        <h2>Your First Component</h2>
+        {title && title.length > 0 && 
+            <h2 class="signature-effect">{title}</h2>
+        }
 <CodeExample is:raw>&lt;!--Declare your component, anywhere in html --&gt;
-&lt;template id="hello-button" adv&gt;
-    &lt;button onclick="$self.sayHello()"&gt; Hello &lt;/button&gt;
+&lt;template id="hello-button" root="light" shadow="closed" adv&gt;
+    &lt;button ref onclick="$self.sayHello()"&gt; Hello &lt;/button&gt;
     &lt;script type="module"&gt;
     export default class extends AdvectElement {
         sayHello() {

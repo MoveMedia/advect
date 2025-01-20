@@ -1,0 +1,14 @@
+---
+import CodeExample from "../../components/CodeExample.astro";
+import InstallLibrary from "../InstallLibrary.astro";
+---
+
+<section class="section">
+    <div class="content">
+        <h2 id="installation">Installation</h2>
+        <p>Installation is pretty simple, just include the CDN in your html, or install the pacakge via npm (or your prefered package solution, not on JSR just yet.)</p>
+        <InstallLibrary></InstallLibrary>
+        <p>When installing from a package manager you will need to include the library somewhere in your code</p>
+         <CodeExample lang="javascript" is:raw>import {advect} from "advect/advect" </CodeExample>
+    </div>
+</section>
