@@ -97,14 +97,12 @@ const createAdvectDedicatedWorker = async () => {
  * @returns a shared worker for running advect
  */
 const createAdvectNoWorker = () => {
-  console.log('IN my deadicated worker')
   // to keep the workflow the same we use 2  broadcast channels noWorker2 sends to noWorker
   const noWorker = new BroadcastChannel("advect:noworker");
   const noWorker2 = new BroadcastChannel("advect:noworker");
 
   noWorker.onmessageerror = (ev) => console.error(ev);
   noWorker.onmessage = (e) => {
-  console.log('got a message',e)
 
     const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
     if (e.data?.isError === true && pr) {
@@ -121,11 +119,9 @@ const createAdvectNoWorker = () => {
   };
   const openPromises = new Map<string,{ resolve: Function; reject: Function }>();
   const messagePromise = async (action: string, data: Record<string, any>) => {
-    console.log('new message promise', data, action)
     return new Promise((resolve, reject) => {
       const $id = Math.random().toString(36).substr(2, 9);
       openPromises.set($id, { resolve, reject });
-      console.log('posting my message')
       noWorker2.postMessage({ action, data, $id });
     });
   }
