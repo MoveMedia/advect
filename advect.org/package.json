@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@advect/advect": "^2.0.6",
     "astro": "^5.1.7"
   }
 }

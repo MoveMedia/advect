@@ -29,6 +29,7 @@
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
   "main": "dist/advect.js",
+  "types": "src/advect.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moveapp2k/advect.git"
