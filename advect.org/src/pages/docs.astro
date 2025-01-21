@@ -1,78 +1,25 @@
 ---
-import CodeExample from "../components/CodeExample.astro";
 import Layout from "../layouts/Layout.astro";
-import InstallLibrary from "../snippets/InstallLibrary.astro";
-import background from "../assets/background.svg";
+import InstallingAdvect from "../snippets/docs/InstallingAdvect.astro";
+import AboutAdvect from "../snippets/docs/AboutAdvect.astro";
+import CreatingYourFirstComponent from "../snippets/docs/CreatingYourFirstComponent.astro";
+import Templating from "../snippets/docs/Templating.astro";
 
 ---
 
 <Layout>
-  <div class="container">
+  <main class="container px-5">
     <section class="hero">
       <div class="hero-body has-text-centered">
         <p class="title">Advect Documentation</p>
       </div>
     </section>
-
-    <section class="block">
-      <div class="content is-normal">
-        <h2>Getting Started</h2>
-        <p>You will find what you need</p>
-        <h2>Installation</h2>
-        <InstallLibrary></InstallLibrary>
-        <p>
-          Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit.
-          Quisque condimentum maximus mi, sit amet commodo arcu rutrum id. Proin
-          pretium urna vel cursus venenatis. Suspendisse potenti. Etiam mattis sem
-          rhoncus lacus dapibus facilisis. Donec at dignissim dui. Ut et neque nisl.
-        </p>
-        <ul>
-          <li>In fermentum leo eu lectus mollis, quis dictum mi aliquet.</li>
-          <li>Morbi eu nulla lobortis, lobortis est in, fringilla felis.</li>
-          <li>
-            Aliquam nec felis in sapien venenatis viverra fermentum nec lectus.
-          </li>
-          <li>Ut non enim metus.</li>
-        </ul>
-      </div>
-    </section>
-    <section class="block">
-      <article class="message">
-        <div class="message-header">
-          <p>Hello World</p>
-        </div>
-        <div class="message-body">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          <strong>Pellentesque risus mi</strong>, tempus quis placerat ut, porta
-          nec nulla. Vestibulum rhoncus ac ex sit amet fringilla. Nullam gravida
-          purus diam, et dictum <a>felis venenatis</a> efficitur. Aenean ac
-          <em>eleifend lacus</em>, in mollis lectus. Donec sodales, arcu et
-          sollicitudin porttitor, tortor urna tempor ligula, id porttitor mi
-          magna a neque. Donec dui urna, vehicula et sem eget, facilisis sodales
-          sem.
-        </div>
-      </article>
-    </section>
-    <section class="block">
-        <div class="content is-normal">
-          <h2>Getting Started</h2>
-          <p>You will find what you need</p>
-          <h2>Installation</h2>
-          <p>
-            Curabitur accumsan turpis pharetra <strong>augue tincidunt</strong> blandit.
-            Quisque condimentum maximus mi, sit amet commodo arcu rutrum id. Proin
-            pretium urna vel cursus venenatis. Suspendisse potenti. Etiam mattis sem
-            rhoncus lacus dapibus facilisis. Donec at dignissim dui. Ut et neque nisl.
-          </p>
-          <ul>
-            <li>In fermentum leo eu lectus mollis, quis dictum mi aliquet.</li>
-            <li>Morbi eu nulla lobortis, lobortis est in, fringilla felis.</li>
-            <li>
-              Aliquam nec felis in sapien venenatis viverra fermentum nec lectus.
-            </li>
-            <li>Ut non enim metus.</li>
-          </ul>
-        </div>
-      </section>
-  </div>
+    <AboutAdvect></AboutAdvect>
+    <hr>
+    <InstallingAdvect></InstallingAdvect>
+    <hr>
+    <CreatingYourFirstComponent></CreatingYourFirstComponent>
+    <hr>
+    <Templating></Templating>
+    </main>
 </Layout>

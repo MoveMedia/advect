@@ -1,6 +1,10 @@
 ---
 import CodeExample from "../components/CodeExample.astro";
 ---
-
-<CodeExample lang="xml">&lt;script src="" type="module"&gt;&lt;/script&gt;</CodeExample>
-<CodeExample lang="bash">npm i @advect/advect</CodeExample>
+<div>
+    <h4>From CDN</h4>
+    <CodeExample lang="xml">&lt;!--anywhere in your html --&gt;
+&lt;script async src="https://cdn.jsdelivr.net/npm/@advect/advect@latest/dist/advect.js" type="module"&gt;&lt;/script&gt;</CodeExample>
+    <h4>From NPM</h4>
+    <CodeExample lang="bash">npm i @advect/advect</CodeExample>
+</div>

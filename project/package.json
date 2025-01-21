@@ -1,7 +1,8 @@
 {
   "name": "@advect/advect",
+  "displayName": "advect",
   "private": false,
-  "version": "2.0.0",
+  "version": "2.0.6",
   "type": "module",
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
@@ -15,14 +16,15 @@
     "publish": "bun run build && bun run publish-npm || bun run publish-jsr"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "happy-dom": "^16.6.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "crossoriginworker": "^1.1.0",
     "eta": "^3.5.0",
-    "happy-dom": "^16.6.0",
     "zustand": "^5.0.1"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",

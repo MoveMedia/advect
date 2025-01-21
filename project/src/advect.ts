@@ -1,10 +1,10 @@
 /**
  * Advect web component library. 
- * 
  */
-
+// @ts-ignore There are no TS definitions for this lib
+import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
-import { AsyncFunction, type CustomElementSettings,toModule } from "./lib";
+import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, toModule } from "./lib";
 import { Eta } from "eta";
 import { cleanTemplate } from "./advect.render";
 import { createStore } from "zustand/vanilla";
@@ -15,13 +15,13 @@ import type { StoreApi } from "zustand";
  * Creates a shared worker for running advect
  * @returns a shared worker for running advect
  */
-const createAdvectSharedWorker = () => {
+const createAdvectSharedWorker = async () => {
   const openPromises = new Map<
     string,
     { resolve: Function; reject: Function }
   >();
-
-  const worker = new SharedWorker(new URL("advect.sharedworker.js", import.meta.url).href, { type: "module" });
+  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.sharedworker.js", import.meta.url).href);
+  const worker = new SharedWorker(workerUrl, { type: "module" });
   worker.onerror = (e) => {
     console.warn("error", e);
   };
@@ -57,13 +57,14 @@ const createAdvectSharedWorker = () => {
  * Creates a dedicated worker for running advect
  * @returns a dedicated worker for running advect
  */
-const createAdvectDedicatedWorker = () => {
+const createAdvectDedicatedWorker = async () => {
   const openPromises = new Map<
     string,
     { resolve: Function; reject: Function }
   >();
 
-  const worker = new Worker(new URL('advect.worker.js',import.meta.url), { type: "module" });
+  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.worker.js", import.meta.url).href);
+  const worker = new Worker(workerUrl, { type: "module" });
   worker.onerror = (e) => {
     console.error("error", e);
   };
@@ -96,13 +97,34 @@ const createAdvectDedicatedWorker = () => {
  * @returns a shared worker for running advect
  */
 const createAdvectNoWorker = () => {
-  const messagePromise = async (
-    action: ActionKey,
-    data: Record<string, any>
-  ) => {
-    // @ts-ignore
-    return Actions[action as ActionKey].call(data);
+  // to keep the workflow the same we use 2  broadcast channels noWorker2 sends to noWorker
+  const noWorker = new BroadcastChannel("advect:noworker");
+  const noWorker2 = new BroadcastChannel("advect:noworker");
+
+  noWorker.onmessageerror = (ev) => console.error(ev);
+  noWorker.onmessage = (e) => {
+
+    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
+    if (e.data?.isError === true && pr) {
+      pr.reject(e);
+    }
+    if (pr) {
+     // @ts-ignore
+     Actions[e.data.action as ActionKey].call(null, e.data.data).then (result => {
+      e.data.result = result;
+      pr.resolve(e);
+      openPromises.delete(e.data.$id);
+    })
+    }
   };
+  const openPromises = new Map<string,{ resolve: Function; reject: Function }>();
+  const messagePromise = async (action: string, data: Record<string, any>) => {
+    return new Promise((resolve, reject) => {
+      const $id = Math.random().toString(36).substr(2, 9);
+      openPromises.set($id, { resolve, reject });
+      noWorker2.postMessage({ action, data, $id });
+    });
+  }
   return {
     messagePromise,
     worker: null,
@@ -110,20 +132,25 @@ const createAdvectNoWorker = () => {
   };
 };
 
-const createAdvect = () => {
-  const { messagePromise } =
-    typeof SharedWorker !== "undefined"
-      ? createAdvectSharedWorker()
-      : typeof Worker !== "undefined"
-      ? createAdvectDedicatedWorker()
-      : createAdvectNoWorker();
+const createAdvect = async () => {
+
+  const workerType = new URL(import.meta.url).searchParams.get("type")?.toLocaleLowerCase(); // 5
+  let messagePromise: (action: string, data: Record<string, any>) => Promise<unknown> | null;
+  switch(workerType){
+    case 'd':
+      messagePromise = (await createAdvectDedicatedWorker()).messagePromise;
+      break;
+    case 's':
+      messagePromise = (await createAdvectSharedWorker()).messagePromise;
+      break;
+    default:
+      messagePromise = createAdvectNoWorker().messagePromise;
+      break;
+  }
 
   const render = async (data: Record<string, any>) => {
     return messagePromise("prerender", data);
   };
-
-
-
 
   /**
    * Loads a webcomponent from a url or list of urls
@@ -179,9 +206,9 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
    * Loads Elements that are inlined in the document
    * @param _ the DOMContentLoaded Event
    */
-  const onContent = (_: Event) => {
+  const onContent = (_: Event|null) => {
     document.querySelectorAll("template[id][adv]")
-      .forEach((template) => advect.build(template.outerHTML));
+      .forEach((template) => build(template.outerHTML));
 
     let templateScriptUrls:string[] = []
     document.querySelectorAll('script[type="text/adv"][src]').forEach( e =>{
@@ -193,7 +220,12 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
 
     document.removeEventListener("DOMContentLoaded", onContent);
   };
-  document.addEventListener("DOMContentLoaded", onContent);
+
+  if (document.readyState !== 'loading') {
+    onContent(null)
+  }else{
+    document.addEventListener("DOMContentLoaded", onContent);
+  }
 
   return {
     render,
@@ -403,6 +435,9 @@ export class AdvectElement extends AdvectBase {
   
   #setupInitialDom(){
     switch (this.$settings?.root) {
+      // this component doesnt have initial markup
+      case "none":
+        break;
       case "shadow":
           this.attachShadow( {mode: this.$settings.shadow })
           if(this.shadowRoot) this.shadowRoot.innerHTML = `<div style="display:contents;" part="root">` + this.html + `</div>`;
@@ -616,8 +651,14 @@ export class AdvectView extends AdvectBase {
 
   render(){
     const clean = cleanTemplate(this.innerHTML, this.#eta.config)
-    const rendered = `<div style="display:contents;" part="root">
-      ${this.eta.renderString(clean, { $self:this })}</div>`;
+    let etaRendered = ""
+    try{
+      etaRendered = this.eta.renderString(clean, { $self:this })
+    }
+    catch(e){
+      adv_warn(e);
+    }
+    const rendered = `<div style="display:contents;" part="root">${etaRendered}</div>`;
 
     if (this.shadowRoot){
       this.shadowRoot.innerHTML = rendered;
@@ -626,14 +667,16 @@ export class AdvectView extends AdvectBase {
 
   
 }
+
 if (!customElements.get('adv-view')){
   customElements.define('adv-view', AdvectView);
 }
-
 // This is necessary so that elements can
-(window as any).AdvectElement = AdvectElement
+(window as any).AdvectElement = AdvectElement;
 
-export const advect = createAdvect();
+export const advect = await createAdvect();
+
+
 
 
 

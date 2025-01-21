@@ -60,7 +60,7 @@ export interface CustomElementSettings {
    * Where the initial markup for the component will be placed
    * light for the light dom, shadow for the shadow dom
    */
-  root: "light" | "shadow";
+  root: "light" | "shadow" | "none";
   /**
    * An object containing the watched attributes
    * Watched attributes are defined inside the
@@ -130,10 +130,13 @@ export function toModule(script: string, inject: string[]) {
     });
 }
 
+/**
+ * Broadcast channel for console logs
+ */
 export const adv_log_channel = new BroadcastChannel("advect:log");
 adv_log_channel.onmessage = (event) => adv_msg(event);
 
-export function adv_msg(msg: MessageEvent) {
+function adv_msg(msg: MessageEvent) {
   switch (msg.data?.___type) {
     case "table":
       console.table(msg.data);
@@ -153,7 +156,10 @@ export function adv_msg(msg: MessageEvent) {
       break;
   }
 }
-
+/**
+ * Logs from anywhere
+ * @param msg 
+ */
 export function adv_log(msg: any) {
   adv_log_channel.postMessage({ ...msg, ___type: "log" });
 }
@@ -169,3 +175,5 @@ export function adv_dir(msg: any) {
 export function adv_table(msg: any) {
   adv_log_channel.postMessage({ ...msg, ___type: "table" });
 }
+
+

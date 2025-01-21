@@ -1,31 +1,35 @@
 ---
 import astroLogo from "../assets/astro.svg";
 import background from "../assets/background.svg";
+import InstallLibrary from "../snippets/InstallLibrary.astro";
 ---
 
-<div id="container">
+<div class="container">
   <img id="background" src={background.src} alt="" fetchpriority="high" />
   <main>
-    <section class="hero is-medium grid-effect effect-1">
+    <section class="hero is-small grid-effect effect-1">
       <div class="hero-body">
-        <div class="container has-text-centered">
-          <h1 class="title is-1 signature-effect">Advect</h1>
-          <h2 class="subtitle has-text-light">Custom Web Element Crafting Library</h2>
-        
-		  <div class="level are-rounded">
-			<div class="level-item">
-				
-				<a class="button is-rounded" href="/docs#getting-started">
-					Get Started
-				  </a>
-			</div>
-			<div class="level-item">
+        <div class="container">
+          <div class="has-text-centered">
+            <h1 class="title is-1 signature-effect">Advect</h1>
+            <h2 class="subtitle has-text-light">
+              Lightweight Webcomponent library for any project.
+            </h2>
+            <div class="level are-rounded">
+              <div class="level-item">
+                <a
+                  class="button is-link is-dark is-outlined"
+                  href="/docs#getting-started"
+                >
+                  Get Started
+                </a>
+              </div>
+            </div>
+          </div>
 
-			  <a class="button is-rounded" href="/docs#installation">
-				Installation
-			  </a>
-			  </div>
-		  </div>
+          <div class="">
+            <InstallLibrary />
+          </div>
         </div>
       </div>
     </section>
