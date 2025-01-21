@@ -4,7 +4,7 @@
 // @ts-ignore There are no TS definitions for this lib
 import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
-import { adv_warn, AsyncFunction, type CustomElementSettings,toModule } from "./lib";
+import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, toModule } from "./lib";
 import { Eta } from "eta";
 import { cleanTemplate } from "./advect.render";
 import { createStore } from "zustand/vanilla";
@@ -63,7 +63,7 @@ const createAdvectDedicatedWorker = async () => {
     { resolve: Function; reject: Function }
   >();
 
-  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.sharedworker.js", import.meta.url).href);
+  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.worker.js", import.meta.url).href);
   const worker = new Worker(workerUrl, { type: "module" });
   worker.onerror = (e) => {
     console.error("error", e);
@@ -97,13 +97,38 @@ const createAdvectDedicatedWorker = async () => {
  * @returns a shared worker for running advect
  */
 const createAdvectNoWorker = () => {
-  const messagePromise = async (
-    action: ActionKey,
-    data: Record<string, any>
-  ) => {
-    // @ts-ignore
-    return Actions[action as ActionKey].call(data);
+  console.log('IN my deadicated worker')
+  // to keep the workflow the same we use 2  broadcast channels noWorker2 sends to noWorker
+  const noWorker = new BroadcastChannel("advect:noworker");
+  const noWorker2 = new BroadcastChannel("advect:noworker");
+
+  noWorker.onmessageerror = (ev) => console.error(ev);
+  noWorker.onmessage = (e) => {
+  console.log('got a message',e)
+
+    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
+    if (e.data?.isError === true && pr) {
+      pr.reject(e);
+    }
+    if (pr) {
+     // @ts-ignore
+     Actions[e.data.action as ActionKey].call(null, e.data.data).then (result => {
+      e.data.result = result;
+      pr.resolve(e);
+      openPromises.delete(e.data.$id);
+    })
+    }
   };
+  const openPromises = new Map<string,{ resolve: Function; reject: Function }>();
+  const messagePromise = async (action: string, data: Record<string, any>) => {
+    console.log('new message promise', data, action)
+    return new Promise((resolve, reject) => {
+      const $id = Math.random().toString(36).substr(2, 9);
+      openPromises.set($id, { resolve, reject });
+      console.log('posting my message')
+      noWorker2.postMessage({ action, data, $id });
+    });
+  }
   return {
     messagePromise,
     worker: null,
@@ -112,19 +137,24 @@ const createAdvectNoWorker = () => {
 };
 
 const createAdvect = async () => {
-  const { messagePromise } =
-    typeof SharedWorker !== "undefined"
-      ? await createAdvectSharedWorker()
-      : typeof Worker !== "undefined"
-      ? await createAdvectDedicatedWorker()
-      : createAdvectNoWorker();
+
+  const workerType = new URL(import.meta.url).searchParams.get("type")?.toLocaleLowerCase(); // 5
+  let messagePromise: (action: string, data: Record<string, any>) => Promise<unknown> | null;
+  switch(workerType){
+    case 'd':
+      messagePromise = (await createAdvectDedicatedWorker()).messagePromise;
+      break;
+    case 's':
+      messagePromise = (await createAdvectSharedWorker()).messagePromise;
+      break;
+    default:
+      messagePromise = createAdvectNoWorker().messagePromise;
+      break;
+  }
 
   const render = async (data: Record<string, any>) => {
     return messagePromise("prerender", data);
   };
-
-
-
 
   /**
    * Loads a webcomponent from a url or list of urls
@@ -641,12 +671,12 @@ export class AdvectView extends AdvectBase {
 
   
 }
+
 if (!customElements.get('adv-view')){
   customElements.define('adv-view', AdvectView);
 }
-
 // This is necessary so that elements can
-(window as any).AdvectElement = AdvectElement
+(window as any).AdvectElement = AdvectElement;
 
 export const advect = await createAdvect();
 
