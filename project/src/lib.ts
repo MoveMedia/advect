@@ -156,6 +156,20 @@ function adv_msg(msg: MessageEvent) {
       break;
   }
 }
+
+export function stripHtmlComments(htmlString:string) {
+  return htmlString.replace(/<!--[\s\S]*?-->/g, '');
+}
+
+export function toUpperCamelCase(snakeCaseString:string) {
+  return snakeCaseString
+      .toLowerCase()
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('');
+}
+
+
 /**
  * Logs from anywhere
  * @param msg 

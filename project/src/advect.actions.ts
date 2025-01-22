@@ -9,7 +9,9 @@ import {
   type CustomElementSettings,
   isValidAttrType,
   toModule,
-  adv_log
+  adv_log,
+  adv_warn,
+  stripHtmlComments
 } from "./lib";
 
 
@@ -21,7 +23,6 @@ export const Actions = {
     template: string;
     state: Record<string, any>;
   }): Promise<string> {
-    adv_log({ renderDesc });
     return "";
   },
   /**
@@ -34,10 +35,7 @@ export const Actions = {
   }: {
     urls: string | string[];
   }): Promise<CustomElementSettings[]> {
-    adv_log({
-      message: "starting my loading",
-      urls,
-    });
+ 
     const settingResults: CustomElementSettings[] = [];
     const _urls: string[] = [];
 
@@ -52,18 +50,11 @@ export const Actions = {
       const data = await fetch(url)
         .then((r) => r.text())
         .then(async (t) => await this.build({ template: t }));
-      adv_log({
-        msg: "wow loading some stuff",
-        url,
-        data,
-      });
+   
       settingResults.push(...data);
     }
 
-    adv_log({
-      message: "done loading",
-      urls,
-    });
+
 
     return settingResults;
   },
@@ -77,21 +68,13 @@ export const Actions = {
   }: {
     template: string;
   }): Promise<CustomElementSettings[]> {
-    const root_nodes = HTMLNode.create(String.raw`${template}`);
+    const cleanTemplate = stripHtmlComments(template);
+    const root_nodes = HTMLNode.create(String.raw`${cleanTemplate}`);
     const results: CustomElementSettings[] = [];
 
-    adv_log({
-      message: "building",
-      template,
-      root_nodes,
-    });
+    console.log(cleanTemplate)
 
     for (let root_node of root_nodes) {
-      adv_log({
-        message: "Adding",
-        root_node: root_node.attributes.id,
-      });
-
       const settings: CustomElementSettings = {
         tagName: "",
         module: "",
@@ -116,14 +99,14 @@ export const Actions = {
       };
       if (root_node.tagName.toLowerCase() === "template") {
         if (!root_node.attributes["id"]) {
-          adv_log(
+          adv_warn(
             "advect Template must have an id that will become the tag name"
           );
           continue;
         }
         const tagName = root_node.attributes["id"];
         if (tagName.indexOf("-") === -1) {
-          adv_log("advect Template tag name must contain a hyphen");
+          adv_warn("advect Template tag name must contain a hyphen");
           continue;
         }
 
@@ -145,10 +128,10 @@ export const Actions = {
 
         const childQueue = [...root_node.children];
         while (childQueue.length > 0) {
-          const node = childQueue.shift();
-          if (!node) continue;
-          if (node.tagName === "settings") {
-            node.children.forEach((child: HTMLNodeInterface) => {
+          const currNode = childQueue.shift();
+          if (!currNode) continue;
+          if (currNode.tagName === "settings") {
+            currNode.children.forEach((child: HTMLNodeInterface) => {
               if (child.tagName == "mutation") {
                 if (
                   settings?.mutation?.attributeFilter &&
@@ -224,30 +207,30 @@ export const Actions = {
               }
               child.remove();
             });
-            node.remove();
+            currNode.remove();
           } // can be a
-          if (node.tagName === "script") {
+          if (currNode.tagName === "script") {
             // can be a
             if (
-              node.attributes["type"].toLocaleLowerCase() === "text/adv" &&
-              node.attributes["type"]
+              currNode.attributes["type"]?.toLocaleLowerCase() === "text/adv" &&
+              currNode.attributes["type"]
             ) {
-              const url = new URL(node.attributes["src"]);
+              const url = new URL(currNode.attributes["src"]);
               this.load({ urls: url.toString() });
             }
             if (
-              node.attributes["type"].toLocaleLowerCase() === "module" &&
-              !node.attributes["src"]
+              currNode.attributes["type"]?.toLocaleLowerCase() === "module" &&
+              !currNode.attributes["src"]
             ) {
-              settings.module = node.text();
+              settings.module = currNode.text();
             }
           }
 
-          if (node.attributes["ref"]) {
-            settings.refs.push(node);
+          if (currNode.attributes["ref"]) {
+            settings.refs.push(currNode);
           }
 
-          childQueue.push(...node.children);
+          childQueue.push(...currNode.children);
         }
       }
       const outerHtml = root_node.children

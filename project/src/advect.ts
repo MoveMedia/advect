@@ -4,11 +4,12 @@
 // @ts-ignore There are no TS definitions for this lib
 import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
-import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, toModule } from "./lib";
+import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, toModule, toUpperCamelCase } from "./lib";
 import { Eta } from "eta";
 import { cleanTemplate } from "./advect.render";
 import { createStore } from "zustand/vanilla";
 import type { StoreApi } from "zustand";
+import type { ModuleDeclaration, ModuleReference } from 'typescript';
 
 
 /**
@@ -169,19 +170,22 @@ const load  = async (urls:string|string[]) =>{
  * @param register 
  * @returns 
  */
-const createCustomElementClasses = (buildSettings:CustomElementSettings[], register =true) =>{
+const createCustomElementClasses = (buildSettings:CustomElementSettings[], register = true) =>{
   const buildClasses: any[] = [];
   // todo try here
   for (let settings of buildSettings) {
     // for some reason ts thinks settings is used before being declared so let's add a pointer
     const $settings = settings;
     toModule(settings.module, []).then((module:any) => {
-      const moduleClass = module?.default;
+      const moduleClassName = toUpperCamelCase(settings.tagName)
+      const moduleClass = module[moduleClassName];
+
       const newClass = class extends (moduleClass || AdvectElement) {
         static observedAttributes = Object.keys($settings.watched_attrs);
         static settings = $settings;
       };
       if (register){
+        console.log(settings)
         customElements.define(settings.tagName, newClass as any);
       }
       buildClasses.push(newClass);
@@ -207,8 +211,7 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
    * @param _ the DOMContentLoaded Event
    */
   const onContent = (_: Event|null) => {
-    document.querySelectorAll("template[id][adv]")
-      .forEach((template) => build(template.outerHTML));
+    document.querySelectorAll("template[id][adv]").forEach((template) => build(template.outerHTML));
 
     let templateScriptUrls:string[] = []
     document.querySelectorAll('script[type="text/adv"][src]').forEach( e =>{
@@ -399,9 +402,23 @@ export class AdvectElement extends AdvectBase {
     return this.$settings.refs;
   }
   /**
-   * 
+   * References
    */
   refs = new Proxy({},
+    {
+      get: (_, key) => {
+        const ref = this.querySelector(`[ref="${key as string}"]`) ||
+        this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
+        if (ref) return ref;
+        return null;
+        
+      },
+    }
+  );
+/**
+ * Refs of custom web elements returns a promise to the ref
+ */
+  fuzzyRefs = new Proxy({},
     {
       get: (_, key) => {
         const ref = this.querySelector(`[ref="${key as string}"]`) ||
@@ -412,6 +429,7 @@ export class AdvectElement extends AdvectBase {
       },
     }
   );
+
   /**
    * 
    */
