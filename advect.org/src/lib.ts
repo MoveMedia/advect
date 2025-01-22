@@ -1,8 +1,3 @@
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-import css from 'highlight.js/lib/languages/css';
-import xml from 'highlight.js/lib/languages/xml';
-
 
 
 export function generateGUID() {
@@ -13,10 +8,3 @@ export function generateGUID() {
   }
   
 
-  export function runHighlighter(){
-    // Then register the languages you need
-    hljs.registerLanguage('javascript', javascript);
-    hljs.registerLanguage('xml', xml);
-    hljs.registerLanguage('css', css);
-    return hljs;
-  }
