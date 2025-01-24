@@ -72,8 +72,6 @@ export const Actions = {
     const root_nodes = HTMLNode.create(String.raw`${cleanTemplate}`);
     const results: CustomElementSettings[] = [];
 
-    console.log(cleanTemplate)
-
     for (let root_node of root_nodes) {
       const settings: CustomElementSettings = {
         tagName: "",

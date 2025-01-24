@@ -10,7 +10,8 @@ export function cleanTemplate(template:string, etaConf:EtaConfig) {
     const [s, e] = etaConf.tags;
     const r = etaConf.parse.exec;
     const unescaped = convertEscapedChars(template);
-    const _if = convertIfElse(unescaped);
+    const _subview = addBracesToSubview(unescaped)
+    const _if = convertIfElse(_subview);
     const _for = convertFor(_if);
     const _of = convertOf(_for);
 
@@ -65,7 +66,10 @@ export function cleanTemplate(template:string, etaConf:EtaConfig) {
             )
             .replace(/<\/of>/g, `${s}${r} }) ${e}`);
     }
+    function addBracesToSubview(htmlString:string) {
+    return htmlString.replace(/(?!{{~)(<adv-view\b[^>]*>.*?<\/adv-view>)(?<!}})/g, "{{~$1}}");
+        
+    }
     
     return _of;
 }
-

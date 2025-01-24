@@ -10,6 +10,7 @@ import { cleanTemplate } from "./advect.render";
 import { createStore } from "zustand/vanilla";
 import type { StoreApi } from "zustand";
 import type { ModuleDeclaration, ModuleReference } from 'typescript';
+import type { HTMLNode } from './HTMLNode';
 
 
 /**
@@ -179,13 +180,12 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
     toModule(settings.module, []).then((module:any) => {
       const moduleClassName = toUpperCamelCase(settings.tagName)
       const moduleClass = module[moduleClassName];
-
+      
       const newClass = class extends (moduleClass || AdvectElement) {
         static observedAttributes = Object.keys($settings.watched_attrs);
         static settings = $settings;
       };
       if (register){
-        console.log(settings)
         customElements.define(settings.tagName, newClass as any);
       }
       buildClasses.push(newClass);
@@ -401,6 +401,20 @@ export class AdvectElement extends AdvectBase {
   get refs_list() {
     return this.$settings.refs;
   }
+
+    /**
+   * All "[ref]"s on the object of refs in the component
+   */
+    get all_refs() {
+      //
+      const refs  = [
+      // @ts-ignore
+        ...this.querySelectorAll('[ref]'), 
+      // @ts-ignore
+        ...this?.shadowRoot?.querySelectorAll('[ref]') 
+      ]; 
+      return refs;
+    }
   /**
    * References
    */
@@ -466,8 +480,9 @@ export class AdvectElement extends AdvectBase {
         break;
     }
   }
-  #hookRefsShadow(){
-    this.shadowRoot?.querySelectorAll("[ref]").forEach((ref) => {
+
+  #hookRef(ref:Element){
+    {
 
       this.mutationObserver?.observe(ref, {
         attributes: true,
@@ -517,41 +532,17 @@ export class AdvectElement extends AdvectBase {
         }
       });
 
-    });
+    }
+  }
+
+  #hookRefsShadow(){
+    this.shadowRoot?.querySelectorAll("[ref]")
+      .forEach((ref) => { this.#hookRef(ref)});
   }
   #hookRefsLight(){
     // refs
     this?.querySelectorAll("[ref]").forEach((ref) => {
-    
-      this.mutationObserver?.observe(ref, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-      });
-
-      const event_attrs = ref
-        .getAttributeNames()
-        .filter((name) => name.startsWith("on"));
-
-      event_attrs.forEach((name) => {
-        const attr_val = ref.getAttribute(name) ?? "";
-          try {
-            // @ts-expect-error assigning event handlers by name nothing to see here
-            ref[name] = (_event) => {
-              new AsyncFunction(
-                "$self",
-                "event",
-                "$this",
-                "refs",
-                "data",
-                attr_val
-              )(this, _event, ref, this.refs, this.data);
-            };
-          } catch (e) {
-            console.error(e, attr_val, this);
-          }
-      });
-
+      this.#hookRef(ref)
     });
      // refs
   }
@@ -582,7 +573,6 @@ export class AdvectElement extends AdvectBase {
     this.#hookRefsSelf();
     this.#hookRefsLight();
     this.#hookRefsShadow();
-    
   }
   /**
    * Mutation observer
@@ -655,7 +645,43 @@ export class AdvectView extends AdvectBase {
   get state(){
     return this.#store?.getState()
   }
+  viewTransition = true;
 
+    /**
+   * References
+   */
+    refs = new Proxy({},
+      {
+        get: (_, key) => {
+          const ref =  this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
+          if (ref) return ref;
+          return null;
+          
+        },
+      }
+    );
+  /**
+   * Refs of custom web elements returns a promise to the ref
+   */
+    fuzzyRefs = new Proxy({},
+      {
+        get: (_, key) => {
+          const ref = this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
+          if (ref) return refHandle(ref as HTMLElement);
+          return null;
+          
+        },
+      }
+    );
+
+    get all_refs() {
+      //
+      const refs  = [
+      // @ts-ignore
+        ...this?.shadowRoot?.querySelectorAll('[ref]') 
+      ]; 
+      return refs;
+    }
 
   override connectedCallback(): void {
     this.attachShadow({mode:'open'});
@@ -679,12 +705,34 @@ export class AdvectView extends AdvectBase {
     const rendered = `<div style="display:contents;" part="root">${etaRendered}</div>`;
 
     if (this.shadowRoot){
-      this.shadowRoot.innerHTML = rendered;
+      const root = this.shadowRoot;
+      if (this.viewTransition){
+        document.startViewTransition(()=>{
+          root.innerHTML = rendered;
+        }).finished.then(()=>{
+          this.afterRender();
+        })
+      }else{
+          root.innerHTML = rendered;
+          requestAnimationFrame(() =>{
+            this.afterRender();
+      
+          })
+      }
     }
+  
   }
 
-  
+   
+
+  onRender?:() => void = () =>{}
+  afterRender(){
+    if (this.onRender) {
+      this.onRender();
+    }
+  } 
 }
+
 
 if (!customElements.get('adv-view')){
   customElements.define('adv-view', AdvectView);
