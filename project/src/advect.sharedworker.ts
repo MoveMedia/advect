@@ -1,8 +1,5 @@
 import { type ActionKey, Actions } from './advect.actions';
 
-
-
-
 // set of all connected ports
 // @ts-ignore
 onconnect = (connectEvent) => {

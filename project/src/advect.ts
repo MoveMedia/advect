@@ -132,6 +132,10 @@ const createAdvectNoWorker = () => {
   };
 };
 
+/**
+ * Creates the advect instance with the correct worker type
+ * @returns 
+ */
 const createAdvect = async () => {
 
   const workerType = new URL(import.meta.url).searchParams.get("type")?.toLocaleLowerCase(); // 5
@@ -794,8 +798,3 @@ if (!customElements.get('adv-shadow-view')){
 (window as any).AdvectElement = AdvectElement;
 
 export const advect = await createAdvect();
-
-
-
-
-

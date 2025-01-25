@@ -1,7 +1,8 @@
 import type { EtaConfig } from "eta";
 
 /**
- * Wraps ETAjs  If / For
+ * Parses rendering templates to suppor the pseudo elements (for/else/of)
+ * as well has handles escaped text
  * @param template 
  * @param etaConf 
  * @returns 
@@ -67,9 +68,7 @@ export function cleanTemplate(template:string, etaConf:EtaConfig) {
             .replace(/<\/of>/g, `${s}${r} }) ${e}`);
     }
     function addBracesToSubview(htmlString:string) {
-    return htmlString.replace(/(?!{{~)(<adv-view\b[^>]*>.*?<\/adv-view>)(?<!}})/g, "{{~$1}}");
-        
+        return htmlString.replace(/(?!{{~)(<adv-view\b[^>]*>.*?<\/adv-view>)(?<!}})/g, "{{~$1}}");
     }
-    
     return _of;
 }
