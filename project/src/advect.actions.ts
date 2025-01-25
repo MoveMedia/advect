@@ -1,6 +1,6 @@
 /**
  * Ok sparky heres the deal.
- * This file contains all of the actions advect can use on a worker no browser access
+ * This file contains all of the actions advect can use on a worker no browser access.
  */
 
 import { HTMLNode, type HTMLNodeInterface } from "./HTMLNode";
