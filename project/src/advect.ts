@@ -4,13 +4,11 @@
 // @ts-ignore There are no TS definitions for this lib
 import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
-import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, toModule, toUpperCamelCase } from "./lib";
+import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, onloadElements, toModule, toUpperCamelCase } from "./lib";
 import { Eta } from "eta";
 import { cleanTemplate } from "./advect.render";
-import { createStore } from "zustand/vanilla";
+import * as zustand from  "zustand/vanilla" 
 import type { StoreApi } from "zustand";
-import type { ModuleDeclaration, ModuleReference } from 'typescript';
-import type { HTMLNode } from './HTMLNode';
 
 
 /**
@@ -481,7 +479,7 @@ export class AdvectElement extends AdvectBase {
     }
   }
 
-  #hookRef(ref:Element){
+  hookRef(ref:Element){
     {
 
       this.mutationObserver?.observe(ref, {
@@ -489,6 +487,11 @@ export class AdvectElement extends AdvectBase {
         childList: true,
         subtree: true,
       });
+
+      Object.defineProperty(ref, "binder", {
+        value: this,
+        writable: false
+      })
 
       const event_attrs = ref
         .getAttributeNames()
@@ -531,18 +534,23 @@ export class AdvectElement extends AdvectBase {
           }
         }
       });
+      if (ref.matches('[onload]') && !onloadElements.find( ole => ole === ref.tagName.toLocaleLowerCase())){
+        ref.dispatchEvent(new Event("load", {
+          bubbles:false,
+        }))
+      }
 
     }
   }
 
   #hookRefsShadow(){
     this.shadowRoot?.querySelectorAll("[ref]")
-      .forEach((ref) => { this.#hookRef(ref)});
+      .forEach((ref) => { this.hookRef(ref)});
   }
   #hookRefsLight(){
     // refs
     this?.querySelectorAll("[ref]").forEach((ref) => {
-      this.#hookRef(ref)
+      this.hookRef(ref)
     });
      // refs
   }
@@ -619,10 +627,8 @@ export class AdvectElement extends AdvectBase {
   }
 }
 
-/**
- * A component for interacting with the ETA templating library
- */
-export class AdvectView extends AdvectBase {
+class AdvectViewbase extends AdvectBase{
+
   override anyAttrChanged(_: string, __: string): void {
     this.render();
   }
@@ -638,7 +644,7 @@ export class AdvectView extends AdvectBase {
       raw: "~"
     }
   })
-  #store:StoreApi<any> = createStore(($s, $g) => ({}))
+  #store:StoreApi<any> = zustand.createStore(($s, $g) => ({}))
   get store(){
     return this.#store;
   }
@@ -684,17 +690,71 @@ export class AdvectView extends AdvectBase {
     }
 
   override connectedCallback(): void {
-    this.attachShadow({mode:'open'});
+    super.connectedCallback()
     this.#store.subscribe((state, prevState) => {
       this.render();
     })
-    this.render();
+    requestAnimationFrame(()=>{
+      this.render();
+    })
+  }
+  get eta(){ return this.#eta; }
+
+  render(){}
+
+  onRender?:() => void = () =>{}
+  afterRender(){
+    if (this.onRender) {
+      this.onRender();
+    }
+  } 
+}
+
+/**
+ * A component for interacting with the ETA templating library
+ */
+export class AdvectView extends AdvectViewbase {
+  
+  override render(){
+    const template = this.querySelector('template');
+    const output = this.querySelector('output');
+    const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
+    let etaRendered = ""
+    try{
+      etaRendered = this.eta.renderString(clean, { $self:this })
+    }
+    catch(e){
+      adv_warn(e);
+    }
+    const rendered = `${etaRendered}`;
+
+      if (this.viewTransition){
+        document.startViewTransition(()=>{
+          if (output) output.innerHTML = rendered;
+        }).finished.then(()=>{
+          this.afterRender();
+        })
+      }else{
+        if (output) {
+          output.innerHTML = rendered;
+          requestAnimationFrame(() =>{
+            this.afterRender();
+      
+          })
+        }
+      }
+  }
+}
+
+export class AdvectShadowView extends AdvectViewbase {
+
+  override connectedCallback(): void {
+    this.attachShadow({mode:'open'});
     super.connectedCallback()
   }
-  get eta(){  return this.#eta; }
 
-  render(){
-    const clean = cleanTemplate(this.innerHTML, this.#eta.config)
+  override render(){
+    const clean = cleanTemplate(this.innerHTML, this.eta.config)
     let etaRendered = ""
     try{
       etaRendered = this.eta.renderString(clean, { $self:this })
@@ -716,26 +776,19 @@ export class AdvectView extends AdvectBase {
           root.innerHTML = rendered;
           requestAnimationFrame(() =>{
             this.afterRender();
-      
           })
       }
     }
-  
   }
-
-   
-
-  onRender?:() => void = () =>{}
-  afterRender(){
-    if (this.onRender) {
-      this.onRender();
-    }
-  } 
 }
 
 
 if (!customElements.get('adv-view')){
   customElements.define('adv-view', AdvectView);
+}
+
+if (!customElements.get('adv-shadow-view')){
+  customElements.define('adv-shadow-view', AdvectShadowView);
 }
 // This is necessary so that elements can
 (window as any).AdvectElement = AdvectElement;

@@ -191,3 +191,14 @@ export function adv_table(msg: any) {
 }
 
 
+export const onloadElements = [
+  "body",
+  "iframe",
+  "img",
+  "link",
+  "object",
+  "script",
+  "style",
+  "audio",
+  "video"
+];
