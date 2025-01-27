@@ -17,22 +17,9 @@ import type { DocPage, DocPages } from "../data/docs"
   
     <div id="basic-navbar" class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item" href="/">
-          Home
-        </a>
+     
   
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link" href="/docs">
-            Documentation
-          </a>
-          <div class="navbar-dropdown">
-            {docPages.filter(p => p.url != "/docs").map( p => (
-              <a class="navbar-item" href={p.url}>
-                {p.pageInfo.name}
-              </a>
-            ))}
-        </div>
-        </div>  
+    
         <!-- <a class="navbar-item" href="/blog">
           Blog
         </a> -->
@@ -60,6 +47,21 @@ import type { DocPage, DocPages } from "../data/docs"
       </div>
   
       <div class="navbar-end">
+        <a class="navbar-item" href="/">
+          Home
+        </a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="/docs">
+            Documentation
+          </a>
+          <div class="navbar-dropdown">
+            {docPages.filter(p => p.url != "/docs").map( p => (
+              <a class="navbar-item" href={p.url}>
+                {p.pageInfo.name}
+              </a>
+            ))}
+        </div>
+        </div>  
         <div class="navbar-item">
             <a href="https://github.com/MoveMedia/advect/" target="_blank">
                 <ion-icon size="large" name="logo-github"></ion-icon>
@@ -67,6 +69,7 @@ import type { DocPage, DocPages } from "../data/docs"
         </div>
       </div>
     </div>
+
   </nav>
   <script>
     const nav = document.getElementById('basic-navbar');
@@ -108,6 +111,7 @@ import type { DocPage, DocPages } from "../data/docs"
   </script>
   <style>
     #main-nav { 
+      border-bottom:1px solid rgb(41, 39, 57);
       a.active{
         font-weight: bold;
     }

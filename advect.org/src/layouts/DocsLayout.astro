@@ -4,6 +4,7 @@ import Header from "./Header.astro";
 import HeadAssets from "./HeadAssets.astro";
 
 import { docPages } from "../data/docs";
+import Breadcrumb from "../components/Breadcrumb.astro";
 
 const sortedDocPages = docPages.sort((a, b) => {
   return a.pageInfo.index - b.pageInfo.index;
@@ -35,6 +36,9 @@ const prevPage = sortedDocPages?.[currentPage - 1];
     <!-- End Google Tag Manager (noscript) -->
     <Header docPages={docPages} />
     <main class="px-3">
+      <div class="container my-2">
+        <Breadcrumb />
+      </div>
       <div>
         <slot />
       </div>

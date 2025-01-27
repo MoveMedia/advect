@@ -43,6 +43,8 @@
     overflow:clip;
   }
 
+
+
   h1, h2,h3, h4, h5{
     background-clip: text;
     color: transparent !important;
@@ -99,6 +101,11 @@
 
 main{
   view-transition-name: main;
+}
+
+.footer{
+  border-top:1px solid rgb(41, 39, 57);
+
 }
 /* Customize the default animation behavior */
 

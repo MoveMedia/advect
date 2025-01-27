@@ -3,11 +3,26 @@ import type { DocPage } from "../../data/docs";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 
 export const pageInfo: DocPage = {
-    name:"Advect View",
+    name:"Templating",
     index:2
 }
 ---
 
 <DocsLayout>
-    
+    <div class="container">
+        <section>
+            <div class="content">
+                <h1 class="title is-1 signature-effect">Using Advect Views</h1>
+                <div class="block">
+                    <p>
+                        Unlike reactive frameworks like React/Vue/Angular; Advect seperates the concerns of component state, and templating. 
+                        <br> The <code>adv-view</code> and <code>adv-shadow-view</code> custom elements. These 2 custom elements provide templating for your site and can be used standalone or within your custom elements.
+                    </p>
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
 </DocsLayout>
