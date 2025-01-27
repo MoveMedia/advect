@@ -13,7 +13,7 @@ export const advectFeatures: Feature[] = [
     {
         title: "Declarative Syntax",
         subtitle : "Beautiful Simplicity",
-        body: "Works in any frontend, and every backend"
+        body: "It's just HTML!"
     },
     {
         title: "No build Step",
@@ -24,5 +24,10 @@ export const advectFeatures: Feature[] = [
         title: "Declarative Syntax",
         subtitle : "Beautiful Simplicity",
         body: "Works in any frontend, and every backend"
+    },
+    {
+        title: "Small & Fast",
+        subtitle : "Just 30kb, 8kb gzipped",
+        body: "Part of the itty bitty framework a committee and Proud of it"
     },
 ]

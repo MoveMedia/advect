@@ -1,0 +1,25 @@
+---
+import InstallingAdvect from "../../snippets/docs/InstallingAdvect.astro";
+import AboutAdvect from "../../snippets/docs/AboutAdvect.astro";
+import CreatingYourFirstComponent from "../../snippets/docs/CreatingYourFirstComponent.astro";
+import Templating from "../../snippets/docs/Templating.astro";
+import DocsLayout from "../../layouts/DocsLayout.astro";
+
+import { type DocPage } from "../../data/docs";
+
+export const pageInfo:DocPage ={
+  name: "Introduction",
+  index:-100
+}
+
+---
+
+<DocsLayout>
+
+  <div class="container">
+    <AboutAdvect></AboutAdvect>
+    <hr>
+    <InstallingAdvect></InstallingAdvect>
+    <hr>
+  </div>
+</DocsLayout>

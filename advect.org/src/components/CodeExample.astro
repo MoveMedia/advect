@@ -3,35 +3,55 @@ import { generateGUID } from "../lib";
 const lang = Astro.props.lang ?? "xml";
 const id = generateGUID();
 ---
-<figure class="highlight  my-4" id={id}>
-  <pre class="is-flex p-0 is-mobile"><code class={`language-${lang} is-flex-grow-1 `}><slot /></code>
-  <button popovertarget={`${id}-popover`} class="button is-small" style="max-height: fit-content;">
-    <ion-icon size="small" name="copy-outline"></ion-icon>
+
+<figure class="highlight is-relative my-4" id={id}>
+  <pre
+    class="is-flex p-0 is-mobile"><code class={`language-${lang} is-flex-grow-1 `}><slot /></code>
+  <button popovertarget={`${id}-popover`} class="button is-small code-copy-btn">
+    <ion-icon size="small" name="copy-outline" />
     <div class="notification is-info" id={`${id}-popover`} popover>Copied!</div>
   </button>
 </pre>
-<style>
-  [popover] {
-    border: 1px solid;
-    padding: 1rem;
-    --p-width: 16ch;
-    --p-height: 7ch;
-    overflow: hidden;
-    width: var(--p-width);
-    height: var(--p-height);
-    top: calc(
-      calc(anchor(top) - var(--p-height)) - calc(var(--p-height) * 1.2)
-    );
-    left: calc(anchor(left) - var(--p-width));
-    right: anchor(right);
-    bottom: anchor(bottom);
-  }
-</style>
+  <style>
+    figure.highlight {
+      max-width: 100%;;
+      pre{
+        background-color: transparent;
+      }
+      & .code-copy-btn {
+        position: absolute;
+        right: 5px;
+        top: 10px;
+        opacity: 0;
+        transition: all 0.2s;
+      }
+      &:hover{
+       .code-copy-btn {
+            opacity: 1;
+        }
+      }
+    }
+
+    [popover] {
+      border: 1px solid;
+      padding: 1rem;
+      --p-width: 16ch;
+      --p-height: 8ch;
+      overflow: hidden;
+      width: var(--p-width);
+      height: var(--p-height);
+      top: calc(
+        calc(anchor(top) - var(--p-height)) - calc(var(--p-height) * 1.2)
+      );
+      left: calc(anchor(left) - var(--p-width));
+      bottom: anchor(bottom);
+    }
+  </style>
 </figure>
 
 <script define:vars={{ id }}>
   const figure = document.getElementById(id);
-  const codeEl = figure.querySelector('code');
+  const codeEl = figure.querySelector("code");
   const copyBtn = figure.querySelector("button");
   const copyBtnPopOver = copyBtn.querySelector("[popover]");
   copyBtn.style.anchorName = `--${id}-anchor`;
@@ -39,11 +59,10 @@ const id = generateGUID();
 
   copyBtn.onclick = () => {
     const codeTxt = codeEl.innerText;
-    navigator.clipboard
-    .writeText(codeTxt)
+    navigator.clipboard.writeText(codeTxt);
 
     setTimeout(() => {
-        copyBtnPopOver.hidePopover();
+      copyBtnPopOver.hidePopover();
     }, 1000);
-  }
+  };
 </script>

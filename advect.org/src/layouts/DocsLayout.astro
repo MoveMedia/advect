@@ -1,0 +1,35 @@
+---
+import Footer from "./Footer.astro";
+import Header from "./Header.astro";
+import HeaderAssets from "./HeaderAssets.astro";
+
+import { docPages } from "../data/docs";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <HeaderAssets />
+    <title>Advect Web Components</title>
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-TSK6ZWSM"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"></iframe></noscript
+    >
+    <!-- End Google Tag Manager (noscript) -->
+    <Header />
+    <main class="px-3">
+        <div>
+          <slot />
+        </div>
+      <Footer />
+    </main>
+  </body><script is:inline>
+    hljs.highlightAll();
+  </script>
+</html>

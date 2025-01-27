@@ -1,0 +1,6 @@
+@import "https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css";
+:not(:defined){
+    border: 1px solid red;
+    width: 40px;
+    height: 40px;;
+}

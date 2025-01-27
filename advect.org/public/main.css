@@ -11,9 +11,9 @@
   @property --secondary-color {
     syntax: "<color>";
     inherits: false;
-    initial-value: #010020;
+    initial-value:rgb(173, 167, 255);
   }
-  @property --tertiary-color {
+  @property --tertiary-color {  
     syntax: "<color>";
     inherits: false;
     initial-value: rgb(57, 0, 97);
@@ -33,19 +33,36 @@
     view-transition-name: root;
     font-size: 16px;
   }
-  html,
+  
+  html{
+    overflow:clip;
+  }
   body {
     margin: 0;
     width: 100%;
-    height: 100%;
+    overflow:clip;
   }
 
+  h1, h2,h3, h4, h5{
+    background-clip: text;
+    color: transparent !important;
+    background-image: linear-gradient(
+      90deg,
+      var(--secondary-color),
+      var(--primary-color)
+    );
+  }
+
+
   main{
-    padding-inline: 10px;
+    max-height: calc(98dvh - 40px);
+    overflow-y:scroll;
+    position:relative;
+
   }
   .signature-effect {
     background-clip: text;
-    color: transparent;
+    color: transparent !important;
     background-image: linear-gradient(
       90deg,
       var(--secondary-color),
@@ -72,3 +89,87 @@
       center,
       center center;
   }
+
+
+/* Create a custom animation */
+
+@view-transition {
+    navigation: auto;
+}
+
+main{
+  view-transition-name: main;
+}
+/* Customize the default animation behavior */
+
+::view-transition-group(main) {
+    animation-duration: 0.5s;
+}
+
+/* Create a custom animation */
+
+@keyframes move-out {
+    from {
+    }
+
+    to {
+        opacity: 0;;
+    }
+}
+
+@keyframes move-in {
+    from {
+        opacity: 0;;
+
+    }
+
+    to {
+        opacity: 1;;
+
+    }
+}
+
+/* Apply the custom animation to the old and new page states */
+
+::view-transition-old(main) {
+    animation: 0.4s ease-in both move-out;
+
+}
+
+::view-transition-new(main) {
+    animation: 0.4s ease-in both move-in;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-button {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #e1e1e1;
+  border: 0px none #ffffff;
+  border-radius: 50px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ffffff;
+}
+::-webkit-scrollbar-thumb:active {
+  background: #000000;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+  border: 0px none transparent;
+  border-radius: 50px;
+}
+::-webkit-scrollbar-track:hover {
+  background: #666666;
+}
+::-webkit-scrollbar-track:active {
+  background: #333333;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

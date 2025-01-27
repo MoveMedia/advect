@@ -11,7 +11,7 @@ const title = Astro.props.title ?? ""
 &lt;template id="hello-button" root="light" shadow="closed" adv&gt;
     &lt;button ref onclick="$self.sayHello()"&gt; Hello &lt;/button&gt;
     &lt;script type="module"&gt;
-    export default class extends AdvectElement {
+    export class HelloButton extends AdvectElement {
         sayHello() {
             alert('How's it going!')
         }
