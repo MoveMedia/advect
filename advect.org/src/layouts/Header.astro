@@ -1,6 +1,7 @@
 ---
-import { type DocPage, docPages } from "../data/docs";
+import type { DocPage, DocPages } from "../data/docs"
 
+   const docPages = (Astro.props.docPages || []) as DocPages;
 ---
 
 <nav id="main-nav" class="navbar" role="navigation" aria-label="main navigation">

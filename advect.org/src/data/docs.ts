@@ -11,3 +11,5 @@ export const docPages = Object
         file:string
         url:string
     }[]
+
+export type DocPages = typeof docPages

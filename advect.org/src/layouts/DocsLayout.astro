@@ -1,15 +1,26 @@
 ---
 import Footer from "./Footer.astro";
 import Header from "./Header.astro";
-import HeaderAssets from "./HeaderAssets.astro";
+import HeadAssets from "./HeadAssets.astro";
 
 import { docPages } from "../data/docs";
+
+const sortedDocPages = docPages.sort((a, b) => {
+  return a.pageInfo.index - b.pageInfo.index;
+});
+
+const currentPage = sortedDocPages.findIndex(
+  (p) => p.url.toLocaleLowerCase() == Astro.url.pathname
+);
+
+const nextPage = sortedDocPages.at(currentPage + 1);
+const prevPage = sortedDocPages?.[currentPage - 1];
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <HeaderAssets />
+    <HeadAssets docPages={docPages} />
     <title>Advect Web Components</title>
   </head>
   <body>
@@ -22,11 +33,34 @@ import { docPages } from "../data/docs";
         style="display:none;visibility:hidden"></iframe></noscript
     >
     <!-- End Google Tag Manager (noscript) -->
-    <Header />
+    <Header docPages={docPages} />
     <main class="px-3">
-        <div>
-          <slot />
-        </div>
+      <div>
+        <slot />
+      </div>
+      <div class="is-flex is-justify-content-space-between container mt-5">
+        {
+          prevPage 
+          ? (
+            <a href={prevPage.url} class="button is-gap-1">
+                  <ion-icon name="chevron-back-outline" />
+                <span >Previous:</span>
+                <span class="signature-effect">{prevPage.pageInfo.name}</span>
+            </a>
+          )
+          : <span></span>
+        }
+
+        {
+          nextPage && (
+            <a href={nextPage.url} class="button is-gap-1">
+                <span >Next:</span>
+                <span class="signature-effect">{nextPage.pageInfo.name}</span>
+                  <ion-icon name="chevron-forward-outline" />
+            </a>
+          )
+        }
+      </div>
       <Footer />
     </main>
   </body><script is:inline>

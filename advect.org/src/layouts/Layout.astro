@@ -1,13 +1,15 @@
 ---
 import Footer from "./Footer.astro";
 import Header from "./Header.astro";
-import HeaderAssets from "./HeaderAssets.astro";
+import HeadAssets from "./HeadAssets.astro";
+
+import { docPages } from "../data/docs";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <HeaderAssets></HeaderAssets>
+    <HeadAssets></HeadAssets>
     <title>Advect Web Components</title>
   </head>
   <body>
@@ -15,7 +17,7 @@ import HeaderAssets from "./HeaderAssets.astro";
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSK6ZWSM"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
-    <Header />
+    <Header docPages={docPages} />
     <main>
       <slot />
       <Footer />
