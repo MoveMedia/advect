@@ -1,0 +1,107 @@
+---
+export interface ElementApi{
+  propName:string;
+  propType:string;
+  propDesc: string;
+  propUsage:string;
+}
+
+
+const elementProps:ElementApi[] = [
+   {
+    propName: "html",
+    propType: "string",
+    propDesc: "The original markup for the custom web element.",
+    propUsage: "Use this property to access the template markup of the element."
+  },
+  {
+    propName: "refs_list",
+    propType: "HTMLNodeInterface[]",
+    propDesc: "The original list of refs in the component.",
+    propUsage: "Use this property to access the list of references in the component."
+  },
+  {
+    propName: "all_refs",
+    propType: "Element[]",
+    propDesc: "All '[ref]'s on the object of refs in the component.",
+    propUsage: "Use this property to access all elements with the 'ref' attribute in the component."
+  },
+  {
+    propName: "refs",
+    propType: "Proxy",
+    propDesc: "References to elements with 'ref' attributes.",
+    propUsage: "Use this property to access specific elements with the 'ref' attribute using a proxy."
+  },
+  {
+    propName: "fuzzyRefs",
+    propType: "Proxy",
+    propDesc: "References to custom web elements, returns a promise to the ref.",
+    propUsage: "Use this property to access specific custom web elements with the 'ref' attribute using a proxy."
+  },
+  {
+    propName: "$settings",
+    propType: "CustomElementSettings",
+    propDesc: "Settings for the custom web element.",
+    propUsage: "Use this property to access the settings of the custom web element."
+  },
+  {
+    propName: "mutationObserver",
+    propType: "MutationObserver",
+    propDesc: "Mutation observer for the element.",
+    propUsage: "Use this property to observe and react to changes in the DOM."
+  },
+  {
+    propName: "interectObserver",
+    propType: "IntersectionObserver",
+    propDesc: "Intersection observer for the element.",
+    propUsage: "Use this property to observe and react to the visibility of the element in the viewport."
+  },
+  {
+    propName: "attr",
+    propType: "Proxy",
+    propDesc: "Helper for getting and setting attributes on this element, calls anyAttrChanged when setting.",
+    propUsage: "Use this property to get and set attributes on the element using a proxy."
+  },
+  {
+    propName: "data",
+    propType: "Proxy",
+    propDesc: "Object for accessing a component's dataset variables, calls anyAttrChanged when setting.",
+    propUsage: "Use this property to get and set dataset variables on the element using a proxy."
+  },
+  {
+    propName: "internals",
+    propType: "ElementInternals",
+    propDesc: "Getter for element internals.",
+    propUsage: "Use this property to access the internals of the element."
+  }
+]
+
+---
+
+<section>
+    <div class="content">
+          <h2>Advect Element API</h2>
+          <p>The <code>AdvectElement</code> class exposes the following properties</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {elementProps.map( ea => 
+                  <tr>
+                    <td>{ea.propName}</td>
+                    <td><code>{ea.propType}</code></td>
+                    <td>{ea.propDesc}</td>
+                    <td>{ea.propUsage}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+   
+    </div>
+</section>

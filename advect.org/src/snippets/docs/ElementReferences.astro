@@ -1,0 +1,39 @@
+---
+import References101 from "./References101.astro";
+---
+
+<section>
+    <div class="content">
+        <h2 id="using-refs" class="title is-3 signature-effect">Using References</h2>
+        <div class="block">
+           <p>References are pointers to elements inside your custom element.
+           Any element that has a <code>ref</code> attribute will be registered as a reference</p>
+           <p>Inside your custom element class refs can be access via the <code>this.refs.yourRefName</code></p>
+           <p>Setting up an element as a reference enhances its event listener functions (onclick, oninput etc) it adds</p>
+           <ul>
+            <li>
+                <div>
+                    New scope variables
+                </div>
+                <ul>
+                    <li>
+                        <code>$self</code> - a pointer to your custom element
+                    </li>
+                    <li>
+                        <code>$this</code> - a safe pointer pointer to the current reference
+                    </li>
+                    <li>
+                        <code>$refs</code> - shorthand for <code>$self.refs</code> allowing a ref to access other refs
+                    </li>
+                </ul>
+            </li>
+            <li>Makes them <code>async</code> </li>
+            <li>Adds <code>onmutate</code> which is called when the markup within a ref is changed</li>
+            <li>Allows all elements to use <code>onload</code> which essentially gives any element a connectedCallback </li>
+           </ul>
+            <References101 />
+        </div>
+    </div>
+</section>
+
+

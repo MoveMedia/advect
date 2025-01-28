@@ -1,0 +1,28 @@
+---
+import CodeExample from "../../components/CodeExample.astro";
+---
+
+<CodeExample is:raw>&lt;!--Declare your component, anywhere in html --&gt;
+        &lt!-- ✅ this is a ref --&gt;
+        &lt;button ref="myButton"
+            onload="console.log($this.innerText)"
+            onclick="alert(`My someProperty is ${$self.someProperty}`)"&gt; 
+            I'll alert 
+        &lt;/button&gt;
+
+        &lt!-- ❌ this is NOT a ref, will error "$self" is not defined, and onload will not be called --&gt;
+        &lt;button
+            onload="console.log($this.innerText)"
+            onclick="alert(`My someProperty is ${$self.someProperty}`)"&gt; 
+            I'll Error 
+        &lt;/button&gt;
+
+        &lt;script type="module"&gt;
+        export class RefExample extends AdvectElement {
+            someProperty = 69420
+        }
+        &lt;/script&gt;
+    &lt;/template&gt;
+    
+    &lt;ref-example&gt;&lt/ref-example&gt;
+    </CodeExample>

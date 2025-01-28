@@ -1,7 +1,9 @@
 ---
 import type { DocPage } from "../../data/docs";
 import DocsLayout from "../../layouts/DocsLayout.astro";
+import ComponentAPI from "../../snippets/docs/ComponentAPI.astro";
 import CreatingYourFirstComponent from "../../snippets/docs/CreatingYourFirstComponent.astro";
+import ElementReferences from "../../snippets/docs/ElementReferences.astro";
 import FirstComponent from "../../snippets/FirstComponent.astro";
 
 export const pageInfo: DocPage = {
@@ -18,11 +20,15 @@ export const pageInfo: DocPage = {
                 <div class="block">
                     <p>
                         Creating web components easily is advect's signature Feature.
-
                     </p>
                 </div>
+                <hr>
                 <CreatingYourFirstComponent></CreatingYourFirstComponent>
             </div>
         </section>
+        <hr>
+        <ComponentAPI />
+        <hr>
+        <ElementReferences />
     </div>
 </DocsLayout>
