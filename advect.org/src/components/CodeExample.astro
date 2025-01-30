@@ -33,6 +33,7 @@ const id = generateGUID();
     }
 
     [popover] {
+      position:absolute;
       border: 1px solid;
       padding: 1rem;
       --p-width: 16ch;
@@ -40,11 +41,11 @@ const id = generateGUID();
       overflow: hidden;
       width: var(--p-width);
       height: var(--p-height);
-      top: calc(
-        calc(anchor(top) - var(--p-height)) - calc(var(--p-height) * 1.2)
-      );
-      left: calc(anchor(left) - var(--p-width));
-      bottom: anchor(bottom);
+      left: anchor(right);
+      top: anchor(bottom);
+
+
+   
     }
   </style>
 </figure>
@@ -54,8 +55,8 @@ const id = generateGUID();
   const codeEl = figure.querySelector("code");
   const copyBtn = figure.querySelector("button");
   const copyBtnPopOver = copyBtn.querySelector("[popover]");
-  copyBtn.style.anchorName = `--${id}-anchor`;
-  copyBtnPopOver.style.positionAnchor = `--${id}-anchor`;
+  copyBtn.style.anchorName = `${id}-anchor`;
+  copyBtnPopOver.style.positionAnchor = `${id}-anchor`;
 
   copyBtn.onclick = () => {
     const codeTxt = codeEl.innerText;

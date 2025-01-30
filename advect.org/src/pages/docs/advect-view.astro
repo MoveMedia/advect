@@ -2,6 +2,7 @@
 import type { DocPage } from "../../data/docs";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 import UsingAdvectView from "../../snippets/docs/UsingAdvectView.astro";
+import UsingIf from "../../snippets/docs/UsingIf.astro";
 
 export const pageInfo: DocPage = {
     name:"Templating",
@@ -16,16 +17,18 @@ export const pageInfo: DocPage = {
                 <h1 class="title is-1 signature-effect">Using Advect Views</h1>
                 <div class="block">
                     <p>
-                        Unlike reactive frameworks like React/Vue/Angular; Advect seperates the concerns of component state, and templating. 
-                        <br> The <code>adv-view</code> and <code>adv-shadow-view</code> custom elements. These 2 custom elements provide templating for your site and can be used standalone or within your custom elements.
+                        Unlike reactive frameworks like React/Vue/Angular; Advect seperates the concerns of component definition and templating 
+                        <br> The <code>adv-view</code> and <code>adv-shadow-view</code> provide templating for your site and can be used standalone or within your custom elements.
                     </p>
                     <p>
-
+                        These components can be stateful using a copy of <a target="_blank" href="https://zustand.docs.pmnd.rs/getting-started/introduction">zustand</a> that comes with the library
                     </p>
                     <UsingAdvectView />
                 </div>
                 <hr>
-
+                <div class="block">
+                    <UsingIf />
+                </div>
             </div>
         </section>
     </div>

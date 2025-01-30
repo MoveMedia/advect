@@ -1,0 +1,33 @@
+---
+import CodeExample from "../../components/CodeExample.astro";
+---
+<h2>Using &lt;if&gt; element</h2>
+<p></p>
+<div class="columns">
+    <div class="column">
+        <CodeExample is:raw>&lt;template id="simple-counter" adv&gt;
+    &lt;div class="display:flex; gap:10px;"&gt;
+        &lt;button ref onclick="refs.counter.data.count--"&gt;Subtract&lt;/button&gt;
+        &lt;adv-view ref="counter" onload="$this.data.count = 0"&gt;
+            &lt;output&gt;&lt;/output&gt;
+            &lt;template&gt;
+                &lt;span&gt;{{ $self.data.count }} - &lt;/span&gt;
+                &lt;if check="$self.data.count &lt; 10"&gt;
+                Low Value
+                &lt;else /&gt;
+                High Value
+                &lt;/if&gt;
+            &lt;/template&gt;
+        &lt;/adv-view&gt;
+        &lt;button ref onclick="refs.counter.data.count++"&gt;Add&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;simple-counter /&gt;</CodeExample>
+    </div>
+    <div class="column">
+        <p>
+            The <code>&lt;if&gt;</code> element is a <strong>conditional rendering mechanism</strong> that dynamically displays content based on a specified condition. It evaluates the expression provided in the <code>check</code> attribute and renders the corresponding content accordingly. Here's how it works in this context:
+        </p>
+    </div>
+</div>

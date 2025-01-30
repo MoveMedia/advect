@@ -2,21 +2,29 @@
 import CodeExample from "../../components/CodeExample.astro";
 ---
 <h2>The AdvectView Component</h2>
-<p></p>
 <div class="columns">
     <div class="column">
-        <CodeExample is:raw>&lt;adv-view&gt;
+        <CodeExample is:raw>&lt;adv-view data-name="john"&gt;
+    &lt;!--any html can go here--&gt;
     &lt;output&gt;
     &lt;!--Results Will render here--&gt;
-
     &lt;/output&gt;
     &lt;template&gt;
     &lt;!-- The markup you want templated goes here --&gt;
-
+    Hello {{$self.data.name}}
+    &lt;!-- This will render a variable &lbrace;&lbrace; someVariable &rbrace;&rbrace; --&gt;
+    &lt;!-- This will render a rawstring &lbrace;&lbrace;~ someVariable &rbrace;&rbrace; --&gt;
+    &lt;!-- This will NOT render but execute the code within &lbrace;&lbrace;&gt; console.log(someVariable)&rbrace;&rbrace; --&gt;
     &lt;/template&gt;
 &lt;/adv-view&gt;</CodeExample>
     </div>
     <div class="column">
-
+        <p>The <code>adv-view</code> uses the light-dom, and expects a <code>output</code> and a <code>template</code> </p>
+        <p><code>adv-view</code> use <a target="_blank" href="https://eta.js.org/">Eta.js</a> 
+        for rendering with a bit of syntactic sugar to help you layout your templates. This example will render <i>Hello John</i> to the <code>output</code> element </p>
+        <p>
+            Templates are rendered with a single variable <code>$self</code> which in this context refers to the advect-view being rendered.
+       on the <code>$self</code> you'll find the <code>attr</code> property and the <code>data</code> property which are proxies to access attributes, and dataset respectively. 
+        Setting an attribute via either of these 2 properties will cause the <code>adv-view</code> to rerender. </p>
     </div>
 </div>

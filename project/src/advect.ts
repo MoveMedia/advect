@@ -6,7 +6,7 @@ import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
 import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, onloadElements, toModule, toUpperCamelCase } from "./lib";
 import { Eta } from "eta";
-import { cleanTemplate } from "./advect.render";
+import { cleanTemplate, convertTables } from "./advect.render";
 import * as zustand from  "zustand/vanilla" 
 import type { StoreApi } from "zustand";
 
@@ -721,26 +721,25 @@ export class AdvectView extends AdvectViewbase {
   
   override render(){
     const template = this.querySelector('template');
-    const output = this.querySelector('output');
+    const output = this.querySelector('[output]');
     const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
-    let etaRendered = ""
+    let etaRendered = "";
+
     try{
-      etaRendered = this.eta.renderString(clean, { $self:this })
+      etaRendered = convertTables(this.eta.renderString(clean, { $self:this }))
     }
     catch(e){
-      adv_warn(e);
+      console.log(e)
     }
-    const rendered = `${etaRendered}`;
-
       if (this.viewTransition){
         document.startViewTransition(()=>{
-          if (output) output.innerHTML = rendered;
+          if (output) output.innerHTML = etaRendered;
         }).finished.then(()=>{
           this.afterRender();
         })
       }else{
         if (output) {
-          output.innerHTML = rendered;
+          output.innerHTML = etaRendered;
           requestAnimationFrame(() =>{
             this.afterRender();
       
@@ -785,6 +784,15 @@ export class AdvectShadowView extends AdvectViewbase {
     }
   }
 }
+
+// if(!customElements.get('adv-template')){
+//   customElements.define('adv-template', class extends HTMLElement{
+//     constructor(){
+//       super();
+//       this.style.display = 'none';
+//     }
+//   })
+// }
 
 
 if (!customElements.get('adv-view')){
