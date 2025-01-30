@@ -1,0 +1,34 @@
+---
+import CodeExample from "../../components/CodeExample.astro";
+---
+<h2>Using &lt;of&gt; element</h2>
+<p></p>
+<div class="columns">
+    <div class="column">
+        <CodeExample is:raw> &lt;template id="an-of-example" adv&gt;
+    &lt;adv-view ref 
+        onload="$this.store.setState({ myObject:{ name:'John Wick', hobby:'murder' } })"&gt;
+    &lt;output&gt;&lt;/output&gt;
+    &lt;template&gt;
+        &lt;for data="$self.state.myObject" name="key" value="val"&gt;
+            &lt;div&gt;{{key}}:{{val}}&lt;/div&gt;
+        &lt;/for&gt;                    
+    &lt;/template&gt;
+    &lt;/adv-view&gt;
+&lt;/template&gt;
+
+&lt;an-of-example /&gt;
+</CodeExample>
+    </div>
+    <div class="column">
+        <p>
+            The <code>&lt;of&gt;</code> is a virtual element for looping over Objects properties
+        </p>
+        <p>The for element takes 3 attributes</p>
+        <ul>
+            <li><code>data</code> The object to loop over the properties of <code>$self</code> in this context refers to the <code>&lt;adv-view&gt;</code> element</li>
+            <li><code>name</code> The name of the property</li>
+            <li><code>value</code> The value of the property</li>
+        </ul>
+    </div>
+</div>

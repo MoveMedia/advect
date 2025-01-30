@@ -1,16 +1,26 @@
 ---
 import CodeExample from "../../components/CodeExample.astro";
 ---
-
-<h2>The AdvectView Component</h2>
-<CodeExample is:raw>&lt;adv-view&gt;
-    &lt;output&gt;
-    &lt;!--Results Will render here--&gt;
-
-    &lt;/output&gt;
-    &lt;template&gt;
-    &lt;!-- The markup you want templated goes here --&gt;
-
-    &lt;/template&gt;
-&lt;/adv-view&gt;
-</CodeExample>
+<h2>The AdvectShadowView Component</h2>
+<div class="columns">
+    <div class="column">
+        <CodeExample is:raw>&lt;adv-shadow-view data-name="john"&gt;
+        &lt;!--any html can go here--&gt;
+        Hello {{$self.data.name}}
+&lt;/adv-shadow-view&gt;</CodeExample>
+    </div>
+    <div class="column">
+        <p>The <code>adv-shadow-view</code> uses the shadow-dom, and unlike the <code>&lt;adv-view&gt;</code> component does not need the <code>output</code> or <code>template</code> </p>
+        <p>The markup for the template exists in the light-dom, and is rendered to the shadow-dom. Choosing to use the shadow-dom comes with a few benefits and drawbacks.</p>
+        <strong>Benefits</strong>
+        <ul>
+            <li>Smaller Component footprint not requiring <code>output</code> or <code>template</code> in the view </li>
+            <li>Elements are insulated from styles that are loaded in the document</li>
+        </ul>
+        <strong>Drawbacks</strong>
+        <ul>
+            <li>Events need to be "composed" to propagate outside the element </li>
+            <li>Elements ARE insulated from styles that are loaded in the document, which can be hinder your styling efforts.</li>
+        </ul>
+    </div>
+</div>

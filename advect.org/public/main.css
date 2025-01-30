@@ -42,7 +42,9 @@
     width: 100%;
     overflow:clip;
   }
-
+  code.nw{
+    white-space: nowrap;
+  }
 
 
   h1, h2,h3, h4, h5{

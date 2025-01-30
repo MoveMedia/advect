@@ -1,0 +1,26 @@
+---
+import { blogPages } from "../data/blog";
+
+
+const pages = Astro.url.pathname.split('/')
+    .filter( p => p.length >0)
+    .map((v,i,a)=>{
+        const url = "/" + a.filter( (p,_i) => _i <= i ).join('/');
+        const page = blogPages.find(p => p.url == url);
+        return page
+    })
+
+
+
+---
+
+<nav class="breadcrumb" aria-label="breadcrumbs">
+    <ul>
+    {pages.map((v,i,a) =>{
+        if (i === a.length -1){
+          <li class="is-active"><a href="#" aria-current="page">{v?.pageInfo.name}</a></li>
+        }
+        return <li><a href={v?.url}>{v?.pageInfo.name}</a></li>
+    })}
+    </ul>
+  </nav>

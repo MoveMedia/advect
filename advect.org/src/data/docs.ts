@@ -2,7 +2,8 @@ import type { AstroBuiltinAttributes } from "astro"
 
 export interface DocPage {
     name:string,
-    index:number
+    index:number,
+    hide?:boolean
 }
 export const docPages = Object
     .values(await import.meta.glob("../pages/docs/**/*.astro", { eager:true })) as {

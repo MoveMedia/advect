@@ -1,0 +1,22 @@
+<template id="simple-counter" adv>
+    <div>
+      <button ref onclick="refs.counter.data.count--">Subtract</button>
+      <adv-view ref="counter" onload="$this.data.count = 0">
+        <output></output>
+        <template>
+          <span>
+            {{ $self.data.count }} - 
+          </span>
+          <if check="$self.data.count < 10">
+            Low Value
+            <else />
+            High Value
+          </if>
+        </template>
+      </adv-view>
+      <button ref onclick="refs.counter.data.count++">Add</button>
+    </div>
+  </template>
+
+
+<simple-counter/>

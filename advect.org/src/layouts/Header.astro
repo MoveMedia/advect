@@ -50,15 +50,15 @@ import type { DocPage, DocPages } from "../data/docs"
         <a class="navbar-item" href="/">
           Home
         </a>
-        <!-- <a class="navbar-item" href="/blog">
+        <a class="navbar-item" href="/blog">
           Blog
-        </a> -->
+        </a>
         <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link" href="/docs">
             Documentation
           </a>
           <div class="navbar-dropdown">
-            {docPages.filter(p => p.url != "/docs").map( p => (
+            {docPages.filter(p => p.url != "/docs" && !p?.pageInfo.hide).map( p => (
               <a class="navbar-item" href={p.url}>
                 {p.pageInfo.name}
               </a>

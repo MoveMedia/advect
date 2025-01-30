@@ -721,7 +721,7 @@ export class AdvectView extends AdvectViewbase {
   
   override render(){
     const template = this.querySelector('template');
-    const output = this.querySelector('[output]');
+    const output = this.querySelector('output');
     const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
     let etaRendered = "";
 
@@ -784,15 +784,6 @@ export class AdvectShadowView extends AdvectViewbase {
     }
   }
 }
-
-// if(!customElements.get('adv-template')){
-//   customElements.define('adv-template', class extends HTMLElement{
-//     constructor(){
-//       super();
-//       this.style.display = 'none';
-//     }
-//   })
-// }
 
 
 if (!customElements.get('adv-view')){

@@ -73,7 +73,25 @@ const elementProps:ElementApi[] = [
     propType: "ElementInternals",
     propDesc: "Getter for element internals.",
     propUsage: "Use this property to access the internals of the element."
-  }
+  },
+  {
+    propName: "onConnect",
+    propType: "Function<void>",
+    propDesc: "a function called after the component is added to the DOM",
+    propUsage: "Use this property to access the internals of the element."
+  },
+  {
+    propName: "onDisconnect",
+    propType: "Function<void>",
+    propDesc: "a function called before the component is removed from the DOM",
+    propUsage: "Use this property to access the internals of the element."
+  },
+  {
+    propName: "onAdopt",
+    propType: "Function<void>",
+    propDesc: "a function called after the component is adopted to another document",
+    propUsage: "Use this property to access the internals of the element."
+  },
 ]
 
 ---
@@ -88,7 +106,7 @@ const elementProps:ElementApi[] = [
                   <th>Property</th>
                   <th>Type</th>
                   <th>Description</th>
-                  <th>Usage</th>
+                 <!--  <th>Usage</th>-->
                 </tr>
               </thead>
               <tbody>
@@ -97,7 +115,7 @@ const elementProps:ElementApi[] = [
                     <td>{ea.propName}</td>
                     <td><code>{ea.propType}</code></td>
                     <td>{ea.propDesc}</td>
-                    <td>{ea.propUsage}</td>
+                    <!-- <td>{ea.propUsage}</td> -->
                   </tr>
                 )}
               </tbody>

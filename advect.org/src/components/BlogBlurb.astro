@@ -1,0 +1,19 @@
+---
+
+const page = Astro.props.page;
+
+---
+<div class="content">
+    <div class="blog-blurb">
+        <h3>{page.pageInfo.name}</h3>
+        <p>{page.pageInfo.blurb}</p>
+        <a href={page.url}>Read More</a>
+    </div>
+    <style>
+       .blog-blurb{
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 0.5em;
+            padding: 1em;
+       }
+    </style>
+</div>

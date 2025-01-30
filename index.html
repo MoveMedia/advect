@@ -1,24 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script type="module">
-        import { advect } from '/project/dist/advect.js'
-        </script>
-</head>
-<body>
-    <template id="cha-man" adv>
-        <div>WOw</div>
-    </template>
-    <cha-man></cha-man>
-    <style>
-        :not(:defined){
-            border: 1px solid red;
-            width: 40px;
-            height: 40px;;
+      import { advect } from "/project/dist/advect.js";
+    </script>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <todo-list />
+
+    <template id="a-todo" adv>
+      <label class="control" for="task-name">
+        <input
+          name="taskName"
+          class="input"
+          id="task-name"
+          type="text"
+          placeholder="Enter Task Name"
+          onchange="$self.updateName()"
+          ref="taskName"
+        />
+      </label>
+      <label class="checkbox" for="task-complete">
+        Completed
+        <input
+          name="taskComplete"
+          class="checkbox"
+          id="task-complete"
+          type="checkbox"
+          ref="taskComplete"
+          onchange="$self.updateComplete()"
+
+        />
+      </label>
+      <label for="delete-btn">
+        <button onclick="$self.deleteTask()" ref> Delete </button>
+      </label>
+      <style>
+        @scope{
+            :scope{
+                transition: all 0.6s;
+                opacity: 1;
+                @starting-style{
+                    opacity:0;
+                }
+            }
         }
-    </style>
-</body>
+      </style>
+      <script type="module">
+        export class ATodo extends AdvectElement {
+     
+          constructor() {
+            super();
+          }
+          onConnect = () => {
+            this.todoChannel = new BroadcastChannel(this.attr.channelId);
+            const {taskName, taskComplete} = this.refs;
+            taskName.value = this.attr.taskname;
+            taskComplete.checked = this.attr.taskcomplete === "true";
+          }
+          updateName(){
+            this.todoChannel.postMessage({action:"updateTaskName", id: this.attr.taskid, name:this.refs.taskName.value })
+          }
+          updateComplete(){
+            this.todoChannel.postMessage({action:"updateTaskComplete", id: this.attr.taskid, complete:this.refs.taskComplete.checked })
+          }
+          deleteTask(){
+            this.style.opacity = 0;
+            this.ontransitionend = (e) => {
+                this.todoChannel.postMessage({action:"deleteTask", id: this.attr.taskid })
+            }
+          }
+        }
+      </script>
+    </template>
+    <!-- Comments still working -->
+    <template id="todo-list" adv>
+      <div class="content px-4">
+        <h2>Todo Form</h2>
+      </div>
+      <div class="columns px-4">
+        <form class="column" onsubmit="$self.submitTodo(event)" ref="todoForm">
+          <div class="is-flex is-flex-direction-column is-gap-2">
+            <label class="control" for="task-name">
+              <span>Task Name</span>
+              <input
+                name="taskName"
+                class="input"
+                id="task-name"
+                type="text"
+                placeholder="Enter Task Name"
+                ref="taskName"
+              />
+            </label>
+            <label class="checkbox" for="task-complete">
+              Completed
+              <input
+                name="taskComplete"
+                class="checkbox"
+                id="task-complete"
+                type="checkbox"
+                ref="taskComplete"
+              />
+            </label>
+            <button type="submit" class="button" ref>Submit</button>
+          </div>
+        </form>
+
+        <adv-view class="column" ref="todoView">
+          <for data="$self.state?.todos" name="todo" index="todo_index">
+            <div>
+              <a-todo
+                taskId="{{todo.id}}"
+                taskName="{{todo.name}}"
+                taskComplete="{{todo.complete}}"
+                channelId="{{$self.attr.channelId}}"
+              />
+            </div>
+          </for>
+        </adv-view>
+      </div>
+      <script type="module">
+        export class TodoList extends AdvectElement {
+        /**
+         * @type {string}
+         * */
+         todoChannelId = null;
+         /**
+         * @type {BroadcastChannel}
+         * */
+         todoChannel = null;
+         todos = [
+            {
+              id: 1,
+              name: "Wash Dishes",
+              complete: true,
+            },
+          ];
+          onConnect = () => {
+            this.todoChannelId =  `todo-channel-${this.attr.channel ?? Math.floor(Math.random() * 200)}`;
+            this.todoChannel = new BroadcastChannel(this.todoChannelId);
+            this.todoChannel.onmessage = (e) =>{
+                console.log(e);
+                const actionName = e.data?.action;
+                try{
+                    this[actionName](e.data);
+                }catch(e){
+                    console.warn(e)
+                }
+            }
+            const {todoView} = this.refs;
+            todoView.attr.channelId = this.todoChannelId;
+            todoView.store.setState({
+                todos: this.todos,
+            });
+          };
+          submitTodo(event) {
+            event.preventDefault();
+            const { taskName, taskComplete, todoView } = this.refs;
+
+            const name = taskName.value;
+            const complete = taskComplete.checked;
+            const id = Math.floor(Math.random() * 20000);
+            
+            event.target.reset();
+
+            this.todos.push({
+              id,
+              name,
+              complete,
+            });
+
+            todoView.store.setState({
+              todos: this.todos,
+            });
+            
+          }
+          updateTaskName({id, name }){
+            // does not rerender
+            this.todos = this.todos.map( task =>{
+                if (task.id == id){
+                    task.name = name;
+                }
+                return task
+            })
+          }
+          updateTaskComplete({id, complete}){
+            // does not rerender
+            this.todos = this.todos.map( task =>{
+                if (task.id == id){
+                    task.complete = complete
+                }
+                return task
+            })
+          }
+          deleteTask({id}){
+            this.todos = this.todos.filter( task => task.id != id);
+            this.refs.todoView.store.setState({
+                todos:this.todos
+            })
+          }
+        }
+      </script>
+    </template>
+  </body>
 </html>

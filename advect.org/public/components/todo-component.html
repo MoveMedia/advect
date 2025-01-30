@@ -1,0 +1,163 @@
+    <template id="a-todo" adv>
+      <label class="control" for="task-name">
+        <input
+          name="taskName"
+          class="input is-input"
+          id="task-name"
+          type="text"
+          placeholder="Enter Task Name"
+          onchange="$self?.binder.updateTaskName({id: $self.attr.taskId, name: $this.value, todoEl: $self})"
+          onload="$this.value = $self.attr.taskname"
+          ref="taskName"
+        />
+      </label>
+      <label class="checkbox" for="task-complete">
+        Completed
+        <input
+          name="taskComplete"
+          class="checkbox"
+          id="task-complete"
+          type="checkbox"
+          ref="taskComplete"
+          onchange="$self?.binder.updateTaskComplete({id: $self.attr.taskId, name: $this.checked, todoEl: $self})"
+          onload="$this.checked = $self.attr.taskcomplete === 'true'"
+        />
+      </label>
+      <label for="delete-btn">
+        <button
+          onclick="{$self?.binder.deleteTask({id: $self.attr.taskId, todoEl: $self});}"
+          ref
+        >
+          Delete
+        </button>
+      </label>
+      <style>
+        @scope {
+          :scope {
+            transition: all 0.6s;
+            opacity: 1;
+            @starting-style {
+              opacity: 0;
+            }
+          }
+        }
+      </style>
+    </template>
+
+
+<template id="todo-list" adv>
+    <div class="content px-4">
+      <h2>Todo Form</h2>
+    </div>
+    <div class="columns px-4">
+      <form class="column" onsubmit="$self.submitTodo(event)" ref="todoForm">
+        <div class="is-flex is-gap-4">
+          <label class="control" for="task-name">
+            <span>Task Name</span>
+            <input
+              name="taskName"
+              class="input"
+              id="task-name"
+              type="text"
+              placeholder="Enter Task Name"
+              ref="taskName"
+            />
+          </label>
+          <label class="checkbox" for="task-complete">
+            Completed
+            <input
+              name="taskComplete"
+              class="checkbox"
+              id="task-complete"
+              type="checkbox"
+              ref="taskComplete"
+            />
+          </label>
+          <button type="submit" class="button" ref>Submit</button>
+        </div>
+      </form>
+
+      <adv-view class="column" ref="todoView">
+        <div class="content">
+          <h3>This should not be replaced</h3>
+        </div>
+        <output> </output>
+        <template>
+          <for data="$self.state?.todos" name="todo" index="todo_index">
+            <div>
+              <a-todo
+                taskId="{{todo.id}}"
+                taskName="{{todo.name}}"
+                taskComplete="{{todo.complete}}"
+                ref
+              />
+            </div>
+          </for>
+        </template>
+      </adv-view>
+    </div>
+    
+    <script type="module">
+      export class TodoList extends AdvectElement {
+        todos = [
+          {
+            id: 1,
+            name: "Wash Dishes",
+            complete: true,
+          },
+        ];
+        onConnect = () => {
+          const { todoView } = this.refs;
+          todoView.viewTransitionName = `td-view`;
+          todoView.onRender = () => {
+            todoView.querySelectorAll("a-todo").forEach((ref) => {
+              if (ref.tagName.toLowerCase() == "a-todo") this.hookRef(ref);
+              ref.style.viewTransitionName = `td-${ref?.attr?.taskId}`;
+            });
+          };
+          todoView.store.setState({ todos: this.todos });
+        };
+        submitTodo(event) {
+          event.preventDefault();
+          const { taskName, taskComplete, todoView } = this.refs;
+
+          const name = taskName.value;
+          const complete = taskComplete.checked;
+          const id = Math.floor(Math.random() * 20000);
+
+          this.todos.push({ id, name, complete });
+          todoView.store.setState({ todos: this.todos });
+          event.target.reset();
+        }
+        updateTaskName = ({ id, name, todoEl }) => {
+          // does not rerender
+          this.todos = this.todos.map((task) => {
+            if (task.id == id) {
+              task.name = name;
+            }
+            return task;
+          });
+        };
+        updateTaskComplete = ({ id, complete, todoEl }) => {
+          // does not rerender
+          this.todos = this.todos.map((task) => {
+            if (task.id == id) {
+              task.complete = complete;
+            }
+            return task;
+          });
+        };
+        deleteTask = ({ id, todoEl }) => {
+          document
+            .startViewTransition(() => {
+              todoEl.style.opacity = 0;
+            })
+            .finished.then(() => {
+              console.log("deleting", { id });
+              this.todos = this.todos.filter((task) => task.id != id);
+              this.refs.todoView.store.setState({ todos: this.todos });
+            });
+        };
+      }
+    </script>
+  </template>

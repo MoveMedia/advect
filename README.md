@@ -15,23 +15,7 @@ On the web we have 3 types of html content
 
 npm
 ```bash
-npx jsr add @advect/advect
-```
-pnpm
-```bash
-pnpm dlx jsr add @advect/advect
-```
-bun
-```bash
-bunx jsr add @advect/advect
-```
-yarn
-```bash
-yarn dlx jsr add @advect/advect
-```
-deno
-```bash
-deno add @advect/advect
+npx i @advect/advect
 ```
 
 ## Features
@@ -44,39 +28,28 @@ deno add @advect/advect
     define a webcompnent with a template tag that has a "adv" attribute
     the id will become the tag of the new component in this case "my-btn"
    -->
-  <template id="my-btn" adv> 
-    <!-- style the new compnent -->
-    <style>
-        :host{
-            button {
-                color:blue;
-            }
-        }
-    </style>
-    <button>
-        <slot name="name">Default Name</slot>
-        <slot name="icon">🤯</slot>
-    </button>
+<template id="simple-counter" adv>
+    <div>
+      <button ref onclick="refs.counter.data.count--">Subtract</button>`
+      <adv-view ref="counter" onload="$this.data.count = 0">
+        <output></output>
+        <template>
+          <span>
+            {{ $self.data.count }} - 
+          </span>
+          <if check="$self.data.count < 10">
+            Low Value
+            <else />
+            High Value
+          </if>
+        </template>
+      </adv-view>
+      <button ref onclick="refs.counter.data.count++">Add</button>
+    </div>
   </template>
 
-    <!-- Now your web compnent is ready to use -->
-    <my-btn>
-        <span slot="name">New icon / name</span>
-        <span slot="icon">😉</span>
-    </my-btn>
 
-    <my-btn onclick="alert('unless you want to')">
-        <span slot="name">No JS</span>
-        <span slot="icon">😍</span>
-    </my-btn>
+<simple-counter/>
   ```
 - HTMX Compatibility 
 
-
-### About
-#### Philosophy
-#### Goals
-#### Motivations
-#### Insprations
-- HATEOS
-- Lit, Alpine, 

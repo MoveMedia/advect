@@ -1,33 +1,44 @@
 ---
 import CodeExample from "../../components/CodeExample.astro";
 ---
-<h2>Using &lt;if&gt; element</h2>
+<h2>Using &lt;for&gt; element</h2>
 <p></p>
 <div class="columns">
     <div class="column">
-        <CodeExample is:raw>&lt;template id="simple-counter" adv&gt;
-    &lt;div class="display:flex; gap:10px;"&gt;
-        &lt;button ref onclick="refs.counter.data.count--"&gt;Subtract&lt;/button&gt;
-        &lt;adv-view ref="counter" onload="$this.data.count = 0"&gt;
-            &lt;output&gt;&lt;/output&gt;
-            &lt;template&gt;
-                &lt;span&gt;{{ $self.data.count }} - &lt;/span&gt;
-                &lt;if check="$self.data.count &lt; 10"&gt;
-                Low Value
-                &lt;else /&gt;
-                High Value
-                &lt;/if&gt;
-            &lt;/template&gt;
-        &lt;/adv-view&gt;
-        &lt;button ref onclick="refs.counter.data.count++"&gt;Add&lt;/button&gt;
-    &lt;/div&gt;
+        <CodeExample is:raw> &lt;template id="a-loop-example" adv&gt;
+    &lt;adv-view ref onload="$this.store.setState({
+            users:[
+                { name: 'John Wick', email: 'john.wick@assassins.net', status: 'avenging'},
+                { name: 'John Cena', email: 'john.cena@cantseeme.org', status: 'invisible'},
+                { name: 'John Doe',  email: 'john.doe@unidentified.io', status: 'missing'},
+            ]
+        })"&gt;
+    &lt;output&gt;&lt;/output&gt;
+    &lt;template&gt;
+        &lt;for data="$self.state.users" name="data" index="user_ind"&gt;
+            &lt;div style="display:flex; gap:1em;"&gt;
+                &lt;span&gt;{{user_ind}}&lt;/span&gt;
+                &lt;span&gt;{{user.name}}&lt;/span&gt;
+                &lt;span&gt;{{user.email}}&lt;/span&gt;
+                &lt;span&gt;{{user.status}}&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/for&gt;                    
+    &lt;/template&gt;
+    &lt;/adv-view&gt;
 &lt;/template&gt;
 
-&lt;simple-counter /&gt;</CodeExample>
+&lt;a-loop-example /&gt;
+</CodeExample>
     </div>
     <div class="column">
         <p>
-            The <code>&lt;if&gt;</code> element is a <strong>conditional rendering mechanism</strong> that dynamically displays content based on a specified condition. It evaluates the expression provided in the <code>check</code> attribute and renders the corresponding content accordingly. Here's how it works in this context:
+            The <code>&lt;for&gt;</code> is a virtual element for looping over Arrays and array-like objects
         </p>
+        <p>The for element takes 3 attributes</p>
+        <ul>
+            <li><code>data</code> The data for the for loop. <code>$self</code> in this context refers to the <code>&lt;adv-view&gt;</code> element</li>
+            <li><code>name</code> The name to use for value accessed in the loop</li>
+            <li><code>index</code> The index of the item loop</li>
+        </ul>
     </div>
 </div>

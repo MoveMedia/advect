@@ -1,8 +1,13 @@
 ---
+import CodeExample from "../../components/CodeExample.astro";
 import type { DocPage } from "../../data/docs";
 import DocsLayout from "../../layouts/DocsLayout.astro";
+import RenderingTables from "../../snippets/docs/RenderingTables.astro";
+import UsingAdvectShadowView from "../../snippets/docs/UsingAdvectShadowView.astro";
 import UsingAdvectView from "../../snippets/docs/UsingAdvectView.astro";
+import UsingFor from "../../snippets/docs/UsingFor.astro";
 import UsingIf from "../../snippets/docs/UsingIf.astro";
+import UsingOf from "../../snippets/docs/UsingOf.astro";
 
 export const pageInfo: DocPage = {
     name:"Templating",
@@ -20,14 +25,37 @@ export const pageInfo: DocPage = {
                         Unlike reactive frameworks like React/Vue/Angular; Advect seperates the concerns of component definition and templating 
                         <br> The <code>adv-view</code> and <code>adv-shadow-view</code> provide templating for your site and can be used standalone or within your custom elements.
                     </p>
+                    <p>Eta.js is used for rendering with the following configuration. check out Eta's <a href="https://eta.js.org/docs/intro/syntax-cheatsheet">Template Syntax</a> &amp; <a href="https://eta.js.org/docs/intro/template-syntax">Cheatsheet</a></p>
+                        <CodeExample is:raw lang="javascript">new Eta({
+    useWith: true, // Removes the "it" part of the renderer
+    tags: ['{{','}}'], // This changes the default start and end tags from <% %> to {{ }}
+    parse: {
+        exec: ">", // normally an empty string. 
+        interpolate: "", // 
+        raw: "~" // this is unchanged.
+    }
+})
+                        </CodeExample>
                     <p>
                         These components can be stateful using a copy of <a target="_blank" href="https://zustand.docs.pmnd.rs/getting-started/introduction">zustand</a> that comes with the library
                     </p>
                     <UsingAdvectView />
+                    <UsingAdvectShadowView />
                 </div>
                 <hr>
                 <div class="block">
                     <UsingIf />
+                </div>
+                <hr>
+                <div class="block">
+                    <UsingFor />
+                </div>
+                <hr>
+                <div class="block">
+                    <UsingOf />
+                </div>
+                <div class="block">
+                    <RenderingTables />
                 </div>
             </div>
         </section>

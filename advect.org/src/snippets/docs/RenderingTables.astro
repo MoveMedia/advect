@@ -1,0 +1,63 @@
+---
+import CodeExample from "../../components/CodeExample.astro";
+---
+
+<h2 id="rendering-tables">Rendering Tables</h2>
+<div class="columns">
+    <div class="column">
+        <p>Due to how most browsers parse the <code class="nw">&lt;table&gt;</code> 
+            elements to render a table in the <code class="nw">&lt;adv-view&gt;</code> &amp; <code class="nw">&lt;adv-shadow-view&gt;</code>  
+            components you will need to use virtual elements in your templates
+        </p>
+        <p>
+            Below are the subsitutions that will be needed in your views to support tables.
+        </p>
+        <ul>
+            <li>For <code class="nw">&lt;table&gt;</code> use <code class="nw">&lt;t-table&gt;</code> </li>
+            <li>For <code class="nw">&lt;thead&gt;</code> use <code class="nw">&lt;t-head&gt;</code> </li>
+            <li>For <code class="nw">&lt;tbody&gt;</code> use <code class="nw">&lt;t-body&gt;</code> </li>
+            <li>For <code class="nw">&lt;tfoot&gt;</code> use <code class="nw">&lt;t-foot&gt;</code> </li>
+            <li>For <code class="nw">&lt;tr&gt;</code> use <code class="nw">&lt;t-r&gt;</code> </li>
+            <li>For <code class="nw">&lt;th&gt;</code> use <code class="nw">&lt;t-h&gt;</code> </li>
+            <li>For <code class="nw">&lt;td&gt;</code> use <code class="nw">&lt;t-d&gt;</code> </li>
+        </ul>
+    </div>
+    <div class="column">
+<CodeExample is:raw>&lt;template id="a-table-example" adv&gt;
+    &lt;adv-view ref
+        onload="
+        $this.store.setState({
+            users:[
+                { name: 'John Wick', email: 'john.wick@assassins.net'},
+                { name: 'John Cena', email: 'john.cena@cantseeme.org'},
+                { name: 'John Doe',  email: 'john.doe@unidentified.io'},
+            ]
+        })"&gt;
+        &lt;div output&gt;&lt;/div&gt;
+        &lt;template&gt;
+            &lt;t-table class="table"&gt;
+                &lt;t-head&gt;
+                &lt;t-r&gt;
+                    &lt;of data="$self.state.users[0]" name="key" value="val"&gt;
+                        &lt;t-h&gt;{{key}}&lt;/t-h&gt;
+                    &lt;/of&gt;
+                &lt;/t-r&gt;
+                &lt;/t-head&gt;
+                &lt;t-body&gt;
+                &lt;for data="$self.state.users" name="user" index="user_ind"&gt;
+                    &lt;t-r&gt;
+                    &lt;t-d&gt;&lt;span&gt;{{user.name}}&lt;/span&gt;&lt;/t-d&gt;
+                    &lt;t-d&gt;&lt;span&gt; {{user.email}} &lt;/span&gt;&lt;/t-d&gt;
+                    &lt;t-d&gt; &lt;span&gt; {{user.status}} &lt;/span&gt;&lt;/t-d&gt;
+                    &lt;/t-r&gt;
+                &lt;/for&gt;
+                &lt;/t-body&gt;
+            &lt;/t-table&gt;
+        &lt;/template&gt;
+    &lt;/adv-view&gt;
+    &lt;/template&gt;
+    
+    &lt;a-table-example /&gt;</CodeExample>
+    </div>
+
+</div>
