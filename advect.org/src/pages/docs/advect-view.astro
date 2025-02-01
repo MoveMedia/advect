@@ -1,6 +1,6 @@
 ---
 import CodeExample from "../../components/CodeExample.astro";
-import type { DocPage } from "../../data/docs";
+import { docPages, type DocPage } from "../../data/docs";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 import RenderingTables from "../../snippets/docs/RenderingTables.astro";
 import UsingAdvectShadowView from "../../snippets/docs/UsingAdvectShadowView.astro";
@@ -15,7 +15,8 @@ export const pageInfo: DocPage = {
 }
 ---
 
-<DocsLayout>
+<DocsLayout docPages={docPages}>
+
     <div class="container">
         <section>
             <div class="content">

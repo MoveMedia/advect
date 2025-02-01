@@ -5,7 +5,7 @@ import CreatingYourFirstComponent from "../../snippets/docs/CreatingYourFirstCom
 import Templating from "../../snippets/docs/Templating.astro";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 
-import { type DocPage } from "../../data/docs";
+import { type DocPage, docPages } from "../../data/docs";
 
 export const pageInfo:DocPage ={
   name: "Docs Home",
@@ -14,7 +14,7 @@ export const pageInfo:DocPage ={
 
 ---
 
-<DocsLayout>
+<DocsLayout docPages={docPages}>
 
   <div class="container">
     <AboutAdvect></AboutAdvect>

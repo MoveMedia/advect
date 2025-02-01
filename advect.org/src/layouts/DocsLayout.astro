@@ -3,8 +3,9 @@ import Footer from "./Footer.astro";
 import Header from "./Header.astro";
 import HeadAssets from "./HeadAssets.astro";
 
-import { docPages } from "../data/docs";
+const docPages:DocPages = Astro.props.docPages;
 import Breadcrumb from "../components/Breadcrumb.astro";
+import type { DocPages } from "../data/docs";
 
 const sortedDocPages = docPages.sort((a, b) => {
   return a.pageInfo.index - b.pageInfo.index;
