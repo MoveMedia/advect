@@ -96,7 +96,7 @@ import type { DocPage, DocPages } from "../data/docs"
               ? 'is-selected'
               : 'active'
 
-            if (link.getAttribute('href') === currentRoute) {
+            if (link.getAttribute('href') === currentRoute ||  link.getAttribute('href') === currentRoute + '/') {
                 link.classList.add(activeClass);
             } else {
                 link.classList.remove(activeClass);
