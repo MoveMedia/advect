@@ -59,7 +59,7 @@ import type { DocPage, DocPages } from "../data/docs"
           </a>
           <div class="navbar-dropdown">
             {docPages.filter(p => p.url != "/docs" && !p?.pageInfo.hide).map( p => (
-              <a class="navbar-item" href={p.url}>
+              <a class="navbar-item" href={`${p.url}/`}>
                 {p.pageInfo.name}
               </a>
             ))}
@@ -96,7 +96,6 @@ import type { DocPage, DocPages } from "../data/docs"
               ? 'is-selected'
               : 'active'
 
-              console.log(currentRoute, link.getAttribute('href'))
             if (link.getAttribute('href') === currentRoute ||  link.getAttribute('href') === currentRoute + '/') {
                 link.classList.add(activeClass);
             } else {
