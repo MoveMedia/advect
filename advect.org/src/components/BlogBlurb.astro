@@ -7,7 +7,7 @@ const page = Astro.props.page;
     <div class="blog-blurb">
         <h3>{page.pageInfo.name}</h3>
         <p>{page.pageInfo.blurb}</p>
-        <a href={page.url}>Read More</a>
+        <a href={`blog/${page.pageInfo.slug}`}>Read More</a>
     </div>
     <style>
        .blog-blurb{

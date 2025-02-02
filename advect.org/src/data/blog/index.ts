@@ -1,16 +1,7 @@
-export interface BlogPage {
-    name:string,
-    index:number,
-    hide?:boolean,
+import type { Page, SitePage } from "../SitePage"
+
+export interface BlogPage extends Page {
     blurb?:string
-    slug:string
 }
 export const blogPages = Object
-    .values(await import.meta.glob("./**/*.astro", { eager:true })) as {
-        pageInfo:BlogPage,
-        default: Function,
-        file:string
-        url:string
-    }[]
-
-export type BlogPages = typeof blogPages
+    .values(await import.meta.glob("./**/*.astro", { eager:true })) as SitePage<BlogPage>[]

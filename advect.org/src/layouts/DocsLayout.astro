@@ -25,7 +25,7 @@ import Breadcrumb from "../components/Breadcrumb.astro";
     <Header docPages={Astro.props.allPages} />
     <main class="px-3">
       <div class="container my-2">
-        <Breadcrumb pagePath={Astro.props.pagePath} pagePrefix="docs" />
+        <Breadcrumb pagePath={Astro.props.pagePath} allPages={Astro.props.allPages} pagePrefix="docs" />
       </div>
       <div>
         <slot />

@@ -1,23 +1,39 @@
 ---
-import { docPages } from "../data/docs";
+import type { Page, SitePage } from "../data/SitePage";
 
 
-const pages = (Astro.props.pagePath as string).split('/')
-    .filter( p => p.length >0)
-    .map((v,i,a)=>{
-        const url = "/" + a.filter( (p,_i) => _i <= i ).join('/').replace(Astro.props.pagePrefix,'');
-        const page = docPages.find(p => p.pageInfo.slug == url);
-        console.log({url, page})
-        return page
+const {allPages, pagePrefix, pagePath} = Astro.props as {
+    allPages:SitePage<Page>[],
+    pagePrefix:string,
+    pagePath:string,
+};
+
+const pages:(SitePage<Page>|undefined)[] = pagePath.split('/')   
+    .filter( part => part.length > 0)
+    .map( (pp, i) => {
+        let aPage:SitePage<Page> | undefined
+        if (pp == pagePrefix){
+            aPage = allPages.find( p => p.pageInfo.slug == '/')
+        }else{
+            aPage = allPages.find( p => p.pageInfo.slug == pp)
+        }
+        return aPage
+
     })
+
+
+console.log({pagePrefix, pagePath, allPages, pages})
+
+
+
 
 ---
 
 <nav class="breadcrumb" aria-label="breadcrumbs">
     <ul>
     {pages.map((v,i,a) =>{
-        if (i === a.length -1){
-          <li class="is-active"><a href="#" aria-current="page">{v?.pageInfo.name}</a></li>
+        if (i === a.length - 1){
+         return <li class="is-active"><a href="#" aria-current="page">{v?.pageInfo.name}</a></li>
         }
         return <li><a href={`/${Astro.props.pagePrefix}/${v?.pageInfo.slug}`}>{v?.pageInfo.name}</a></li>
     })}
