@@ -1,17 +1,17 @@
 ---
 import { docPages, type DocPage } from "../../data/docs";
-import DocsLayout from "../../layouts/DocsLayout.astro";
 import ComponentAPI from "../../snippets/docs/ComponentAPI.astro";
 import CreatingYourFirstComponent from "../../snippets/docs/CreatingYourFirstComponent.astro";
 import ElementReferences from "../../snippets/docs/ElementReferences.astro";
+import DocsLayout from "../../layouts/DocsLayout.astro"
 
 export const pageInfo: DocPage = {
     name:"Custom Elements",
-    index:1
+    index:1,
+    slug:'custom-elements'
 }
 ---
-
-<DocsLayout docPages={docPages}>
+<DocsLayout {...Astro.props}>
     <div class="container">
         <section>
             <div class="content">

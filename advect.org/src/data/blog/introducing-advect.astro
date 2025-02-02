@@ -6,11 +6,12 @@ export const pageInfo:BlogPage = {
     name:'Introducing Advect',
     index: -1,
     blurb:'',
-    hide:false
+    hide:false,
+    slug: 'introducing-advect'
 }
 ---
 
-<BlogLayout>
+<BlogLayout {...Astro.props}>
     <div class="container">
         <div class="content">
             <h1 class="">{pageInfo.name}</h1>

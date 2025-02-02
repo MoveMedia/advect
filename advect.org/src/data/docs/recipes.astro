@@ -1,15 +1,17 @@
 ---
+import DocsLayout from "../../layouts/DocsLayout.astro"
 import { docPages, type DocPage } from "../../data/docs";
-import DocsLayout from "../../layouts/DocsLayout.astro";
+
 
 export const pageInfo: DocPage = {
     name:"Recipes",
     index:3,
-    hide:true
+    hide:true,
+    slug: 'docs/recipes'
 }
 ---
 
-<DocsLayout docPages={docPages}>
+<DocsLayout {...Astro.props}>
     <div class="container content">
         <div>
             <h1 class="title is-3 signature-effect">Recipes</h1>

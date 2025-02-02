@@ -3,9 +3,10 @@ export interface BlogPage {
     index:number,
     hide?:boolean,
     blurb?:string
+    slug:string
 }
 export const blogPages = Object
-    .values(await import.meta.glob("../pages/blog/**/*.astro", { eager:true })) as {
+    .values(await import.meta.glob("./**/*.astro", { eager:true })) as {
         pageInfo:BlogPage,
         default: Function,
         file:string

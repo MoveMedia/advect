@@ -2,13 +2,15 @@
 import { docPages } from "../data/docs";
 
 
-const pages = Astro.url.pathname.split('/')
+const pages = (Astro.props.pagePath as string).split('/')
     .filter( p => p.length >0)
     .map((v,i,a)=>{
-        const url = "/" + a.filter( (p,_i) => _i <= i ).join('/');
-        const page = docPages.find(p => p.url == url);
+        const url = "/" + a.filter( (p,_i) => _i <= i ).join('/').replace(Astro.props.pagePrefix,'');
+        const page = docPages.find(p => p.pageInfo.slug == url);
+        console.log({url, page})
         return page
     })
+
 ---
 
 <nav class="breadcrumb" aria-label="breadcrumbs">
@@ -17,7 +19,7 @@ const pages = Astro.url.pathname.split('/')
         if (i === a.length -1){
           <li class="is-active"><a href="#" aria-current="page">{v?.pageInfo.name}</a></li>
         }
-        return <li><a href={v?.url}>{v?.pageInfo.name}</a></li>
+        return <li><a href={`/${Astro.props.pagePrefix}/${v?.pageInfo.slug}`}>{v?.pageInfo.name}</a></li>
     })}
     </ul>
   </nav>

@@ -3,25 +3,13 @@ import Footer from "./Footer.astro";
 import Header from "./Header.astro";
 import HeadAssets from "./HeadAssets.astro";
 import Breadcrumb from "../components/Breadcrumb.astro";
-import  { type DocPages, docPages } from "../data/docs";
 
-
-const sortedDocPages = docPages.sort((a, b) => {
-  return a.pageInfo.index - b.pageInfo.index;
-});
-
-const currentPage = sortedDocPages.findIndex(
-  (p) => p.url.toLocaleLowerCase() == Astro.url.pathname
-);
-
-const nextPage = sortedDocPages.at(currentPage + 1);
-const prevPage = sortedDocPages?.[currentPage - 1];
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <HeadAssets docPages={docPages} />
+    <HeadAssets />
     <title>Advect Web Components</title>
   </head>
   <body>
@@ -34,32 +22,32 @@ const prevPage = sortedDocPages?.[currentPage - 1];
         style="display:none;visibility:hidden"></iframe></noscript
     >
     <!-- End Google Tag Manager (noscript) -->
-    <Header docPages={docPages} />
+    <Header docPages={Astro.props.allPages} />
     <main class="px-3">
       <div class="container my-2">
-        <Breadcrumb />
+        <Breadcrumb pagePath={Astro.props.pagePath} pagePrefix="docs" />
       </div>
       <div>
         <slot />
       </div>
       <div class="is-flex is-justify-content-space-between container mt-5">
         {
-          prevPage 
+          Astro.props.prevPage 
           ? (
-            <a href={prevPage.url} class="button is-gap-1">
+            <a href={`/docs/${Astro.props.prevPage.pageInfo.slug}`} class="button is-gap-1">
                   <ion-icon name="chevron-back-outline" />
                 <span >Previous:</span>
-                <span class="signature-effect">{prevPage.pageInfo.name}</span>
+                <span class="signature-effect">{Astro.props.prevPage.pageInfo.name}</span>
             </a>
           )
           : <span></span>
         }
 
         {
-          nextPage && (
-            <a href={nextPage.url} class="button is-gap-1">
+          Astro.props.nextPage && !Astro.props.nextPage.pageInfo.hide  && (
+            <a href={`/docs/${Astro.props.nextPage.pageInfo.slug}`} class="button is-gap-1">
                 <span >Next:</span>
-                <span class="signature-effect">{nextPage.pageInfo.name}</span>
+                <span class="signature-effect">{Astro.props.nextPage.pageInfo.name}</span>
                   <ion-icon name="chevron-forward-outline" />
             </a>
           )

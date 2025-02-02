@@ -1,0 +1,25 @@
+---
+import { docPages } from "../../data/docs";
+
+
+export function getStaticPaths() {
+  const paths =  docPages.map((dp, i, arr) => ({
+    params: { page: dp.pageInfo.slug },
+    props: { 
+      docPage: dp, 
+      allPages:docPages, 
+      nextPage: arr.at(i + 1), 
+      prevPage: arr?.[i - 1],
+      pagePath: `/docs/${dp.pageInfo.slug}` 
+    },
+  }));
+  return paths;
+}
+
+const { docPage } = Astro.props;
+
+const MainComponent = docPage.default
+
+---
+
+<MainComponent {...Astro.props} />

@@ -1,0 +1,25 @@
+---
+import { blogPages } from "../../data/blog";
+
+
+export function getStaticPaths() {
+  const paths =  blogPages.map((dp, i, arr) => ({
+    params: { page: dp.pageInfo.slug },
+    props: { 
+      blogPage: dp, 
+      allPages: blogPages, 
+      nextPage: arr.at(i + 1), 
+      prevPage: arr?.[i - 1],
+      pagePath: `/blog/${dp.pageInfo.slug}` 
+    },
+  }));
+  return paths;
+}
+
+const { blogPage } = Astro.props;
+
+const MainComponent = blogPage.default
+
+---
+
+<MainComponent {...Astro.props} />

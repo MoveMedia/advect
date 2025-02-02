@@ -58,8 +58,8 @@ import type { DocPage, DocPages } from "../data/docs"
             Documentation
           </a>
           <div class="navbar-dropdown">
-            {docPages.filter(p => p.url != "/docs" && !p?.pageInfo.hide).map( p => (
-              <a class="navbar-item" href={`${p.url}/`}>
+            {docPages.filter(p => p.pageInfo.slug != "/" && !p?.pageInfo.hide).map( p => (
+              <a class="navbar-item" href={`/docs/${p.pageInfo.slug}`}>
                 {p.pageInfo.name}
               </a>
             ))}
