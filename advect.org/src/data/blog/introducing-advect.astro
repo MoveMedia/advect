@@ -1,20 +1,57 @@
 ---
+import CodeExample from "../../components/CodeExample.astro";
 import type { BlogPage } from "../../data/blog";
 import BlogLayout from "../../layouts/BlogLayout.astro";
+import ComponentEquation from "../../snippets/blog/ComponentEquation.astro";
+import WidgetEquation from "../../snippets/blog/WidgetEquation.astro";
 
-export const pageInfo:BlogPage = {
-    name:'Introducing Advect',
-    index: -1,
-    blurb:'',
-    hide:false,
-    slug: 'introducing-advect'
-}
+export const pageInfo: BlogPage = {
+  name: "Introducing Advect",
+  index: -1,
+  blurb: "",
+  hide: false,
+  slug: "introducing-advect",
+};
 ---
 
 <BlogLayout {...Astro.props}>
-    <div class="container">
-        <div class="content">
-            <h1 class="">{pageInfo.name}</h1>
+  <div class="container">
+    <div class="content">
+      <h1 class="has-text-centered title is-1">{pageInfo.name}</h1>
+      <div class="block">
+        <h2>What is Advect?</h2>
+        <p>
+          Advect is a library (not really a framework) for creating, and loading
+          web components. It provides an easy to learn syntax, small bundle size, a loading strategy and most important of NO BUILD STEP.  
+          I wanted to see I could make Web Components not suck, and fill the niche of providing a component based workflow without having to buy into React/Vue/Angular/Lit.  
+        </p>
+        <p>
+            The name <code>/adˈvek(t)/</code> comes from from the physical process of heat/material moving horizontally, usually after a REACTtion. A lot of the inspiration 
+        </p>
+
+        <div class="block">
+          <h2>What did I make this?</h2>
+          <p>I needed to see for myself could I make web components suck</p>
         </div>
+        <div class="block">
+          <h2>A little history</h2>
+          <p>
+            I've been in web dev a while, the better part of 15yrs at time of writing. My journey writing code goes even further back to when I started learning Java in 2006.
+            In middle / high school I was making games and websites in flash and good ol PHP. I playing way too much Maplestory / Endless Online and replaying the same Linkin Park AMVs on youtube (truly simpler times).
+         </p>
+         <p>
+            All of that is to say I'm not new to this.  I was there when the flatlanders needed a store to sell their gems
+            and more, when they needed to do it quick so they used Angular to do the trick (I even authored the Vue 1.0 & 2.0 bindings for Haxe).
+            Something special happened when AngularJs  hit the scene. <i>Reactivity has entered the chat</i>, and these <i>Reactive Components</i> were a game changer. 
+            Jquery had reusable bits but IMO it only gave you "widgets" ( <WidgetEquation />). Now we have "components" (<ComponentEquation />)! 
+          </p>
+          <p>
+            The web abandoned widgets and adopted stateful largely MVC Components overnight with the advent of reactivity and style libraries.  
+            This is where we start seeing the fork in the road for how you build on the web. 
+          </p>
+         
+        </div>
+      </div>
     </div>
+  </div>
 </BlogLayout>
