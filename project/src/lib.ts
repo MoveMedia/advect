@@ -1,12 +1,68 @@
+import type { AdvectElement } from "../dist/advect";
 import { type HTMLNodeInterface } from "./HTMLNode";
 
 export type AttrTypeKey = keyof typeof AttrTypes;
 export type AttrType = typeof AttrTypes;
-const AttrTypes = {
-  number: {},
-  string: {},
-  bigint: {},
+export const AttrTypes = {
+  int: {
+    parse: (val:string) =>{
+      try {
+        return parseInt(val);
+      }catch(e){
+        return null
+      }
+    },
+    store(val:number){
+      return `${val}}`;
+    }
+  },
+  float:{
+    parse: (val:string) =>{
+      try {
+        return parseFloat(val);
+      }catch(e){
+        return null
+      }
+    },
+    store(val:number){
+      return `${val}}`;
+    }
+  },
+  string: {
+    parse: (val:string) =>{
+      return val;
+    },
+    store(val:number){
+      return val;
+    }
+  },
+  bigint: {
+    parse: (val:string) =>{
+      try {
+        return BigInt(val);
+      }catch(e){
+        return null
+      }
+    },
+    store(val:number){
+      return `${val}}`;
+    }
+  },
   color: {},
+  callback: {
+    parse: (val:string, element:AdvectElement) =>{
+      return () => new AsyncFunction(
+        "$self",
+        "refs",
+        "data",
+        val
+      )(element, element.refs, element.data);
+    },
+    store(val:number){
+      return `${val}}`;
+    }
+  },
+
 };
 
 export type FormatTypeKey = keyof typeof FormatTypes;

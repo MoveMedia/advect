@@ -4,7 +4,7 @@
 // @ts-ignore There are no TS definitions for this lib
 import getCrossOriginWorkerURL from 'crossoriginworker';
 import { Actions, type ActionKey } from "./advect.actions";
-import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, onloadElements, toModule, toUpperCamelCase } from "./lib";
+import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, onloadElements, toModule, toUpperCamelCase, AttrTypes } from "./lib";
 import { Eta } from "eta";
 import { cleanTemplate, convertTables } from "./advect.render";
 import * as zustand from  "zustand/vanilla" 
@@ -187,8 +187,8 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
         static observedAttributes = Object.keys($settings.watched_attrs);
         static settings = $settings;
       };
-      if (register){
-        customElements.define(settings.tagName, newClass as any);
+      if (register && $settings.tagName.length > 3 && $settings.tagName.indexOf('-')){
+        customElements.define($settings.tagName, newClass as any);
       }
       buildClasses.push(newClass);
     });
@@ -454,6 +454,46 @@ export class AdvectElement extends AdvectBase {
     return this.constructor.settings as CustomElementSettings;
   }
 
+  typed = new Proxy(
+    {},
+    {
+      get: (_, name) => {
+        if (this.isConnected) {
+          try{
+
+          let val:any | null = this.getAttribute(name as string)
+          const type = this.$settings.watched_attrs[name as string].type
+          if (!type) return val;
+
+          const handler = AttrTypes[type] ?? AttrTypes.string;
+          if ( type =="callback"){
+            // @ts-ignore
+            return handler.parse(val, this);
+          }
+        }
+        catch(e){
+          console.warn(e);
+        }
+
+            // @ts-ignore
+          return handler.parse(val);
+
+        }
+        return null;
+      },
+      set: (_, name, value:string) => {
+        if (this.isConnected) {
+          const att = this.$settings.watched_attrs[name as string];
+          if (!att) return false;
+          
+          this.setAttribute(name as string, value);
+          this.anyAttrChanged(name as string, value);
+          return true;
+        }
+        return false;
+      },
+    }
+  );
   constructor() {
     super();
   }
@@ -721,7 +761,7 @@ export class AdvectView extends AdvectViewbase {
   
   override render(){
     const template = this.querySelector('template');
-    const output = this.querySelector('output');
+    const output = this.querySelector('[output]');
     const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
     let etaRendered = "";
 

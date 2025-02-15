@@ -49,7 +49,8 @@ export const Actions = {
     for (let url of _urls) {
       const data = await fetch(url)
         .then((r) => r.text())
-        .then(async (t) => await this.build({ template: t }));
+      
+        .then(async (t) => await Actions.build({ template: t }));
    
       settingResults.push(...data);
     }
@@ -103,6 +104,7 @@ export const Actions = {
           continue;
         }
         const tagName = root_node.attributes["id"];
+        
         if (tagName.indexOf("-") === -1) {
           adv_warn("advect Template tag name must contain a hyphen");
           continue;
@@ -128,9 +130,9 @@ export const Actions = {
         while (childQueue.length > 0) {
           const currNode = childQueue.shift();
           if (!currNode) continue;
-          if (currNode.tagName === "settings") {
+          if (currNode.tagName === "adv-settings") {
             currNode.children.forEach((child: HTMLNodeInterface) => {
-              if (child.tagName == "mutation") {
+              if (child.tagName == "adv-mutation") {
                 if (
                   settings?.mutation?.attributeFilter &&
                   child.attributes["attributeFilter"]
@@ -175,7 +177,7 @@ export const Actions = {
                       .indexOf("true") != -1;
                 }
               }
-              if (child.tagName == "intersection") {
+              if (child.tagName == "adv-intersection") {
                 if (settings?.intersection && child.attributes["margin"]) {
                   settings.intersection.margin = parseFloat(
                     child.attributes["margin"]
@@ -193,7 +195,7 @@ export const Actions = {
                   settings.intersection.root = child.attributes["root"];
                 }
               }
-              if (child.tagName == "attr" && child.attributes["name"]) {
+              if (child.tagName == "adv-attr" && child.attributes["name"]) {
                 const name = child.attributes["name"];
                 const type = child.attributes["type"] ?? "string";
                 //const format = child.attributes['format'] ?? 'none';
@@ -203,9 +205,9 @@ export const Actions = {
                   };
                 }
               }
-              child.remove();
+             child.remove();
             });
-            currNode.remove();
+          currNode.remove();
           } // can be a
           if (currNode.tagName === "script") {
             // can be a

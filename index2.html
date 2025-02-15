@@ -10,44 +10,8 @@
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <template id="a-table-example" adv>
-      <adv-view
-        ref
-        onload="
-          $this.store.setState({
-              users:[
-                { name: 'John Wick', email: 'john.wick@assassins.net', inventory: [ 'a gun', 'a suit' ]},
-                { name: 'John Cena', email: 'john.cena@cantseeme.org', inventory: [ 'something invisible' ]},
-                { name: 'John Doe',  email: 'john.doe@unidentified.io', inventory: [ 'empty wallet' ]},
-              ]
-          })
-        "
-      >
-        <div output></div>
-        <template>
-          <t-table class="table">
-            <t-head>
-              <t-r>
-                <of data="$self.state.users[0]" name="key" value="val">
-                  <t-h>{{key}}</t-h>
-                </of>
-              </t-r>
-            </t-head>
-            <t-body>
-              <for data="$self.state.users" name="user" index="user_ind">
-                <t-r>
-                  <t-d><span>{{user.name}}</span></t-d>
-                  <t-d><span> {{user.email}} </span></t-d>
-                  <t-d> <span> {{user.status}} </span></t-d>
-                  <t-d><span> {{user.inventory}} </span> </t-d>
-                </t-r>
-              </for>
-            </t-body>
-          </t-table>
-        </template>
-      </adv-view>
-    </template>
-
-    <a-table-example />
+ 
+    <script type="text/adv" src="/a-table-example.html"></script>
+    <a-table-example example="25" cb="console.log('my callback')" />
   </body>
 </html>
