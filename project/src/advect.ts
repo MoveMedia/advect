@@ -243,6 +243,7 @@ const createCustomElementClasses = (buildSettings:CustomElementSettings[], regis
  * Base class for AdvectElement and AdvectView
  */
 export class AdvectBase extends HTMLElement {
+  createStore = zustand.createStore
   anyAttrChanged (_:string, __:string){}
   /**
    * Helper for getting and setting attributes on this element
@@ -697,6 +698,99 @@ class AdvectViewbase extends AdvectBase{
   }
   viewTransition = true;
 
+
+
+  override connectedCallback(): void {
+    super.connectedCallback()
+    this.#store.subscribe((state, prevState) => {
+      this.render();
+    })
+    requestAnimationFrame(()=>{
+      this.render();
+    })
+  }
+  get eta(){ return this.#eta; }
+
+  render(){}
+
+  onRender?:() => void = () =>{}
+  afterRender(){
+    if (this.onRender) {
+      this.onRender();
+    }
+  } 
+}
+
+/**
+ * A component for interacting with the ETA templating library
+ */
+export class AdvectView extends AdvectViewbase {
+    /**
+   * References
+   */
+    refs = new Proxy({},
+      {
+        get: (_, key) => {
+          const ref =  this.querySelector(`[ref="${key as string}"]`); 
+          if (ref) return ref;
+          return null;
+          
+        },
+      }
+    );
+  /**
+   * Refs of custom web elements returns a promise to the ref
+   */
+    fuzzyRefs = new Proxy({},
+      {
+        get: (_, key) => {
+          const ref = this?.querySelector(`[ref="${key as string}"]`); 
+          if (ref) return refHandle(ref as HTMLElement);
+          return null;
+          
+        },
+      }
+    );
+
+    get all_refs() {
+      //
+      const refs  = [
+      // @ts-ignore
+        ...this?.querySelectorAll('[ref]') 
+      ]; 
+      return refs;
+    }  
+  override render(){
+    const template = this.querySelector('template');
+    const output = this.querySelector('[output]');
+    const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
+    let etaRendered = "";
+
+    try{
+      etaRendered = convertTables(this.eta.renderString(clean, { $self:this }))
+    }
+    catch(e){
+      console.log(e)
+    }
+      if (this.viewTransition){
+        document.startViewTransition(()=>{
+          if (output) output.innerHTML = etaRendered;
+        }).finished.then(()=>{
+          this.afterRender();
+        })
+      }else{
+        if (output) {
+          output.innerHTML = etaRendered;
+          requestAnimationFrame(() =>{
+            this.afterRender();
+      
+          })
+        }
+      }
+  }
+}
+
+export class AdvectShadowView extends AdvectViewbase {
     /**
    * References
    */
@@ -732,65 +826,6 @@ class AdvectViewbase extends AdvectBase{
       ]; 
       return refs;
     }
-
-  override connectedCallback(): void {
-    super.connectedCallback()
-    this.#store.subscribe((state, prevState) => {
-      this.render();
-    })
-    requestAnimationFrame(()=>{
-      this.render();
-    })
-  }
-  get eta(){ return this.#eta; }
-
-  render(){}
-
-  onRender?:() => void = () =>{}
-  afterRender(){
-    if (this.onRender) {
-      this.onRender();
-    }
-  } 
-}
-
-/**
- * A component for interacting with the ETA templating library
- */
-export class AdvectView extends AdvectViewbase {
-  
-  override render(){
-    const template = this.querySelector('template');
-    const output = this.querySelector('[output]');
-    const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
-    let etaRendered = "";
-
-    try{
-      etaRendered = convertTables(this.eta.renderString(clean, { $self:this }))
-    }
-    catch(e){
-      console.log(e)
-    }
-      if (this.viewTransition){
-        document.startViewTransition(()=>{
-          if (output) output.innerHTML = etaRendered;
-        }).finished.then(()=>{
-          this.afterRender();
-        })
-      }else{
-        if (output) {
-          output.innerHTML = etaRendered;
-          requestAnimationFrame(() =>{
-            this.afterRender();
-      
-          })
-        }
-      }
-  }
-}
-
-export class AdvectShadowView extends AdvectViewbase {
-
   override connectedCallback(): void {
     this.attachShadow({mode:'open'});
     super.connectedCallback()
