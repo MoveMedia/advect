@@ -120,13 +120,18 @@ export interface CustomElementSettings {
   watched_attrs: {
     [key: string]: {
       type: AttrTypeKey;
-      // format?: FormatType
+      format?: string
       // storage: 'css-var' | 'store'
     };
   };
 
   props: {
-    [key: string]: AttrTypeKey;
+    [key: string]: {
+      type: AttrTypeKey;
+      format?: string
+      // format?: FormatType
+      // storage: 'css-var' | 'store'
+    };
   };
 
   logs: string[];
@@ -298,8 +303,7 @@ export function getBooleanHtmlTags (){
 
 export const advect_keys = {
   settings: 'settings',
-  attrs: 'attr',
-  props: 'props',
+  settings_data: 'data',
   template_attr: 'advect'
 
 }

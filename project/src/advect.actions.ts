@@ -122,20 +122,32 @@ export const Actions = {
         const childQueue = [...root_node.children];
         while (childQueue.length > 0) {
           const currNode = childQueue.shift();
+          
           if (!currNode) continue;
-          const is_root_child = currNode.parent?.tagName.toLocaleLowerCase() == 'template'
 
+          const is_root_child = currNode.parent?.tagName.toLocaleLowerCase() == 'template'
           
           if (currNode.tagName ===  advect_keys.settings && is_root_child) {
             currNode.children.forEach((child: HTMLNode) => {
-              if (child.tagName == advect_keys.attrs && child.attributes["name"]) {
+              if (child.tagName == advect_keys.settings_data && child.attributes["name"]) {
                 const name = child.attributes["name"];
-                const type = child.attributes["type"] ?? "string";
-                //const format = child.attributes['format'] ?? 'none';
-                if (isValidAttrType(type)) {
+                const type = child.attributes?.["type"] ?? "string";
+                const format = child.attributes?.['format'] ?? 'none';
+                const _set  = child.attributes?.['set'] ?? 'attribute'
+
+                const hasValidType = isValidAttrType(type)
+
+                if (hasValidType && (_set =='attribute' || _set =='attr')) {
                   settings.watched_attrs[name] = {
                     type: type as AttrTypeKey,
+                    format
                   };
+                }
+                if (hasValidType && (_set ==='property' || _set =='prop')){
+                  settings.props[name] ={
+                    type: type as AttrTypeKey,
+                    format
+                  }
                 }
               }
               

@@ -71,6 +71,7 @@ export function createEta(){
  */
 export class AdvectElement extends HTMLElement {
   $vm: AdvectVM | null = null;
+  #internals: ElementInternals;
   /**
    *
    */
@@ -80,10 +81,6 @@ export class AdvectElement extends HTMLElement {
   }
   #shadow!: ShadowRoot
   get $domRoot(): HTMLElement | ShadowRoot {
-    console.log({
-      light: this,
-      shadow: this.#shadow
-    })
     const root = this.$settings.root === "shadow" ? this.#shadow : this;
     return root;
   }
@@ -182,12 +179,31 @@ export class AdvectElement extends HTMLElement {
       },
     }
   );
-  $props: Record<string, any> | null = null;
+  #props: Record<string|symbol, any> = {} 
+  $props = new Proxy({}, {
+    has: (_, name) => {
+      return Object.hasOwn(this.#props, name)
+    },
+    get:(_, name) => {
+      if (Object.hasOwn(this.#props, name)){
+        return this.#props[name];
+      }
+      return null
+    },
+    set: (_, name, value) =>{
+      const hasKey = Object.keys(this.$settings.props).find( k => k === name)
+      if (!hasKey) return false
+      this.#props[name] = value;
+      return true;
+    }
+  });
 
   constructor() {
     super();
     //const guid = crypto.randomUUID();
     let times_rendered = 0;
+    this.#internals = this.attachInternals();
+
     root((dispose) => {
       this.#reactiveDispose = dispose;
       
@@ -198,6 +214,7 @@ export class AdvectElement extends HTMLElement {
         $props: this.$props,
         $refs: this.$refs,
         $attr: this.$attr,
+        $internals: this.#internals
       });
       this.#getScope = () => getScope();
       effect(() => {
@@ -206,6 +223,8 @@ export class AdvectElement extends HTMLElement {
         times_rendered++
       });
     });
+
+
     this.render.bind(this)
   }
 
@@ -213,7 +232,6 @@ export class AdvectElement extends HTMLElement {
   
   onConnect: (() => void) | null = null;
   connectedCallback() {
-    console.log('attaching shadow')
     if (this.$settings.root == 'shadow'){
       this.#shadow = this.attachShadow({mode: this.$settings.shadow })
       this.render()
@@ -223,6 +241,7 @@ export class AdvectElement extends HTMLElement {
 
 
  render() {
+    if (!this.isConnected || !this.$domRoot) return;
 
     const frame: Record<string | number | symbol, any> = {
       $props: this.$props,
@@ -269,9 +288,7 @@ export class AdvectElement extends HTMLElement {
     // }
     // nodeTree.forEach(n => walk(n))
     
-    if (this.isConnected && this.$domRoot){
       this.$domRoot.innerHTML = nodeTree.map(n => n.html()).join("");
-    }
     
     requestAnimationFrame(() => {
       this.hook();
