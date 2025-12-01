@@ -15,7 +15,7 @@ import { type CustomElementSettings } from "./lib";
 
 import { Eta } from "eta";
 import { cleanTemplate, convertTables } from "./advect.render";
-import { create } from "lodash";
+import { create, times } from "lodash";
 import { HTMLNode } from "./advect.HTMLNode";
 
 const events = getEventMap();
@@ -78,10 +78,14 @@ export class AdvectElement extends HTMLElement {
     // @ts-ignore Assigned by componnet builder
     return this.constructor.$settings as CustomElementSettings;
   }
-
+  #shadow!: ShadowRoot
   get $domRoot(): HTMLElement | ShadowRoot {
-    const root = this.$settings.root === "shadow" ? this.shadowRoot : this;
-    return root ?? this;
+    console.log({
+      light: this,
+      shadow: this.#shadow
+    })
+    const root = this.$settings.root === "shadow" ? this.#shadow : this;
+    return root;
   }
 
   $renderer: AdvectElement | null = null;
@@ -183,6 +187,7 @@ export class AdvectElement extends HTMLElement {
   constructor() {
     super();
     //const guid = crypto.randomUUID();
+    let times_rendered = 0;
     root((dispose) => {
       this.#reactiveDispose = dispose;
       
@@ -196,20 +201,29 @@ export class AdvectElement extends HTMLElement {
       });
       this.#getScope = () => getScope();
       effect(() => {
+        console.log('times rendered: ', times_rendered)
         this.render();
+        times_rendered++
       });
     });
+    this.render.bind(this)
   }
 
   anyAttrChanged: ((name: string, value: string) => void) | null = null;
   
   onConnect: (() => void) | null = null;
   connectedCallback() {
+    console.log('attaching shadow')
+    if (this.$settings.root == 'shadow'){
+      this.#shadow = this.attachShadow({mode: this.$settings.shadow })
+      this.render()
+    }
     this?.onConnect?.call(this);
   }
 
 
  render() {
+
     const frame: Record<string | number | symbol, any> = {
       $props: this.$props,
       $el: this,
@@ -222,39 +236,43 @@ export class AdvectElement extends HTMLElement {
     const rendered = this.#eta.renderString(clean, frame);
     const nodeTree = HTMLNode.create(rendered);
     const refsNodes: HTMLNode[] = []
-    function walk(node: HTMLNode){
-      const attr_keys = Object.keys(node.attributes)
-      let hasEvent = false;
-      let hasProps = false;
-      let hasRef = false;
+    // function walk(node: HTMLNode){
+    //   const attr_keys = Object.keys(node.attributes)
+    //   let hasEvent = false;
+    //   let hasProps = false;
+    //   let hasRef = false;
 
-      attr_keys.forEach(key => {
-        const _k = key.toLocaleLowerCase()
-        if (events.has(_k)) {
-          hasEvent = true;
-        }
-        if (_k.startsWith("prop-")) {
-          hasProps = true;
-        }
-        if (_k == 'checked' || _k == 'disabled'){
-          hasRef = true;
-        }
-        if (_k === "ref") {
-          hasRef = true;
-        }
-      })
-      if (!hasRef){
-        node.attributes['ref']=crypto.randomUUID();
-      }
-      if (hasEvent || hasProps || hasRef) {
-        refsNodes.push(node)
-      }
-      for (const child of node.children) {
-        walk(child)
-      }
+    //   attr_keys.forEach(key => {
+    //     const _k = key.toLocaleLowerCase()
+    //     if (events.has(_k)) {
+    //       hasEvent = true;
+    //     }
+    //     if (_k.startsWith("prop-")) {
+    //       hasProps = true;
+    //     }
+    //     if (_k == 'checked' || _k == 'disabled'){
+    //       hasRef = true;
+    //     }
+    //     if (_k === "ref") {
+    //       hasRef = true;
+    //     }
+    //   })
+    //   if (!hasRef){
+    //     node.attributes['ref']=crypto.randomUUID();
+    //   }
+    //   if (hasEvent || hasProps || hasRef) {
+    //     refsNodes.push(node)
+    //   }
+    //   for (const child of node.children) {
+    //     walk(child)
+    //   }
+    // }
+    // nodeTree.forEach(n => walk(n))
+    
+    if (this.isConnected && this.$domRoot){
+      this.$domRoot.innerHTML = nodeTree.map(n => n.html()).join("");
     }
-    nodeTree.forEach(n => walk(n))
-    this.$domRoot.innerHTML = nodeTree.map(n => n.html()).join("");
+    
     requestAnimationFrame(() => {
       this.hook();
     });

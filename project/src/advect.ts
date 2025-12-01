@@ -215,11 +215,13 @@ const createAdvect = async () => {
       toModule(settings.module, []).then((module: any) => {
         // TODO fix change to module default
         //const moduleClass = module[moduleClassName];
-        console.log(settings)
         const newClass = class extends AdvectElement {
           static observedAttributes = Object.keys($settings.watched_attrs);
           static $settings = $settings;
           static $advectVMProvider: AvectVMProvider = module.default;
+          connectedCallback(): void {
+            super.connectedCallback();
+          }
         };
         if (
           register &&
