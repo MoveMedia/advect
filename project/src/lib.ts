@@ -1,5 +1,4 @@
-import type { AdvectElement } from "../dist/advect";
-import { type HTMLNodeInterface } from "./HTMLNode";
+import type { HTMLNode } from "./advect.HTMLNode";
 
 export type AttrTypeKey = keyof typeof AttrTypes;
 export type AttrType = typeof AttrTypes;
@@ -49,20 +48,6 @@ export const AttrTypes = {
     }
   },
   color: {},
-  callback: {
-    parse: (val:string, element:AdvectElement) =>{
-      return () => new AsyncFunction(
-        "$self",
-        "refs",
-        "data",
-        val
-      )(element, element.refs, element.data);
-    },
-    store(val:number){
-      return `${val}}`;
-    }
-  },
-
 };
 
 export type FormatTypeKey = keyof typeof FormatTypes;
@@ -102,12 +87,19 @@ export interface CustomElementSettings {
    * Reference to the HTMLNode interface.
    * This can be used to reference the original component markup without needing access the the browser APIs
    */
-  templateNode: HTMLNodeInterface | null;
+  templateNode: HTMLNode | null;
+
+  /**
+   * Layout of the component
+   */
+  layout: string | null
+
   /**
    * References in the template.
    * all html elements with a "ref attribute"
    */
-  refs: HTMLNodeInterface[];
+  
+  refs: HTMLNode[];
   /**
    * Shadow Mode for the component
    */
@@ -132,23 +124,11 @@ export interface CustomElementSettings {
       // storage: 'css-var' | 'store'
     };
   };
-  /**
-   * Mutation observer settings set inside
-   * <setting>
-   * </setting>
-   */
-  mutation?: {
-    attributes?: boolean;
-    characterData?: boolean;
-    childList?: boolean;
-    subtree?: boolean;
-    attributeFilter?: string[];
+
+  props: {
+    [key: string]: AttrTypeKey;
   };
-  intersection: {
-    margin?: number;
-    threshhold?: number;
-    root?: string;
-  };
+
   logs: string[];
 }
 
@@ -163,9 +143,7 @@ export function isValidAttrType(attr: string) {
 /**
  * Constructor for an async function.
  */
-export const AsyncFunction = Object.getPrototypeOf(
-  async function () {}
-).constructor;
+export const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
 /**
  * Given a string creates a module
@@ -217,15 +195,6 @@ export function stripHtmlComments(htmlString:string) {
   return htmlString.replace(/<!--[\s\S]*?-->/g, '');
 }
 
-export function toUpperCamelCase(snakeCaseString:string) {
-  return snakeCaseString
-      .toLowerCase()
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
-}
-
-
 /**
  * Logs from anywhere
  * @param msg 
@@ -246,7 +215,9 @@ export function adv_table(msg: any) {
   adv_log_channel.postMessage({ ...msg, ___type: "table" });
 }
 
-
+/**
+ * Onload natively works for these 
+ */
 export const onloadElements = [
   "body",
   "iframe",
@@ -258,3 +229,77 @@ export const onloadElements = [
   "audio",
   "video"
 ];
+
+export interface AdvectVM {
+  onConnect?: () => void;
+  onDisconnect?: () => void;
+  onAttrChange?: (name: string, value: string, oldValue: string) => void;
+}
+
+export type AvectVMProvider = () => AdvectVM;
+
+
+export function getEventMap (): Map<string,string> {
+  return new Map([
+    ["onclick", "click"],
+    ["ondblclick", "dblclick"],
+    ["onmousedown", "mousedown"],
+    ["onmouseup", "mouseup"],
+    ["onmousemove", "mousemove"],
+    ["onmouseover", "mouseover"],
+    ["onmouseout", "mouseout"],
+    ["oncontextmenu", "contextmenu"],
+    ["onwheel", "wheel"],
+    ["onkeydown", "keydown"],
+    ["onkeypress", "keypress"],
+    ["onkeyup", "keyup"],
+    ["onfocus", "focus"],
+    ["onblur", "blur"],
+    ["onchange", "change"],
+    ["oninput", "input"],
+    ["onselect", "select"],
+    ["onsubmit", "submit"],
+    ["onreset", "reset"],
+    ["oninvalid", "invalid"],
+    ["onsearch", "search"],
+    ["onload", "load"],
+    ["onunload", "unload"],
+    ["onresize", "resize"],
+    ["onscroll", "scroll"],
+    ["ononline", "online"],
+    ["onoffline", "offline"],
+    ["ondrag", "drag"],
+    ["ondragstart", "dragstart"],
+    ["ondragend", "dragend"],
+    ["ondragenter", "dragenter"],
+    ["ondragleave", "dragleave"],
+    ["ondragover", "dragover"],
+    ["ondrop", "drop"],
+    ["onanimationstart", "animationstart"],
+    ["onanimationend", "animationend"],
+    ["onanimationiteration", "animationiteration"],
+    ["ontransitionstart", "transitionstart"],
+    ["ontransitionend", "transitionend"],
+    ["ontransitionrun", "transitionrun"],
+    ["ontransitioncancel", "transitioncancel"],
+  ]);
+}
+
+
+export function getBooleanHtmlTags (){
+  return [
+    'checked',
+    'disabled',
+    'readonly',
+    'popover'
+  ]
+}
+
+
+export const advect_keys = {
+  settings: 'settings',
+  attrs: 'attr',
+  props: 'props',
+  template_attr: 'advect'
+
+}

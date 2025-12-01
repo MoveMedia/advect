@@ -3,7 +3,7 @@
  * This file contains all of the actions advect can use on a worker no browser access.
  */
 
-import { HTMLNode, type HTMLNodeInterface } from "./HTMLNode";
+import { HTMLNode } from "./advect.HTMLNode";
 import {
   type AttrTypeKey,
   type CustomElementSettings,
@@ -11,8 +11,10 @@ import {
   toModule,
   adv_log,
   adv_warn,
-  stripHtmlComments
+  stripHtmlComments,
+  advect_keys
 } from "./lib";
+
 
 
 /**
@@ -49,9 +51,7 @@ export const Actions = {
     for (let url of _urls) {
       const data = await fetch(url)
         .then((r) => r.text())
-      
         .then(async (t) => await Actions.build({ template: t }));
-   
       settingResults.push(...data);
     }
 
@@ -83,27 +83,18 @@ export const Actions = {
         root: "light",
         shadow: "closed",
         watched_attrs: {},
-        mutation: {
-          attributeFilter: [],
-          attributes: true,
-          characterData: false,
-          childList: true,
-          subtree: true,
-        },
-        intersection: {
-          margin: 0.5,
-          threshhold: 1,
-        },
+        props: {},
         logs: [],
+        layout: null
       };
       if (root_node.tagName.toLowerCase() === "template") {
-        if (!root_node.attributes["id"]) {
+        if (!root_node.attributes[advect_keys.template_attr]) {
           adv_warn(
-            "advect Template must have an id that will become the tag name"
+            "advect Template must have an advect that will become the tag name"
           );
           continue;
         }
-        const tagName = root_node.attributes["id"];
+        const tagName = root_node.attributes[advect_keys.template_attr];
         
         if (tagName.indexOf("-") === -1) {
           adv_warn("advect Template tag name must contain a hyphen");
@@ -112,6 +103,7 @@ export const Actions = {
 
         settings.tagName = tagName;
         settings.templateNode = root_node;
+        
         if (root_node.attributes["root"]) {
           settings.root = root_node.attributes["root"] as any;
           // TODO check for the real val
@@ -126,76 +118,17 @@ export const Actions = {
           settings.shadow = "closed";
         }
 
+
         const childQueue = [...root_node.children];
         while (childQueue.length > 0) {
           const currNode = childQueue.shift();
           if (!currNode) continue;
-          if (currNode.tagName === "adv-settings") {
-            currNode.children.forEach((child: HTMLNodeInterface) => {
-              if (child.tagName == "adv-mutation") {
-                if (
-                  settings?.mutation?.attributeFilter &&
-                  child.attributes["attributeFilter"]
-                ) {
-                  settings.mutation.attributeFilter =
-                    child.attributes["attributeFilter"].split(",");
-                }
-                if (
-                  settings?.mutation?.attributes &&
-                  child.attributes["attributes"]
-                ) {
-                  settings.mutation.attributes =
-                    child.attributes["attributes"]
-                      .toLocaleLowerCase()
-                      .indexOf("true") != -1;
-                }
-                if (
-                  settings?.mutation?.characterData &&
-                  child.attributes["characterData"]
-                ) {
-                  settings.mutation.characterData =
-                    child.attributes["characterData"]
-                      .toLocaleLowerCase()
-                      .indexOf("true") != -1;
-                }
-                if (
-                  settings?.mutation?.childList &&
-                  child.attributes["childList"]
-                ) {
-                  settings.mutation.childList =
-                    child.attributes["childList"]
-                      .toLocaleLowerCase()
-                      .indexOf("true") != -1;
-                }
-                if (
-                  settings?.mutation?.subtree &&
-                  child.attributes["subtree"]
-                ) {
-                  settings.mutation.subtree =
-                    child.attributes["subtree"]
-                      .toLocaleLowerCase()
-                      .indexOf("true") != -1;
-                }
-              }
-              if (child.tagName == "adv-intersection") {
-                if (settings?.intersection && child.attributes["margin"]) {
-                  settings.intersection.margin = parseFloat(
-                    child.attributes["margin"]
-                  );
-                }
-                if (
-                  settings?.intersection.threshhold &&
-                  child.attributes["threshhold"]
-                ) {
-                  settings.intersection.threshhold = parseFloat(
-                    child.attributes["threshhold"]
-                  );
-                }
-                if (settings?.intersection.root && child.attributes["root"]) {
-                  settings.intersection.root = child.attributes["root"];
-                }
-              }
-              if (child.tagName == "adv-attr" && child.attributes["name"]) {
+          const is_root_child = currNode.parent?.tagName.toLocaleLowerCase() == 'template'
+
+          
+          if (currNode.tagName ===  advect_keys.settings && is_root_child) {
+            currNode.children.forEach((child: HTMLNode) => {
+              if (child.tagName == advect_keys.attrs && child.attributes["name"]) {
                 const name = child.attributes["name"];
                 const type = child.attributes["type"] ?? "string";
                 //const format = child.attributes['format'] ?? 'none';
@@ -205,19 +138,10 @@ export const Actions = {
                   };
                 }
               }
-             child.remove();
+              
             });
-          currNode.remove();
           } // can be a
-          if (currNode.tagName === "script") {
-            // can be a
-            if (
-              currNode.attributes["type"]?.toLocaleLowerCase() === "text/adv" &&
-              currNode.attributes["type"]
-            ) {
-              const url = new URL(currNode.attributes["src"]);
-              this.load({ urls: url.toString() });
-            }
+          if (currNode.tagName === "script" && is_root_child) {
             if (
               currNode.attributes["type"]?.toLocaleLowerCase() === "module" &&
               !currNode.attributes["src"]
@@ -226,15 +150,18 @@ export const Actions = {
             }
           }
 
+          if (currNode.tagName.toLocaleLowerCase() === 'layout' && is_root_child){
+            settings.layout = currNode.children.map( c => c.html()).join('')
+          }
+
           if (currNode.attributes["ref"]) {
             settings.refs.push(currNode);
           }
-
           childQueue.push(...currNode.children);
         }
       }
       const outerHtml = root_node.children
-        .map((node: HTMLNodeInterface) => node.html())
+        .map((node: HTMLNode) => node.html())
         .join("");
 
       settings.template = outerHtml;

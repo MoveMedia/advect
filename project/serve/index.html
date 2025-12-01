@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../src/advect.ts" type="module"></script>
+  </head>
+  <body>
+    <my-component> </my-component>
+
+
+    <template advect="my-component" root="shadow" shadow="open">
+      <settings>
+        <data attr=""></data>
+      </settings>
+      <layout>
+        <h1>Hello World</h1>
+      </layout>
+      <script type="module">
+        export default function ({ $, $el, $props, $refs, $attr }) {}
+      </script>
+    </template>
+  </body>
+</html>

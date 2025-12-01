@@ -115,6 +115,3 @@ export function convertTables(template:string,) {
 
   
 }
-function addBracesToSubview(htmlString:string) {
-  return htmlString.replace(/(?!{{~)(<adv-view\b[^>]*>.*?<\/adv-view>)(?<!}})/g, "{{~$1}}");
-}

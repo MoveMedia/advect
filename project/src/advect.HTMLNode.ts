@@ -6,6 +6,8 @@
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
  */
 
+const props_prefix ='prop-'
+const ref_key = 'ref'
 
 /**
  * @enum {number}
@@ -25,7 +27,6 @@ const TokenType = {
  * @property {string} value
  */
 
-/** @type {Set<string>} */
 const selfClosingTags = new Set([
     'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
     'link', 'meta', 'source', 'track', 'wbr','att',
@@ -35,38 +36,27 @@ const selfClosingTags = new Set([
 
 
 
-/**
- * @typedef {Object} HTMLNodeInterface
- * @property {string} tagName
- * @property {Object.<string, string>} attributes
- * @property {HTMLNodeInterface[]} children
- * @property {boolean} isSelfClosing
- * @property {string} [content]
- * @property {function(): string} html
- * @property {function(): string} text
- * @property {function(string): (HTMLNodeInterface | null)} getElementById
- * @property {function(string): HTMLNodeInterface[]} getElementsByClass
- * @property {function(): void} hidden
- * @property {function(): void} show
- * @property {function(): void} remove
- * @property {function(): void} unRemove
- * @property {function(string[]): void} filterAttributes
- */
 
 export class HTMLNode {
-    /**
-     * @param {string} tagName
-     * @param {Object.<string, string>} attributes
-     * @param {HTMLNodeInterface[]} children
-     * @param {string} [content]
-     */
-    constructor(tagName, attributes, children, content) {
+    tagName:string
+    attributes:Record<string, string>
+    props:Record<string, string>
+    children:HTMLNode[]
+    content:string
+    isSelfClosing:boolean
+    isRemoved:boolean
+    parent:HTMLNode | null
+
+
+    constructor(tagName:string, attributes:Record<string,string>, children: HTMLNode[] = [], content:string = "", parent:HTMLNode | null = null, props:Record<string, string> = {}) {
         this.tagName = tagName;
         this.attributes = attributes;
         this.children = children;
         this.content = content;
         this.isRemoved = false;
         this.isSelfClosing = false;
+        this.parent = parent;
+        this.props = props;
     }
 
     /**
@@ -100,7 +90,7 @@ export class HTMLNode {
      * @param {string} id
      * @returns {HTMLNodeInterface | null}
      */
-    getElementById(id) {
+    getElementById(id:string) : HTMLNode | null {
         if (this.isRemoved) {
             return null;
         }
@@ -119,12 +109,12 @@ export class HTMLNode {
      * @param {string} className
      * @returns {HTMLNodeInterface[]}
      */
-    getElementsByClass(className) {
+    getElementsByClass(className:string) {
         if (this.isRemoved) {
             return [];
         }
 
-        const results = [];
+        const results:HTMLNode[] = [];
 
         if (this.attributes['class'] && this.attributes['class'].split(' ').includes(className)) {
             results.push(this);
@@ -171,12 +161,12 @@ export class HTMLNode {
      * @param {string[]} whitelist
      * @returns {void}
      */
-    filterAttributes(whitelist) {
+    filterAttributes(whitelist:string[]) {
         if (whitelist.includes('*')) {
             return;
         }
 
-        const filteredAttributes = {};
+        const filteredAttributes:Record<string, string> = {};
 
         for (const [key, value] of Object.entries(this.attributes)) {
             if (whitelist.includes(key)) {
@@ -202,14 +192,16 @@ export class HTMLNode {
      * @param {string} input
      * @returns {HTMLNodeInterface[]}
      */
-    static create(input) {
+    static create(input:string) {
         const tokens = HTMLNode.tokenize(input);
-
+        const refs:Map<string, string> = new Map()
         const nodes = [];
-        const stack = [];
+        const stack:HTMLNode[] = [];
 
         let currentNode = null;
-        let currentAttributes = {};
+        let currentAttributes:Record<string, any> = {};
+        let currentProps:Record<string, any> = {};
+
         let currentContent = '';
 
         for (const token of tokens) {
@@ -221,32 +213,39 @@ export class HTMLNode {
                         }
 
                         currentNode.content = currentContent.trim();
-
                         currentAttributes = {};
                         currentContent = '';
-
                         stack.push(currentNode);
                     }
 
                     currentNode = new HTMLNode(token.value, {}, []);
+                    
+
                     break;
                 case TokenType.ATTRIBUTE_NAME:
                     currentAttributes[token.value] = '';
                     break;
                 case TokenType.ATTRIBUTE_VALUE:
                     const lastKey = Object.keys(currentAttributes).pop();
+                    if (!lastKey) break;
                     currentAttributes[lastKey] = token.value;
+                    if (lastKey.startsWith(props_prefix)){
+                        currentProps[lastKey.substring(props_prefix.length)] = token.value;
+                    }
                     break;
                 case TokenType.TAG_CLOSE:
                 case TokenType.SELF_CLOSING_TAG:
                     if (!currentNode) {
                         break;
                     }
-
+                    
                     currentNode.isSelfClosing = token.type === TokenType.SELF_CLOSING_TAG;
 
                     if (Object.keys(currentNode.attributes).length === 0) {
                         currentNode.attributes = currentAttributes
+                    }
+                    if (Object.keys(currentNode.props).length === 0) {
+                        currentNode.props = currentProps
                     }
 
                     if (!currentNode.content) {
@@ -258,7 +257,9 @@ export class HTMLNode {
                     currentContent = '';
                     currentAttributes = {};
                     if (stack.length > 0) {
-                        stack[stack.length - 1].children.push(currentNode);
+                        const parent = stack[stack.length - 1];
+                        currentNode.parent = parent;
+                        parent.children.push(currentNode);
                     } else {
                         nodes.push(currentNode);
                     }
@@ -279,7 +280,7 @@ export class HTMLNode {
      * @param {string} input
      * @returns {Token[]}
      */
-    static tokenize(input) {
+    static tokenize(input:string) {
         const tokens = [];
         let i = 0;
 
