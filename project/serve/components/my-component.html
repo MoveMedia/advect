@@ -1,0 +1,43 @@
+ <template advect="my-component" root="shadow" shadow="open">
+      <settings>
+        <data name="my-attr" type="string" set="attr"></data>
+        <data name="myProp"  type="string" set="props"></data>
+      </settings>
+      <layout>
+        <h1>Hello World</h1>
+        <h2>None slotted h2</h2>
+
+        <slot name="stuff">
+          <h2>No content</h2>
+        </slot>
+        <t-table>
+          <t-head>
+            <t-r>
+              <t-d>Name</t-d>
+              <t-d>Age</t-d>
+              <t-d>Height</t-d>
+            </tr>
+          </t-head>
+          <t-body>
+            <for data="$.data" name="d" index="d_i">
+              <t-r>
+                <t-d>{{d.name}}</t-d>
+                <t-d>{{d.age}}</t-d>
+                <t-d>{{d.height}} cm</t-d>
+              </t-r>
+            </for>
+          </t-body>
+          <t-foot></t-foot>
+        </t-table>
+      </layout>
+      <script type="module">
+        export default function ({ $, $el, $props, $refs, $attr, $internals }) {
+          console.log($props)
+          $.data = [
+            {name : 'John', age: 22, height: '172'},
+            {name : 'Carl', age: 22, height: '142'},
+            {name : 'Laura', age: 22, height: '152'},
+          ]
+        }
+      </script>
+    </template>

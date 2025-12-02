@@ -188,6 +188,7 @@ const createAdvect = async () => {
    * @returns
    */
   const load = async (urls: string | string[]) => {
+    console.log('loading', urls)
     const buildMsg = (await messagePromise("load", { urls })) as MessageEvent<{
       result: CustomElementSettings[];
       id: string;
@@ -264,9 +265,9 @@ const createAdvect = async () => {
       .forEach((template) => build(template.outerHTML));
 
     let templateScriptUrls: string[] = [];
-    document.querySelectorAll('script[type="text/advect"][src]').forEach((e) => {
-      if (e.hasAttribute("src")) {
-        templateScriptUrls.push(e.getAttribute("src") ?? "");
+    document.querySelectorAll('script[rel]').forEach((e) => {
+      if (e.hasAttribute("rel")) {
+        templateScriptUrls.push(e.getAttribute("rel") ?? "");
       }
     });
     load(templateScriptUrls);

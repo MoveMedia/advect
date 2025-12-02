@@ -1,7 +1,7 @@
 {
   "name": "@advect/advect",
   "displayName": "advect",
-  "private": false,
+  "private": true,
   "version": "2.1.1",
   "type": "module",
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
@@ -23,9 +23,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "crossoriginworker": "^1.1.0",
-    "eta": "^3.5.0",
-    "zustand": "^5.0.1"
+    "@maverick-js/signals": "^6.0.0",
+    "crossoriginworker": "^1.1.0"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
   "main": "dist/advect.js",

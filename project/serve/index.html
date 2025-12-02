@@ -5,28 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="../src/advect.ts" type="module"></script>
+    <script rel="/components/my-component.html" type="application/html"></script>
   </head>
   <body>
     <my-component>
       <h2 slot="stuff">Some Content</h2>
     </my-component>
 
-    <template advect="my-component" root="shadow" shadow="open">
-      <settings>
-        <data name="my-attr" type="string" set="attr"></data>
-        <data name="myProp"  type="string" set="props"></data>
-      </settings>
-      <layout>
-        <h1>Hello World</h1>
-        <slot name="stuff">
-          <h2>No content</h2>
-        </slot>
-      </layout>
-      <script type="module">
-        export default function ({ $, $el, $props, $refs, $attr, $internals }) {
-          console.log($props)
-        }
-      </script>
-    </template>
+    <div class="content-section">
+
+    </div>
+   <style>
+      :root{
+        --fg-root: white;
+        --bg-root: #222;
+      }
+      body{
+        background-color: var(--bg-root);
+        color: var(--fg-root);
+      }
+      .content-section {
+        background-color: hsl(from var(--bg-root) h s calc(l + 2));
+        padding: 2em;
+      }
+   </style>
   </body>
 </html>

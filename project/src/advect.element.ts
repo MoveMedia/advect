@@ -1,4 +1,9 @@
-import { AsyncFunction, getEventMap, onloadElements, type AdvectVM } from "./lib";
+import {
+  AsyncFunction,
+  getEventMap,
+  onloadElements,
+  type AdvectVM,
+} from "./lib";
 import {
   root,
   signal,
@@ -13,10 +18,10 @@ import {
 } from "@maverick-js/signals";
 import { type CustomElementSettings } from "./lib";
 
-import { Eta } from "eta";
-import { cleanTemplate, convertTables } from "./advect.render";
-import { create, times } from "lodash";
+//import { Eta } from "eta";
+//import { cleanTemplate, renderTree } from "./advect.render";
 import { HTMLNode } from "./advect.HTMLNode";
+import { renderTree } from "./advect.render";
 
 const events = getEventMap();
 
@@ -49,22 +54,20 @@ export function refHandle(el: HTMLElement): Promise<HTMLElement | null> {
   });
 }
 
-
-export function createEta(){
-    return new Eta({
-        useWith: true,
-        tags: ['{{','}}'],
-        parse: {
-          /** Which prefix to use for evaluation. Default `""`, does not support `"-"` or `"_"` */
-          exec: ">",
-          /** Which prefix to use for interpolation. Default `"="`, does not support `"-"` or `"_"` */
-          interpolate: "",
-          /** Which prefix to use for raw interpolation. Default `"~"`, does not support `"-"` or `"_"` */
-          raw: "~"
-        }
-      })
-}
-
+// export function createEta() {
+//   return new Eta({
+//     useWith: true,
+//     tags: ["{{", "}}"],
+//     parse: {
+//       /** Which prefix to use for evaluation. Default `""`, does not support `"-"` or `"_"` */
+//       exec: ">",
+//       /** Which prefix to use for interpolation. Default `"="`, does not support `"-"` or `"_"` */
+//       interpolate: "",
+//       /** Which prefix to use for raw interpolation. Default `"~"`, does not support `"-"` or `"_"` */
+//       raw: "~",
+//     },
+//   });
+// }
 
 /**
  * Base class for custom web elements
@@ -79,14 +82,14 @@ export class AdvectElement extends HTMLElement {
     // @ts-ignore Assigned by componnet builder
     return this.constructor.$settings as CustomElementSettings;
   }
-  #shadow!: ShadowRoot
+  #shadow!: ShadowRoot;
   get $domRoot(): HTMLElement | ShadowRoot {
     const root = this.$settings.root === "shadow" ? this.#shadow : this;
     return root;
   }
 
   $renderer: AdvectElement | null = null;
-  #eta = createEta()
+  //#eta = createEta();
   #reactiveDispose!: Dispose;
   #getScope!: () => Scope | null;
   #state: Map<string | Symbol, WriteSignal<any>> = new Map();
@@ -179,34 +182,50 @@ export class AdvectElement extends HTMLElement {
       },
     }
   );
-  #props: Record<string|symbol, any> = {} 
-  $props = new Proxy({}, {
-    has: (_, name) => {
-      return Object.hasOwn(this.#props, name)
-    },
-    get:(_, name) => {
-      if (Object.hasOwn(this.#props, name)){
-        return this.#props[name];
-      }
-      return null
-    },
-    set: (_, name, value) =>{
-      const hasKey = Object.keys(this.$settings.props).find( k => k === name)
-      if (!hasKey) return false
-      this.#props[name] = value;
-      return true;
+  #props: Record<string | symbol, any> = {};
+  $props = new Proxy(
+    {},
+    {
+      has: (_, name) => {
+         if (!this.#props){
+          this.#props = {};
+        }
+        return Object.hasOwn(this.#props, name);
+      },
+      get: (_, name) => {
+         if (!this.#props){
+          this.#props = {};
+        }
+        if (Object.hasOwn(this.#props, name)) {
+          return this.#props[name];
+        }
+        return null;
+      },
+      set: (_, name, value) => {
+        if (!this.#props){
+          this.#props = {};
+        }
+        const hasKey = Object.keys(this.$settings.props).find(
+          (k) => k === name
+        );
+        if (!hasKey) return false;
+        this.#props[name] = value;
+        return true;
+      },
     }
-  });
+  );
+  setProps( props: Record<string | symbol, any> ){
+    this.#props = props;
+    this.render()
+  }
 
   constructor() {
     super();
-    //const guid = crypto.randomUUID();
     let times_rendered = 0;
     this.#internals = this.attachInternals();
-
+    
     root((dispose) => {
       this.#reactiveDispose = dispose;
-      
       // @ts-ignore also a little sussy
       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
         $: this.$state,
@@ -214,33 +233,31 @@ export class AdvectElement extends HTMLElement {
         $props: this.$props,
         $refs: this.$refs,
         $attr: this.$attr,
-        $internals: this.#internals
+        $internals: this.#internals,
       });
       this.#getScope = () => getScope();
       effect(() => {
-        console.log('times rendered: ', times_rendered)
+        console.log("times rendered: ", times_rendered);
         this.render();
-        times_rendered++
+        times_rendered++;
       });
     });
 
-
-    this.render.bind(this)
+    this.render.bind(this);
   }
 
   anyAttrChanged: ((name: string, value: string) => void) | null = null;
-  
+
   onConnect: (() => void) | null = null;
   connectedCallback() {
-    if (this.$settings.root == 'shadow'){
-      this.#shadow = this.attachShadow({mode: this.$settings.shadow })
-      this.render()
+    if (this.$settings.root == "shadow") {
+      this.#shadow = this.attachShadow({ mode: this.$settings.shadow });
+      this.render();
     }
     this?.onConnect?.call(this);
   }
 
-
- render() {
+  render() {
     if (!this.isConnected || !this.$domRoot) return;
 
     const frame: Record<string | number | symbol, any> = {
@@ -250,54 +267,21 @@ export class AdvectElement extends HTMLElement {
     };
     this.#state.entries().forEach(([key, s]) => {
       frame["$"][key as string] = s();
-    });
-    const clean = cleanTemplate(this.$settings.layout ?? "", this.#eta.config);
-    const rendered = this.#eta.renderString(clean, frame);
-    const nodeTree = HTMLNode.create(rendered);
-    const refsNodes: HTMLNode[] = []
-    // function walk(node: HTMLNode){
-    //   const attr_keys = Object.keys(node.attributes)
-    //   let hasEvent = false;
-    //   let hasProps = false;
-    //   let hasRef = false;
+    }); 
 
-    //   attr_keys.forEach(key => {
-    //     const _k = key.toLocaleLowerCase()
-    //     if (events.has(_k)) {
-    //       hasEvent = true;
-    //     }
-    //     if (_k.startsWith("prop-")) {
-    //       hasProps = true;
-    //     }
-    //     if (_k == 'checked' || _k == 'disabled'){
-    //       hasRef = true;
-    //     }
-    //     if (_k === "ref") {
-    //       hasRef = true;
-    //     }
-    //   })
-    //   if (!hasRef){
-    //     node.attributes['ref']=crypto.randomUUID();
-    //   }
-    //   if (hasEvent || hasProps || hasRef) {
-    //     refsNodes.push(node)
-    //   }
-    //   for (const child of node.children) {
-    //     walk(child)
-    //   }
-    // }
-    // nodeTree.forEach(n => walk(n))
-    
-      this.$domRoot.innerHTML = nodeTree.map(n => n.html()).join("");
-    
-    requestAnimationFrame(() => {
-      this.hook();
-    });
+    const rendered = renderTree(this.$settings.layout ?? "", frame)
+    this.$domRoot.innerHTML = rendered;
+
+    // const clean = cleanTemplate(this.$settings.layout ?? "", this.#eta.config);
+    // const rendered = this.#eta.renderString(clean, frame);
+    // const nodeTree = HTMLNode.create(rendered);
+    // this.$domRoot.innerHTML = nodeTree.map((n) => n.html()).join("");
+
+    requestAnimationFrame(() => this.hook());
   }
   hook() {
-
+    
   }
-
 
   hookRef(ref: Element) {
     {
@@ -319,7 +303,8 @@ export class AdvectElement extends HTMLElement {
               this.$refs
             );
           };
-        } catch (e) {+9
+        } catch (e) {
+          +9;
           console.error(e, attr_val, this);
         }
       });
