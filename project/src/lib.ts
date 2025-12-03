@@ -94,6 +94,9 @@ export interface CustomElementSettings {
    */
   layout: string | null
 
+
+  layoutNodes: HTMLNode[]
+
   /**
    * References in the template.
    * all html elements with a "ref attribute"

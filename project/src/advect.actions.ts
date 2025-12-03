@@ -69,8 +69,8 @@ export const Actions = {
   }: {
     template: string;
   }): Promise<CustomElementSettings[]> {
-    const cleanTemplate = stripHtmlComments(template);
-    const root_nodes = HTMLNode.create(String.raw`${cleanTemplate}`);
+    //const cleanTemplate = stripHtmlComments(template);
+    const root_nodes = HTMLNode.create(String.raw`${template}`);
     const results: CustomElementSettings[] = [];
 
     for (let root_node of root_nodes) {
@@ -85,7 +85,8 @@ export const Actions = {
         watched_attrs: {},
         props: {},
         logs: [],
-        layout: null
+        layout: null,
+        layoutNodes: []
       };
       if (root_node.tagName.toLowerCase() === "template") {
         if (!root_node.attributes[advect_keys.template_attr]) {
@@ -164,6 +165,7 @@ export const Actions = {
 
           if (currNode.tagName.toLocaleLowerCase() === 'layout' && is_root_child){
             settings.layout = currNode.children.map( c => c.html()).join('')
+            settings.layoutNodes = currNode.children
           }
 
           if (currNode.attributes["ref"]) {

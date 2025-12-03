@@ -18,10 +18,7 @@ import {
 } from "@maverick-js/signals";
 import { type CustomElementSettings } from "./lib";
 
-//import { Eta } from "eta";
-//import { cleanTemplate, renderTree } from "./advect.render";
 import { HTMLNode } from "./advect.HTMLNode";
-import { renderTree } from "./advect.render";
 
 const events = getEventMap();
 
@@ -53,21 +50,6 @@ export function refHandle(el: HTMLElement): Promise<HTMLElement | null> {
     resolve(el);
   });
 }
-
-// export function createEta() {
-//   return new Eta({
-//     useWith: true,
-//     tags: ["{{", "}}"],
-//     parse: {
-//       /** Which prefix to use for evaluation. Default `""`, does not support `"-"` or `"_"` */
-//       exec: ">",
-//       /** Which prefix to use for interpolation. Default `"="`, does not support `"-"` or `"_"` */
-//       interpolate: "",
-//       /** Which prefix to use for raw interpolation. Default `"~"`, does not support `"-"` or `"_"` */
-//       raw: "~",
-//     },
-//   });
-// }
 
 /**
  * Base class for custom web elements
@@ -269,13 +251,8 @@ export class AdvectElement extends HTMLElement {
       frame["$"][key as string] = s();
     }); 
 
-    const rendered = renderTree(this.$settings.layout ?? "", frame)
+    const rendered = ''//HTMLNode.renderTree(this.$settings.layout ?? "", frame)
     this.$domRoot.innerHTML = rendered;
-
-    // const clean = cleanTemplate(this.$settings.layout ?? "", this.#eta.config);
-    // const rendered = this.#eta.renderString(clean, frame);
-    // const nodeTree = HTMLNode.create(rendered);
-    // this.$domRoot.innerHTML = nodeTree.map((n) => n.html()).join("");
 
     requestAnimationFrame(() => this.hook());
   }
