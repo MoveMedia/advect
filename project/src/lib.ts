@@ -307,6 +307,15 @@ export function getBooleanHtmlTags (){
 export const advect_keys = {
   settings: 'settings',
   settings_data: 'data',
-  template_attr: 'advect'
+  template_attr: 'advect',
+  props_prefix : "prop-",
+  ref_key: "ref",
+  directives:{
+    forStatement: 'adv-for',
+    ifStatement: 'adv-if',
+    ofStatement: 'adv-of',
+    replaceValue: 'adv-replace'
+  
+  }
 
 }

@@ -2,44 +2,17 @@
  * NO BROWSER ACCESS
  */
 
+import { advect } from "./advect";
+import { advect_keys } from "./lib";
+import {addDirectives, directives, type DirectiveDescription} from './advect.directive'
+
+
 /**
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
  */
 
-export interface DirectiveDescription {
-  handle: (
-    node: HTMLNode,
-    frame: Record<string | number | symbol, any>
-  ) => void;
-}
 
-const props_prefix = "prop-";
-const ref_key = "ref";
 
-const directives = new Map<string, DirectiveDescription>([
-  [
-    "adv-for",
-    {
-      handle: (node, frame) => {},
-    },
-  ],
-  [
-    "adv-if",
-    {
-      handle: (node, frame) => {},
-    },
-  ],
-  [
-    "adv-of",
-    {
-      handle: (node, frame) => {},
-    },
-  ],
-]);
-
-function setDirectives(node: HTMLNode) {
-  const dirs = Object.keys(node.attributes).filter((a) => directives.has(a));
-}
 
 /**
  * @enum {number}
@@ -83,6 +56,8 @@ const selfClosingTags = new Set([
 ]);
 
 export class HTMLNode {
+  // addition 
+  $id: string = crypto.randomUUID();
   tagName: string;
   attributes: Record<string, string>;
   props: Record<string, string>;
@@ -91,6 +66,51 @@ export class HTMLNode {
   isSelfClosing: boolean;
   isRemoved: boolean;
   parent: HTMLNode | null;
+  indexInParent: number = -1;
+
+
+  // Changes from og
+  directives: Record<string, DirectiveDescription> = {};
+
+  hydrate(context: Record<string|symbol, any>) {
+    if (this.isRemoved) return;
+    let ifStatement: DirectiveDescription | null = null;
+    let forStatement: DirectiveDescription | null = null;
+    let ofStatement: DirectiveDescription | null = null;
+    
+    if (Object.hasOwn(this.directives, advect_keys.directives.ifStatement)){
+      ifStatement = this.directives[advect_keys.directives.ifStatement];
+    }
+    
+    if (Object.hasOwn(this.directives, advect_keys.directives.forStatement)){
+      forStatement = this.directives[advect_keys.directives.forStatement];
+    }
+    if (Object.hasOwn(this.directives, advect_keys.directives.ofStatement)){
+      ofStatement = this.directives[advect_keys.directives.ofStatement];
+    }
+
+    ifStatement?.handle(this, context)
+
+    if (!this.isRemoved){
+      forStatement?.handle(this, context)
+      ofStatement?.handle(this, context)
+    }
+
+    directives.get(advect_keys.directives.replaceValue)?.handle(this, context)
+    
+    this.children.forEach(c => c.hydrate(context))
+
+    //
+    return {
+      context,
+    };
+  }
+
+  addChild(node:HTMLNode){
+    this.children.push(node);
+    node.parent = this;
+    node.indexInParent = this.children.length - 1;
+  }
 
   constructor(
     tagName: string,
@@ -109,7 +129,6 @@ export class HTMLNode {
     this.parent = parent;
     this.props = props;
   }
-
   /**
    * @returns {string}
    */
@@ -288,8 +307,8 @@ export class HTMLNode {
           const lastKey = Object.keys(currentAttributes).pop();
           if (!lastKey) break;
           currentAttributes[lastKey] = token.value;
-          if (lastKey.startsWith(props_prefix)) {
-            currentProps[lastKey.substring(props_prefix.length)] = token.value;
+          if (lastKey.startsWith(advect_keys.props_prefix)) {
+            currentProps[lastKey.substring(advect_keys.props_prefix.length)] = token.value;
           }
           break;
         case TokenType.TAG_CLOSE:
@@ -313,15 +332,17 @@ export class HTMLNode {
             currentNode.content += " " + currentContent;
           }
 
+
           currentContent = "";
           currentAttributes = {};
           if (stack.length > 0) {
             const parent = stack[stack.length - 1];
-            currentNode.parent = parent;
-            parent.children.push(currentNode);
+            parent.addChild(currentNode);
           } else {
             nodes.push(currentNode);
           }
+          addDirectives(currentNode)
+
           currentNode = stack.pop() || null;
           break;
         case TokenType.TEXT:
@@ -333,18 +354,6 @@ export class HTMLNode {
     }
 
     return nodes;
-  }
-
-  static renderTree(
-    layout: string,
-    frame: Record<string | number | symbol, any>
-  ) {
-    const rootNodes = HTMLNode.create(layout);
-    const queue: HTMLNode[] = [];
-    function walk(node: HTMLNode) {
-      node.children.forEach(walk);
-    }
-    return "";
   }
 
   /**
@@ -441,5 +450,11 @@ export class HTMLNode {
     }
 
     return tokens;
+  }
+
+  clone():HTMLNode{
+    const newNode = new HTMLNode(this.tagName, this.attributes, this.children.map(c => c.clone()), this.content, this.parent, this.props);
+    return newNode
+
   }
 }

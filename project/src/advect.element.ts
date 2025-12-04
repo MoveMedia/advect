@@ -250,10 +250,14 @@ export class AdvectElement extends HTMLElement {
     this.#state.entries().forEach(([key, s]) => {
       frame["$"][key as string] = s();
     }); 
-
-    const rendered = ''//HTMLNode.renderTree(this.$settings.layout ?? "", frame)
+    const rendered = this.$settings.layoutNodes
+      .map( ln => {
+        ln.hydrate(frame); 
+        return ln.html()
+      })
+      .join('\n')//HTMLNode.renderTree(this.$settings.layout ?? "", frame)
+  //  console.log('rendered', rendered, this.$settings.layoutNodes)
     this.$domRoot.innerHTML = rendered;
-
     requestAnimationFrame(() => this.hook());
   }
   hook() {
