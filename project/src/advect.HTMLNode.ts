@@ -4,15 +4,10 @@
 
 import { advect } from "./advect";
 import { advect_keys } from "./lib";
-import {addDirectives, directives, type DirectiveDescription} from './advect.directive'
-
 
 /**
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
  */
-
-
-
 
 /**
  * @enum {number}
@@ -52,11 +47,11 @@ const selfClosingTags = new Set([
   "mutation",
   "intersection",
   "settings",
-  "prop"
+  "prop",
 ]);
 
 export class HTMLNode {
-  // addition 
+  // addition
   $id: string = crypto.randomUUID();
   tagName: string;
   attributes: Record<string, string>;
@@ -68,37 +63,111 @@ export class HTMLNode {
   parent: HTMLNode | null;
   indexInParent: number = -1;
 
-
   // Changes from og
-  directives: Record<string, DirectiveDescription> = {};
 
-  hydrate(context: Record<string|symbol, any>) {
+  hydrate(context: Record<string | symbol, any>) {
     if (this.isRemoved) return;
-    let ifStatement: DirectiveDescription | null = null;
-    let forStatement: DirectiveDescription | null = null;
-    let ofStatement: DirectiveDescription | null = null;
-    
-    if (Object.hasOwn(this.directives, advect_keys.directives.ifStatement)){
-      ifStatement = this.directives[advect_keys.directives.ifStatement];
+
+    let preScript = Object.keys(context)
+      .map((v) => {
+        return `let ${v} = context['${v}'];`;
+      })
+      .join("\n");
+
+    let ifStatementRes = true;
+    let hasForLoop = false;
+
+    // If Statement
+    if (this.hasAttribute(advect_keys.directives.ifStatement)) {
+      context["currentNode"] = this;
+      let preScript = Object.keys(context)
+        .map((v) => {
+          return `let ${v} = context['${v}'];`;
+        })
+        .join("\n");
+      const script = this.attributes[advect_keys.directives.ifStatement];
+      // TODO warn if there is no script
+      if (script.length > 0) {
+        const ifStatementRes = new Function(
+          "context",
+          `${preScript}\n return ${script}`
+        )(context);
+        if (!ifStatementRes) {
+          this.remove();
+        }
+      }
     }
-    
-    if (Object.hasOwn(this.directives, advect_keys.directives.forStatement)){
-      forStatement = this.directives[advect_keys.directives.forStatement];
-    }
-    if (Object.hasOwn(this.directives, advect_keys.directives.ofStatement)){
-      ofStatement = this.directives[advect_keys.directives.ofStatement];
+    if (!ifStatementRes) return;
+
+    if (this.hasAttribute(advect_keys.directives.forStatement)) {
+      context["currentNode"] = this;
+      hasForLoop = true;
+      // For Statement
+      const script = this.attributes[advect_keys.directives.forStatement];
+      // TODO warn if there is no script
+      if (script.length > 0) {
+        const sides = script.split(" of "); // expect name,index of array
+        const left_side = sides[0].split(",");
+        const valueName = left_side[0].trim();
+        let indexName = "";
+        if (left_side.length > 1) {
+          indexName = left_side[1].trim();
+        }
+        const arrayName = sides[1];
+        context["og"] = () => {
+          const clone = this.clone();
+          delete clone.attributes[advect_keys.directives.forStatement];
+          return clone;
+        };
+        this.children.forEach((n) => n.remove());
+
+        const finalScript = `
+          ${preScript}
+          for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
+            let ${valueName} = ${arrayName}[${indexName}];
+              context['${valueName}'] = ${arrayName}[${indexName}];
+              context['${indexName}'] = ${indexName};
+              const newClone = context['og']();
+              newClone.hydrate(context);
+              context['currentNode'].parent.addChild(newClone);
+          }
+          `;
+        this.remove();
+        const res = new Function("context", finalScript)(context);
+      }
     }
 
-    ifStatement?.handle(this, context)
-
-    if (!this.isRemoved){
-      forStatement?.handle(this, context)
-      ofStatement?.handle(this, context)
+    if (!hasForLoop) {
+      // attributes
+      Object.keys(this.attributes)
+        .filter((k) => !Object.hasOwn(advect_keys.directives, k))
+        .forEach((k) => {
+          const v = `${this.attributes[k]}`.trim();
+          if (v.startsWith("{") && v.endsWith("}")) {
+            console.log({
+              v,
+              context,
+            });
+            const attrScript = v.substring(1, v.length - 1);
+            const res = new Function(
+              "context",
+              ` ${preScript} return ${attrScript}`
+            )(context);
+            this.attributes[k] = res;
+          }
+        });
+      const exp = this.content.matchAll(/\{\{(.*?)\}\}/g);
+      exp.forEach((v) => {
+        const contentScript = v[1].trim();
+        const res = new Function(
+          "context",
+          `${preScript} return ${contentScript}`
+        )(context);
+        this.content = this.content.replace(v[0], res);
+      });
+      this.children.forEach((c) => c.hydrate(context));
     }
 
-    directives.get(advect_keys.directives.replaceValue)?.handle(this, context)
-    
-    this.children.forEach(c => c.hydrate(context))
 
     //
     return {
@@ -106,7 +175,7 @@ export class HTMLNode {
     };
   }
 
-  addChild(node:HTMLNode){
+  addChild(node: HTMLNode) {
     this.children.push(node);
     node.parent = this;
     node.indexInParent = this.children.length - 1;
@@ -308,7 +377,8 @@ export class HTMLNode {
           if (!lastKey) break;
           currentAttributes[lastKey] = token.value;
           if (lastKey.startsWith(advect_keys.props_prefix)) {
-            currentProps[lastKey.substring(advect_keys.props_prefix.length)] = token.value;
+            currentProps[lastKey.substring(advect_keys.props_prefix.length)] =
+              token.value;
           }
           break;
         case TokenType.TAG_CLOSE:
@@ -332,7 +402,6 @@ export class HTMLNode {
             currentNode.content += " " + currentContent;
           }
 
-
           currentContent = "";
           currentAttributes = {};
           if (stack.length > 0) {
@@ -341,7 +410,6 @@ export class HTMLNode {
           } else {
             nodes.push(currentNode);
           }
-          addDirectives(currentNode)
 
           currentNode = stack.pop() || null;
           break;
@@ -452,9 +520,15 @@ export class HTMLNode {
     return tokens;
   }
 
-  clone():HTMLNode{
-    const newNode = new HTMLNode(this.tagName, this.attributes, this.children.map(c => c.clone()), this.content, this.parent, this.props);
-    return newNode
-
+  clone(): HTMLNode {
+    const newNode = new HTMLNode(
+      this.tagName,
+      this.attributes,
+      this.children.map((c) => c.clone()),
+      this.content,
+      this.parent,
+      this.props
+    );
+    return newNode;
   }
 }

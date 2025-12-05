@@ -314,8 +314,8 @@ export const advect_keys = {
     forStatement: 'adv-for',
     ifStatement: 'adv-if',
     ofStatement: 'adv-of',
-    replaceValue: 'adv-replace'
-  
+    replaceContent: 'adv-replace',
+    replaceAttr: 'adv-attribute'
   }
 
 }

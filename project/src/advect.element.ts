@@ -238,7 +238,7 @@ export class AdvectElement extends HTMLElement {
     }
     this?.onConnect?.call(this);
   }
-
+  
   render() {
     if (!this.isConnected || !this.$domRoot) return;
 
