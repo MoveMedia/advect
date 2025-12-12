@@ -16,7 +16,7 @@
             </tr>
           </thead>
           <tbody>
-              <tr ind="{di}" adv-for="d,di of $.data">
+              <tr  adv-for="d,di of $.data" ind="{di}">
                 <td>{{di}}</td>
                 <td>{{d.name}}</td>
                 <td>{{d.age}}</td>
@@ -28,7 +28,6 @@
       </layout>
       <script type="module">
         export default function ({ $, $el, $props, $refs, $attr, $internals }) {
-          console.log($props)
           $.data = [
             {name : 'John', age: 22, height: '172'},
             {name : 'Carl', age: 22, height: '142'},

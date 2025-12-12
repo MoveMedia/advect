@@ -9,6 +9,11 @@ import { advect_keys } from "./lib";
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
  */
 
+
+const createContext = () => new Proxy({},{
+  
+})
+
 /**
  * @enum {number}
  */
@@ -64,8 +69,49 @@ export class HTMLNode {
   indexInParent: number = -1;
 
   // Changes from og
+  hydrateAttr(
+    context: Record<string | symbol, any>,
+  ) {
+    let preScript = Object.keys(context)
+      .map((v) => {
+        return `let ${v} = context['${v}'];`;
+      })
+      .join("\n");
 
-  hydrate(context: Record<string | symbol, any>) {
+      Object.keys(this.attributes)
+      .filter((k) => !Object.hasOwn(advect_keys.directives, k))
+      .forEach((k) => {
+        console.log('attr', this, context)
+        const v = `${this.attributes[k]}`.trim();
+        if (v.startsWith("{") && v.endsWith("}")) {
+          const attrScript = v.substring(1, v.length - 1);
+          const finalAttrScript = ` ${preScript} return ${attrScript}`;
+          const res = new Function("context", finalAttrScript)(context);
+          this.attributes[k] = res;
+        }
+      });
+  }
+  hydrateContent(
+    context: Record<string | symbol, any>,
+    clone: HTMLNode | null = null
+  ) {
+    let preScript = Object.keys(context)
+      .map((v) => {
+        return `let ${v} = context['${v}'];`;
+      })
+      .join("\n");
+    const exp = this.content.matchAll(/\{\{(.*?)\}\}/g);
+    exp.forEach((v) => {
+      const contentScript = v[1].trim();
+      const res = new Function(
+        "context",
+        `${preScript} return ${contentScript}`
+      )(context);
+      this.content = this.content.replace(v[0], res);
+    });
+  }
+  hydrate(
+    context: Record<string | symbol, any>) {
     if (this.isRemoved) return;
 
     let preScript = Object.keys(context)
@@ -75,7 +121,6 @@ export class HTMLNode {
       .join("\n");
 
     let ifStatementRes = true;
-    let hasForLoop = false;
 
     // If Statement
     if (this.hasAttribute(advect_keys.directives.ifStatement)) {
@@ -101,9 +146,9 @@ export class HTMLNode {
 
     if (this.hasAttribute(advect_keys.directives.forStatement)) {
       context["currentNode"] = this;
-      hasForLoop = true;
       // For Statement
       const script = this.attributes[advect_keys.directives.forStatement];
+      delete this.attributes[advect_keys.directives.forStatement]
       // TODO warn if there is no script
       if (script.length > 0) {
         const sides = script.split(" of "); // expect name,index of array
@@ -114,11 +159,7 @@ export class HTMLNode {
           indexName = left_side[1].trim();
         }
         const arrayName = sides[1];
-        context["og"] = () => {
-          const clone = this.clone();
-          delete clone.attributes[advect_keys.directives.forStatement];
-          return clone;
-        };
+        this.remove()
         this.children.forEach((n) => n.remove());
 
         const finalScript = `
@@ -127,47 +168,22 @@ export class HTMLNode {
             let ${valueName} = ${arrayName}[${indexName}];
               context['${valueName}'] = ${arrayName}[${indexName}];
               context['${indexName}'] = ${indexName};
-              const newClone = context['og']();
-              newClone.hydrate(context);
+              const newClone = context['currentNode'].clone();
+              console.log('clone', newClone.attributes)
               context['currentNode'].parent.addChild(newClone);
+              newClone.hydrate(context);
           }
           `;
         this.remove();
         const res = new Function("context", finalScript)(context);
       }
     }
-
-    if (!hasForLoop) {
+    if (!this.isRemoved) {
+      this.hydrateAttr(context);
       // attributes
-      Object.keys(this.attributes)
-        .filter((k) => !Object.hasOwn(advect_keys.directives, k))
-        .forEach((k) => {
-          const v = `${this.attributes[k]}`.trim();
-          if (v.startsWith("{") && v.endsWith("}")) {
-            console.log({
-              v,
-              context,
-            });
-            const attrScript = v.substring(1, v.length - 1);
-            const res = new Function(
-              "context",
-              ` ${preScript} return ${attrScript}`
-            )(context);
-            this.attributes[k] = res;
-          }
-        });
-      const exp = this.content.matchAll(/\{\{(.*?)\}\}/g);
-      exp.forEach((v) => {
-        const contentScript = v[1].trim();
-        const res = new Function(
-          "context",
-          `${preScript} return ${contentScript}`
-        )(context);
-        this.content = this.content.replace(v[0], res);
-      });
-      this.children.forEach((c) => c.hydrate(context));
+      this.hydrateContent(context);
     }
-
+    this.children.forEach((c) => c.hydrate(context));
 
     //
     return {
@@ -523,7 +539,7 @@ export class HTMLNode {
   clone(): HTMLNode {
     const newNode = new HTMLNode(
       this.tagName,
-      this.attributes,
+      { ...this.attributes },
       this.children.map((c) => c.clone()),
       this.content,
       this.parent,
