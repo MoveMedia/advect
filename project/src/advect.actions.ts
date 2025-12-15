@@ -3,28 +3,20 @@
  * This file contains all of the actions advect can use on a worker no browser access.
  */
 
+import { set } from "lodash";
 import { HTMLNode } from "./advect.HTMLNode";
+import AdvectLog from "./advect.log";
 import {
   type AttrTypeKey,
   type CustomElementSettings,
   isValidAttrType,
-  toModule,
-  adv_log,
-  adv_warn,
-  stripHtmlComments,
-  advect_keys,
+  AdvectSettings,
 } from "./lib";
 
 /**
  * List of actions available in advect
  */
 export const Actions = {
-  async prerender(renderDesc: {
-    template: string;
-    state: Record<string, any>;
-  }): Promise<string> {
-    return "";
-  },
   /**
    * Given a URL
    * @param param0
@@ -77,23 +69,24 @@ export const Actions = {
         refs: [],
         root: "light",
         shadow: "closed",
-        watched_attrs: {},
+        watched: {},
         props: {},
         logs: [],
         layout: null,
         layoutNodes: [],
+        style: "",
       };
       if (root_node.tagName.toLowerCase() === "template") {
-        if (!root_node.attributes[advect_keys.template_attr]) {
-          adv_warn(
+        if (!root_node.attributes[AdvectSettings.attributes.template]) {
+          AdvectLog.log.warn(
             "advect Template must have an advect that will become the tag name"
           );
           continue;
         }
-        const tagName = root_node.attributes[advect_keys.template_attr];
+        const tagName = root_node.attributes[AdvectSettings.attributes.template];
 
         if (tagName.indexOf("-") === -1) {
-          adv_warn("advect Template tag name must contain a hyphen");
+          AdvectLog.log.warn("advect Template tag name must contain a hyphen");
           continue;
         }
 
@@ -123,21 +116,29 @@ export const Actions = {
             currNode.parent?.tagName.toLocaleLowerCase() == "template";
 
           if (is_root_child) {
-            if (currNode.tagName === advect_keys.settings) {
+            if (currNode.tagName === AdvectSettings.tags.settings) {
               currNode.children.forEach((child: HTMLNode) => {
                 if (
-                  child.tagName == advect_keys.settings_data &&
+                  child.tagName == AdvectSettings.tags.options &&
                   child.attributes["name"]
                 ) {
                   const name = child.attributes["name"];
-                  const type = child.attributes?.["type"] ?? "string";
+                  let type = child.attributes?.["type"] ?? "string";
+                  if (type == '') type = 'string';
                   const format = child.attributes?.["format"] ?? "none";
                   const _set = child.attributes?.["set"] ?? "attribute";
-
+                  
+                  console.log({
+                    name,
+                    type,
+                    format,
+                    _set,
+                  })
                   const hasValidType = isValidAttrType(type);
+                  console.log(settings.watched, hasValidType)
 
                   if (hasValidType && (_set == "attribute" || _set == "attr")) {
-                    settings.watched_attrs[name] = {
+                    settings.watched[name] = {
                       type: type as AttrTypeKey,
                       format,
                     };
@@ -159,10 +160,12 @@ export const Actions = {
                 settings.module = currNode.text();
               }
             }
-            if (currNode.tagName.toLocaleLowerCase() === "layout") {
+            if (currNode.tagName.toLocaleLowerCase() === AdvectSettings.tags.layout) {
               settings.layout = currNode.children.map((c) => c.html()).join("");
-              console.log('setting layout ')
               settings.layoutNodes = currNode.children;
+            }
+            if (currNode.tagName.toLocaleLowerCase() === "style") {
+              settings.template = currNode.text()
             }
           }
 
@@ -172,9 +175,7 @@ export const Actions = {
           childQueue.push(...currNode.children);
         }
       }
-      const outerHtml = root_node.children
-        .map((node: HTMLNode) => node.html())
-        .join("");
+      const outerHtml = String.raw`${template}`;
 
       settings.template = outerHtml;
       results.push(settings);

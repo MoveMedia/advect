@@ -5,17 +5,10 @@
 import getCrossOriginWorkerURL from "crossoriginworker";
 import { Actions, type ActionKey } from "./advect.actions";
 import {
-  adv_log,
-  adv_warn,
-  AsyncFunction,
   type CustomElementSettings,
-  onloadElements,
   toModule,
-  AttrTypes,
-  type AdvectVM,
   type AvectVMProvider,
-  advect_keys,
-  getEventMap,
+  AdvectSettings,
 } from "./lib";
 
 import { AdvectElement } from "./advect.element";
@@ -178,9 +171,6 @@ const createAdvect = async () => {
       break;
   }
 
-  const render = async (data: Record<string, any>) => {
-    return messagePromise("prerender", data);
-  };
 
   /**
    * Loads a webcomponent from a url or list of urls
@@ -216,9 +206,12 @@ const createAdvect = async () => {
       toModule(settings.module, []).then((module: any) => {
         // TODO fix change to module default
         //const moduleClass = module[moduleClassName];
+        const stylesheet = new CSSStyleSheet()
+        stylesheet.replace($settings.style)
         const newClass = class extends AdvectElement {
-          static observedAttributes = Object.keys($settings.watched_attrs);
+          static observedAttributes = Object.keys($settings.watched);
           static $settings = $settings;
+          static $stylesheet = stylesheet;
           static $advectVMProvider: AvectVMProvider = module.default;
           connectedCallback(): void {
             super.connectedCallback();
@@ -261,7 +254,7 @@ const createAdvect = async () => {
    */
   const onContent = (_: Event | null) => {
     document
-      .querySelectorAll(`template[${advect_keys.template_attr}]`)
+      .querySelectorAll(`template[${AdvectSettings.attributes.template}]`)
       .forEach((template) => build(template.outerHTML));
 
     let templateScriptUrls: string[] = [];
@@ -282,7 +275,6 @@ const createAdvect = async () => {
   }
 
   return {
-    render,
     build,
     load,
   };

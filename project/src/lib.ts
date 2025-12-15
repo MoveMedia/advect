@@ -4,48 +4,48 @@ export type AttrTypeKey = keyof typeof AttrTypes;
 export type AttrType = typeof AttrTypes;
 export const AttrTypes = {
   int: {
-    parse: (val:string) =>{
+    parse: (val: string) => {
       try {
         return parseInt(val);
-      }catch(e){
-        return null
+      } catch (e) {
+        return null;
       }
     },
-    store(val:number){
-      return `${val}}`;
-    }
+    store(val: number) {
+      return `${val}`;
+    },
   },
-  float:{
-    parse: (val:string) =>{
+  float: {
+    parse: (val: string) => {
       try {
         return parseFloat(val);
-      }catch(e){
-        return null
+      } catch (e) {
+        return null;
       }
     },
-    store(val:number){
-      return `${val}}`;
-    }
+    store(val: number) {
+      return `${val}`;
+    },
   },
   string: {
-    parse: (val:string) =>{
+    parse: (val: string) => {
       return val;
     },
-    store(val:number){
+    store(val: number) {
       return val;
-    }
+    },
   },
   bigint: {
-    parse: (val:string) =>{
+    parse: (val: string) => {
       try {
         return BigInt(val);
-      }catch(e){
-        return null
+      } catch (e) {
+        return null;
       }
     },
-    store(val:number){
-      return `${val}}`;
-    }
+    store(val: number) {
+      return `${val}`;
+    },
   },
   color: {},
 };
@@ -92,16 +92,15 @@ export interface CustomElementSettings {
   /**
    * Layout of the component
    */
-  layout: string | null
+  layout: string | null;
 
-
-  layoutNodes: HTMLNode[]
+  layoutNodes: HTMLNode[];
 
   /**
    * References in the template.
    * all html elements with a "ref attribute"
    */
-  
+
   refs: HTMLNode[];
   /**
    * Shadow Mode for the component
@@ -120,10 +119,10 @@ export interface CustomElementSettings {
    * </settings> tags
    * these are not added to the mark up
    */
-  watched_attrs: {
+  watched: {
     [key: string]: {
       type: AttrTypeKey;
-      format?: string
+      format?: string;
       // storage: 'css-var' | 'store'
     };
   };
@@ -131,11 +130,13 @@ export interface CustomElementSettings {
   props: {
     [key: string]: {
       type: AttrTypeKey;
-      format?: string
+      format?: string;
       // format?: FormatType
       // storage: 'css-var' | 'store'
     };
   };
+
+  style: string;
 
   logs: string[];
 }
@@ -143,7 +144,7 @@ export interface CustomElementSettings {
 export function isValidAttrType(attr: string) {
   return (
     Object.keys(AttrTypes).find(
-      (t) => t.toLowerCase() == attr.toLocaleLowerCase()
+      (t) => t.toLowerCase() == attr.toLowerCase()
     ) != null
   );
 }
@@ -151,7 +152,9 @@ export function isValidAttrType(attr: string) {
 /**
  * Constructor for an async function.
  */
-export const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+export const AsyncFunction = Object.getPrototypeOf(
+  async function () {}
+).constructor;
 
 /**
  * Given a string creates a module
@@ -175,147 +178,119 @@ export function toModule(script: string, inject: string[]) {
 /**
  * Broadcast channel for console logs
  */
-export const adv_log_channel = new BroadcastChannel("advect:log");
-adv_log_channel.onmessage = (event) => adv_msg(event);
 
-function adv_msg(msg: MessageEvent) {
-  switch (msg.data?.___type) {
-    case "table":
-      console.table(msg.data);
-      break;
-    case "dir":
-      console.dir(msg.data);
-      break;
-    case "error":
-      console.error(msg.data);
-      break;
-    case "warn":
-      console.warn(msg.data);
-      break;
-    default:
-    case "log":
-      console.log(msg.data);
-      break;
-  }
-}
-
-export function stripHtmlComments(htmlString:string) {
-  return htmlString.replace(/<!--[\s\S]*?-->/g, '');
+export function stripHtmlComments(htmlString: string) {
+  return htmlString.replace(/<!--[\s\S]*?-->/g, "");
 }
 
 /**
  * Logs from anywhere
- * @param msg 
+ * @param msg
  */
-export function adv_log(msg: any) {
-  adv_log_channel.postMessage({ ...msg, ___type: "log" });
-}
-export function adv_warn(msg: any) {
-  adv_log_channel.postMessage({ ...msg, ___type: "warn" });
-}
-export function adv_error(msg: any) {
-  adv_log_channel.postMessage({ ...msg, ___type: "error" });
-}
-export function adv_dir(msg: any) {
-  adv_log_channel.postMessage({ ...msg, ___type: "dir" });
-}
-export function adv_table(msg: any) {
-  adv_log_channel.postMessage({ ...msg, ___type: "table" });
-}
 
-/**
- * Onload natively works for these 
- */
-export const onloadElements = [
-  "body",
-  "iframe",
-  "img",
-  "link",
-  "object",
-  "script",
-  "style",
-  "audio",
-  "video"
-];
+
 
 export interface AdvectVM {
+  /**
+   * Fired when element is connected for the first time
+   */
   onConnect?: () => void;
+  /**
+   * Fired when element is disconnected
+   */
   onDisconnect?: () => void;
+  /**
+   * Fires When any attribute is changed via the $el.attr property
+   */
   onAttrChange?: (name: string, value: string, oldValue: string) => void;
+  /**
+   * Fires when watched Attributes are changed 
+   */
+  onWatchedAttrChanged?: (name: string, value: string, oldValue: string) => void;
+  /**
+   * Fires when element is moved within the same document 
+   */
+  onMove?: () => void;
+  /**
+   * Fires when element is adopted to new document 
+   */
+  onAdopt?: () => void;
+
+
+  
 }
 
 export type AvectVMProvider = () => AdvectVM;
 
-
-export function getEventMap (): Map<string,string> {
-  return new Map([
-    ["onclick", "click"],
-    ["ondblclick", "dblclick"],
-    ["onmousedown", "mousedown"],
-    ["onmouseup", "mouseup"],
-    ["onmousemove", "mousemove"],
-    ["onmouseover", "mouseover"],
-    ["onmouseout", "mouseout"],
-    ["oncontextmenu", "contextmenu"],
-    ["onwheel", "wheel"],
-    ["onkeydown", "keydown"],
-    ["onkeypress", "keypress"],
-    ["onkeyup", "keyup"],
-    ["onfocus", "focus"],
-    ["onblur", "blur"],
-    ["onchange", "change"],
-    ["oninput", "input"],
-    ["onselect", "select"],
-    ["onsubmit", "submit"],
-    ["onreset", "reset"],
-    ["oninvalid", "invalid"],
-    ["onsearch", "search"],
-    ["onload", "load"],
-    ["onunload", "unload"],
-    ["onresize", "resize"],
-    ["onscroll", "scroll"],
-    ["ononline", "online"],
-    ["onoffline", "offline"],
-    ["ondrag", "drag"],
-    ["ondragstart", "dragstart"],
-    ["ondragend", "dragend"],
-    ["ondragenter", "dragenter"],
-    ["ondragleave", "dragleave"],
-    ["ondragover", "dragover"],
-    ["ondrop", "drop"],
-    ["onanimationstart", "animationstart"],
-    ["onanimationend", "animationend"],
-    ["onanimationiteration", "animationiteration"],
-    ["ontransitionstart", "transitionstart"],
-    ["ontransitionend", "transitionend"],
-    ["ontransitionrun", "transitionrun"],
-    ["ontransitioncancel", "transitioncancel"],
-  ]);
-}
-
-
-export function getBooleanHtmlTags (){
-  return [
-    'checked',
-    'disabled',
-    'readonly',
-    'popover'
-  ]
-}
-
-
-export const advect_keys = {
-  settings: 'settings',
-  settings_data: 'data',
-  template_attr: 'advect',
-  props_prefix : "prop-",
-  ref_key: "ref",
-  directives:{
-    forStatement: 'adv-for',
-    ifStatement: 'adv-if',
-    ofStatement: 'adv-of',
-    replaceContent: 'adv-replace',
-    replaceAttr: 'adv-attribute'
-  }
-
-}
+export const AdvectSettings = {
+  tags: {
+    layout: "layout",
+    settings: "datalist",
+    options: "option",
+    onloadElements: [
+      "body",
+      "iframe",
+      "img",
+      "link",
+      "object",
+      "script",
+      "style",
+      "audio",
+      "video"
+    ],
+  },
+  attributes: {
+    booleans: ["checked", "disabled", "readonly", "popover"],
+    template: "advect",
+    props_prefix: "prop-",
+    ref_key: "ref",
+    directives: {
+      forStatement: "adv-for",
+      ifStatement: "adv-if",
+      ofStatement: "adv-of",
+    },
+  },
+  events: [
+    "onclick",
+    "ondblclick",
+    "onmousedown",
+    "onmouseup",
+    "onmousemove",
+    "onmouseover",
+    "onmouseout",
+    "oncontextmenu",
+    "onwheel",
+    "onkeydown",
+    "onkeypress",
+    "onkeyup",
+    "onfocus",
+    "onblur",
+    "onchange",
+    "oninput",
+    "onselect",
+    "onsubmit",
+    "onreset",
+    "oninvalid",
+    "onsearch",
+    "onload",
+    "onunload",
+    "onresize",
+    "onscroll",
+    "ononline",
+    "onoffline",
+    "ondrag",
+    "ondragstart",
+    "ondragend",
+    "ondragenter",
+    "ondragleave",
+    "ondragover",
+    "ondrop",
+    "onanimationstart",
+    "onanimationend",
+    "onanimationiteration",
+    "ontransitionstart",
+    "ontransitionend",
+    "ontransitionrun",
+    "ontransitioncancel",
+  ],
+};

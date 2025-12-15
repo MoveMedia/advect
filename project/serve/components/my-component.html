@@ -1,8 +1,10 @@
- <template advect="my-component" root="light" >
+ <template advect="my-component" root="shadow" shadow="open" >
+      <datalist>
+        <option name="message" value="Unset Message" type="" set="attribute"></option>
+        <option name=""></option>
+      </datalist>
       <layout>
         <h1>Hello World</h1>
-        <h2>None slotted h2</h2>
-
         <slot name="stuff">
           <h2>No content</h2>
         </slot>
@@ -16,7 +18,7 @@
             </tr>
           </thead>
           <tbody>
-              <tr  adv-for="d,di of $.data" ind="{di}">
+              <tr adv-for="d,di of $.data" ind="{di}">
                 <td>{{di}}</td>
                 <td>{{d.name}}</td>
                 <td>{{d.age}}</td>
@@ -26,6 +28,9 @@
           <tfoot></tfoot>
         </table>
       </layout>
+      <style>
+        
+      </style>
       <script type="module">
         export default function ({ $, $el, $props, $refs, $attr, $internals }) {
           $.data = [
@@ -33,6 +38,12 @@
             {name : 'Carl', age: 22, height: '142'},
             {name : 'Laura', age: 22, height: '152'},
           ]
+
+          return {
+            onWatchedAttrChanged(){
+              console.log('attr changed')
+            }
+          }
         }
       </script>
     </template>

@@ -1,7 +1,7 @@
 import {
+  AdvectSettings,
   AsyncFunction,
-  getEventMap,
-  onloadElements,
+  AttrTypes,
   type AdvectVM,
 } from "./lib";
 import {
@@ -17,10 +17,6 @@ import {
   type WriteSignal,
 } from "@maverick-js/signals";
 import { type CustomElementSettings } from "./lib";
-
-import { HTMLNode } from "./advect.HTMLNode";
-
-const events = getEventMap();
 
 // custom elements my not be defined or ready when you access them
 // the same is not true for regular dom elements
@@ -56,6 +52,16 @@ export function refHandle(el: HTMLElement): Promise<HTMLElement | null> {
  */
 export class AdvectElement extends HTMLElement {
   $vm: AdvectVM | null = null;
+
+  get $style(){
+    return this.$settings.style
+  }
+
+  get $stylesheet(): CSSStyleSheet{
+    // @ts-ignore
+    return this.constructor.$stylesheet
+  }
+  
   #internals: ElementInternals;
   /**
    *
@@ -70,7 +76,6 @@ export class AdvectElement extends HTMLElement {
     return root;
   }
 
-  $renderer: AdvectElement | null = null;
   //#eta = createEta();
   #reactiveDispose!: Dispose;
   #getScope!: () => Scope | null;
@@ -95,6 +100,7 @@ export class AdvectElement extends HTMLElement {
           this.#state.set(p, signal(newValue));
           return true;
         }
+        
       },
     }
   );
@@ -149,22 +155,31 @@ export class AdvectElement extends HTMLElement {
     {},
     {
       get: (_, name) => {
-        if (this.isConnected) {
-          return this.getAttribute(name as string);
+        if (!this.isConnected) return null;
+        if (this.$settings.watched[name as string]){
+          const type = AttrTypes[this.$settings.watched[name as string].type]
+          // @ts-ignore
+          return type?.parse(this.getAttribute(name as string) ?? "") ?? null;
         }
-        return null;
+        return this.getAttribute(name as string);
       },
       set: (_, name, value) => {
+        let newValue = value
         if (this.isConnected) {
-          this.setAttribute(name as string, value);
-          this.anyAttrChanged?.call(this, name as string, value);
+          if (this.$settings.watched[name as string]){
+              const type = AttrTypes[this.$settings.watched[name as string].type]
+              // @ts-ignore
+              newValue = type?.store(this.getAttribute(name as string) ?? "") ?? null;
+          }
+          this.setAttribute(name as string, newValue);
+          this.anyAttrChanged?.call(this, name as string, newValue, this.getAttribute(name as string) ?? '');
           return true;
         }
         return false;
       },
     }
   );
-  #props: Record<string | symbol, any> = {};
+  #props: Record<string | symbol, any>|null = null;
   $props = new Proxy(
     {},
     {
@@ -203,9 +218,7 @@ export class AdvectElement extends HTMLElement {
 
   constructor() {
     super();
-    let times_rendered = 0;
     this.#internals = this.attachInternals();
-    
     root((dispose) => {
       this.#reactiveDispose = dispose;
       // @ts-ignore also a little sussy
@@ -216,27 +229,54 @@ export class AdvectElement extends HTMLElement {
         $refs: this.$refs,
         $attr: this.$attr,
         $internals: this.#internals,
+        $dispose: dispose,
+        $computed:computed,
+        $getContext: getContext,
+        $tick: tick,
+        $scope: getScope,
       });
+
       this.#getScope = () => getScope();
       effect(() => {
-        console.log("times rendered: ", times_rendered);
         this.render();
-        times_rendered++;
       });
     });
 
     this.render.bind(this);
   }
 
-  anyAttrChanged: ((name: string, value: string) => void) | null = null;
+  anyAttrChanged: ((name: string, value: string, oldValue: string) => void) | null = null;
 
-  onConnect: (() => void) | null = null;
   connectedCallback() {
     if (this.$settings.root == "shadow") {
       this.#shadow = this.attachShadow({ mode: this.$settings.shadow });
+      this.#shadow.adoptedStyleSheets = [this.$stylesheet]
       this.render();
+    }else{
+      if(document.adoptedStyleSheets.indexOf(this.$stylesheet) == -1){
+        document.adoptedStyleSheets.push(this.$stylesheet)
+      }
     }
-    this?.onConnect?.call(this);
+    this?.$vm?.onConnect?.call(this);
+  }
+
+
+  connectedMoveCallback() {
+    this.$vm?.onMove?.call(this);
+  }
+
+  disconnectedCallback() {
+    this.#reactiveDispose();
+    this?.$vm?.onDisconnect?.call(this);
+  }
+
+
+  adoptedCallback() {
+    this.$vm?.onAdopt?.call(this);
+  }
+
+  attributeChangedCallback(name:string, oldValue:string, newValue:string) {
+    this.$vm?.onWatchedAttrChanged?.call(this, name, newValue, oldValue);
   }
   
   render() {
@@ -255,8 +295,7 @@ export class AdvectElement extends HTMLElement {
         ln.hydrate(frame); 
         return ln.html()
       })
-      .join('\n')//HTMLNode.renderTree(this.$settings.layout ?? "", frame)
-  //  console.log('rendered', rendered, this.$settings.layoutNodes)
+      .join('\n');
     this.$domRoot.innerHTML = rendered;
     requestAnimationFrame(() => this.hook());
   }
@@ -268,7 +307,7 @@ export class AdvectElement extends HTMLElement {
     {
       const event_attrs = ref
         .getAttributeNames()
-        .filter((name) => events.has(name));
+        .filter((name) => AdvectSettings.events.indexOf(name) != -1);
       // todo maybe make this a setting, I could see this causing unnecessary rendering
 
       event_attrs.forEach((name) => {
@@ -291,7 +330,7 @@ export class AdvectElement extends HTMLElement {
       });
       if (
         ref.matches("[onload]") &&
-        !onloadElements.find((ole) => ole === ref.tagName.toLocaleLowerCase())
+        !AdvectSettings.tags.onloadElements.find((ole) => ole === ref.tagName.toLocaleLowerCase())
       ) {
         ref.dispatchEvent(
           new Event("load", {
