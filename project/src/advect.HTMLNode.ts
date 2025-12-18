@@ -132,8 +132,11 @@ export class HTMLNode {
       this.hydrateContent(context);
     }
 
+    console.log('reffing')
     if (this.attributes['ref']){
-      context['$$$refs'][this.attributes['ref']] = {
+      let refId = this.attributes['ref'];
+      if (refId.length == 0 || !refId) refId = crypto.randomUUID();
+      context['$$$refs'][refId] = {
         ref: this,
         context: {...context}
       };

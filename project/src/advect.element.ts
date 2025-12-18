@@ -288,9 +288,9 @@ export class AdvectElement extends HTMLElement {
     ];
     refEls.forEach((refEl) => {
       if (!refEl) return;
-      const { context } = hydradedRefs[refEl.getAttribute("ref") ?? ""];
-
-      const preScript = getScriptVars(context);
+      const postCTX = hydradedRefs[refEl.getAttribute("ref") ?? ""];
+      const context = postCTX?.context ?? {};
+      const preScript = postCTX ? getScriptVars(context) : '';
 
       const event_attrs = refEl
         .getAttributeNames()
