@@ -1,14 +1,13 @@
  <template advect="my-component" root="shadow" shadow="open" >
       <datalist>
-        <option name="message" value="Unset Message" type="" set="attribute"></option>
-        <option name=""></option>
+        <option name="message" value="Unset Message" type="string" set="attr"></option>
       </datalist>
       <layout>
         <h1>Hello World</h1>
         <slot name="stuff">
           <h2>No content</h2>
         </slot>
-        <table>
+        <table ref="mytable">
           <thead>
             <tr>
               <td>#</td>
@@ -19,7 +18,7 @@
           </thead>
           <tbody>
               <tr adv-for="d,di of $.data" ind="{di}">
-                <td>{{di}}</td>
+                <td onclick="console.log(di)" ref="{ 'item_' + di }">{{di}}</td>
                 <td>{{d.name}}</td>
                 <td>{{d.age}}</td>
                 <td>{{d.height}} cm</td>
@@ -29,6 +28,15 @@
         </table>
       </layout>
       <style>
+        td{
+          padding:0;
+        }
+        tr{
+          &:hover{
+            background-color: blue;
+
+          }
+        }
         
       </style>
       <script type="module">

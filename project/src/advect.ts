@@ -203,6 +203,12 @@ const createAdvect = async () => {
     for (let settings of buildSettings) {
       // for some reason ts thinks settings is used before being declared so let's add a pointer
       const $settings = settings;
+
+      if (customElements.get($settings.tagName)){
+        console.warn(`Already registered ${$settings.tagName}`)
+        continue;
+      }
+
       toModule(settings.module, []).then((module: any) => {
         // TODO fix change to module default
         //const moduleClass = module[moduleClassName];

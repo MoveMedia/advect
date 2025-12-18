@@ -2,7 +2,7 @@
  * NO BROWSER ACCESS
  */
 
-import { AdvectSettings } from "./lib";
+import { AdvectSettings, getScriptVars } from "./lib";
 
 /**
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
@@ -26,29 +26,13 @@ const TokenType = {
  * @property {string} value
  */
 
-const selfClosingTags = new Set([
-  "area",
-  "base",
-  "br",
-  "col",
-  "embed",
-  "hr",
-  "img",
-  "input",
-  "link",
-  "meta",
-  "source",
-  "track",
-  "wbr",
-  "att",
-]);
+
 
 export class HTMLNode {
   // addition
   $id: string = crypto.randomUUID();
   tagName: string;
   attributes: Record<string, string>;
-  props: Record<string, string>;
   children: HTMLNode[];
   content: string;
   isSelfClosing: boolean;
@@ -91,7 +75,6 @@ export class HTMLNode {
     if (this.isRemoved) return;
 
     let preScript = getScriptVars(context)
-
     let ifStatementRes = true;
 
     // If Statement
@@ -143,13 +126,22 @@ export class HTMLNode {
         const res = new Function("context", finalScript)(context);
       }
     }
+
     if (!this.isRemoved) {
       this.hydrateAttr(context);
       this.hydrateContent(context);
     }
+
+    if (this.attributes['ref']){
+      context['$$$refs'][this.attributes['ref']] = {
+        ref: this,
+        context: {...context}
+      };
+    }
+
     this.children.forEach((c) => c.hydrate(context));
     return {
-      context,
+      context
     };
   }
 
@@ -165,7 +157,6 @@ export class HTMLNode {
     children: HTMLNode[] = [],
     content: string = "",
     parent: HTMLNode | null = null,
-    props: Record<string, string> = {}
   ) {
     this.tagName = tagName;
     this.attributes = attributes;
@@ -174,7 +165,6 @@ export class HTMLNode {
     this.isRemoved = false;
     this.isSelfClosing = false;
     this.parent = parent;
-    this.props = props;
   }
   /**
    * @returns {string}
@@ -327,7 +317,6 @@ export class HTMLNode {
     const stack: HTMLNode[] = [];
     let currentNode = null;
     let currentAttributes: Record<string, any> = {};
-    let currentProps: Record<string, any> = {};
 
     let currentContent = "";
 
@@ -354,10 +343,6 @@ export class HTMLNode {
           const lastKey = Object.keys(currentAttributes).pop();
           if (!lastKey) break;
           currentAttributes[lastKey] = token.value;
-          if (lastKey.startsWith(AdvectSettings.attributes.props_prefix)) {
-            currentProps[lastKey.substring(AdvectSettings.attributes.props_prefix.length)] =
-              token.value;
-          }
           break;
         case TokenType.TAG_CLOSE:
         case TokenType.SELF_CLOSING_TAG:
@@ -370,9 +355,7 @@ export class HTMLNode {
           if (Object.keys(currentNode.attributes).length === 0) {
             currentNode.attributes = currentAttributes;
           }
-          if (Object.keys(currentNode.props).length === 0) {
-            currentNode.props = currentProps;
-          }
+
 
           if (!currentNode.content) {
             currentNode.content = currentContent;
@@ -477,7 +460,7 @@ export class HTMLNode {
             }
           }
 
-          if (selfClosingTags.has(tagName.toLowerCase()) && input[j] === ">") {
+          if (AdvectSettings.tags.selfClosing.has(tagName.toLowerCase()) && input[j] === ">") {
             tokens.push({ type: TokenType.SELF_CLOSING_TAG, value: tagName });
           }
 
@@ -505,16 +488,8 @@ export class HTMLNode {
       this.children.map((c) => c.clone()),
       this.content,
       this.parent,
-      this.props
     );
     return newNode;
   }
 }
 
-function getScriptVars (context:Record<string | symbol, any>):string{
-  return Object.keys(context)
-      .map((v) => {
-        return `let ${v} = context['${v}'];`;
-      })
-      .join("\n");
-}

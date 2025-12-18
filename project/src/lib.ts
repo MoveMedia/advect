@@ -127,15 +127,6 @@ export interface CustomElementSettings {
     };
   };
 
-  props: {
-    [key: string]: {
-      type: AttrTypeKey;
-      format?: string;
-      // format?: FormatType
-      // storage: 'css-var' | 'store'
-    };
-  };
-
   style: string;
 
   logs: string[];
@@ -143,9 +134,8 @@ export interface CustomElementSettings {
 
 export function isValidAttrType(attr: string) {
   return (
-    Object.keys(AttrTypes).find(
-      (t) => t.toLowerCase() == attr.toLowerCase()
-    ) != null
+    Object.keys(AttrTypes).find((t) => t.toLowerCase() == attr.toLowerCase()) !=
+    null
   );
 }
 
@@ -188,8 +178,6 @@ export function stripHtmlComments(htmlString: string) {
  * @param msg
  */
 
-
-
 export interface AdvectVM {
   /**
    * Fired when element is connected for the first time
@@ -204,20 +192,21 @@ export interface AdvectVM {
    */
   onAttrChange?: (name: string, value: string, oldValue: string) => void;
   /**
-   * Fires when watched Attributes are changed 
+   * Fires when watched Attributes are changed
    */
-  onWatchedAttrChanged?: (name: string, value: string, oldValue: string) => void;
+  onWatchedAttrChanged?: (
+    name: string,
+    value: string,
+    oldValue: string
+  ) => void;
   /**
-   * Fires when element is moved within the same document 
+   * Fires when element is moved within the same document
    */
   onMove?: () => void;
   /**
-   * Fires when element is adopted to new document 
+   * Fires when element is adopted to new document
    */
   onAdopt?: () => void;
-
-
-  
 }
 
 export type AvectVMProvider = () => AdvectVM;
@@ -236,8 +225,24 @@ export const AdvectSettings = {
       "script",
       "style",
       "audio",
-      "video"
+      "video",
     ],
+     selfClosing : new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "source",
+  "track",
+  "wbr",
+  "att",
+])
   },
   attributes: {
     booleans: ["checked", "disabled", "readonly", "popover"],
@@ -292,5 +297,22 @@ export const AdvectSettings = {
     "ontransitionend",
     "ontransitionrun",
     "ontransitioncancel",
+    "ontoggle",
+    "onbeforetoggle",
+    
+
   ],
+ 
 };
+
+export interface HydratedRef {
+  ref: HTMLNode;
+  context: Record<string, any>;
+}
+export function getScriptVars (context:Record<string | symbol, any>):string{
+  return Object.keys(context)
+      .map((v) => {
+        return `let ${v} = context['${v}'];`;
+      })
+      .join("\n");
+}

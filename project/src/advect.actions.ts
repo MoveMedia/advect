@@ -70,7 +70,6 @@ export const Actions = {
         root: "light",
         shadow: "closed",
         watched: {},
-        props: {},
         logs: [],
         layout: null,
         layoutNodes: [],
@@ -128,14 +127,7 @@ export const Actions = {
                   const format = child.attributes?.["format"] ?? "none";
                   const _set = child.attributes?.["set"] ?? "attribute";
                   
-                  console.log({
-                    name,
-                    type,
-                    format,
-                    _set,
-                  })
                   const hasValidType = isValidAttrType(type);
-                  console.log(settings.watched, hasValidType)
 
                   if (hasValidType && (_set == "attribute" || _set == "attr")) {
                     settings.watched[name] = {
@@ -143,12 +135,7 @@ export const Actions = {
                       format,
                     };
                   }
-                  if (hasValidType && (_set === "property" || _set == "prop")) {
-                    settings.props[name] = {
-                      type: type as AttrTypeKey,
-                      format,
-                    };
-                  }
+                  
                 }
               });
             } // can be a
@@ -165,7 +152,7 @@ export const Actions = {
               settings.layoutNodes = currNode.children;
             }
             if (currNode.tagName.toLocaleLowerCase() === "style") {
-              settings.template = currNode.text()
+              settings.style = currNode.text()
             }
           }
 
@@ -174,6 +161,10 @@ export const Actions = {
           }
           childQueue.push(...currNode.children);
         }
+      }
+      // load dependant compmponents
+      if (root_node.tagName.toLowerCase() == 'script' && root_node.attributes['rel'] && root_node.attributes['type'] =='application/html'){
+        this.load({urls:root_node.attributes['rel']})
       }
       const outerHtml = String.raw`${template}`;
 
