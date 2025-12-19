@@ -123,6 +123,7 @@ export interface CustomElementSettings {
     [key: string]: {
       type: AttrTypeKey;
       format?: string;
+      defaultValue?: string;
       // storage: 'css-var' | 'store'
     };
   };

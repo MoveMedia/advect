@@ -125,14 +125,17 @@ export const Actions = {
                   let type = child.attributes?.["type"] ?? "string";
                   if (type == '') type = 'string';
                   const format = child.attributes?.["format"] ?? "none";
-                  const _set = child.attributes?.["set"] ?? "attribute";
+                  const defaultValue = child.attributes?.["value"] ?? "";
+
+                  // const _set = child.attributes?.["set"] ?? "attribute";
                   
                   const hasValidType = isValidAttrType(type);
 
-                  if (hasValidType && (_set == "attribute" || _set == "attr")) {
+                  if (hasValidType) {
                     settings.watched[name] = {
                       type: type as AttrTypeKey,
                       format,
+                      defaultValue
                     };
                   }
                   

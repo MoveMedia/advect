@@ -40,8 +40,8 @@
         
       </style>
       <script type="module">
-        export default function ({ $, $el, $props, $refs, $attr, $internals }) {
-          $.data = [
+        export default function ({ $state, $el, $props, $refs, $attr, $internals }) {
+          $state.data = [
             {name : 'John', age: 22, height: '172'},
             {name : 'Carl', age: 22, height: '142'},
             {name : 'Laura', age: 22, height: '152'},

@@ -226,7 +226,8 @@ const createAdvect = async () => {
         if (
           register &&
           $settings.tagName.length >= 3 &&
-          $settings.tagName.indexOf("-")
+          $settings.tagName.indexOf("-") &&
+          customElements.get($settings.tagName) === undefined
         ) {
           customElements.define($settings.tagName, newClass as any);
         }

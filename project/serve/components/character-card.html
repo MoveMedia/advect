@@ -1,0 +1,42 @@
+<template advect="character-card" root="shadow" shadow="open">
+  <datalist>
+    <option
+      value="https://picsum.photos/200/200"
+      name="image"
+      type="string"
+    ></option>
+    <option value="Name Goes here" name="Name" type="string"></option>
+  </datalist>
+  <layout>
+    <div class="char-card">
+      <figure class="headshot">
+        <img
+          src="{$attr.image}"
+          alt="image"
+          width="200px"
+          height="200px"
+        />
+        <figcaption>{{$attr.caption}}</figcaption>
+      </figure>
+    </div>
+  </layout>
+  <style>
+    .char-card{
+      border: 2px solid white;
+      border-radius: 1em;
+      width: fit-content;
+      overflow: hidden;
+      padding-bottom: 20px;;
+      figure.headshot{
+        margin: 0;
+        & figcaption{
+          font-size: 20px;
+        }
+      }
+
+    }
+  </style>
+  <script type="module">
+    export default function ({ $state }) {}
+  </script>
+</template>

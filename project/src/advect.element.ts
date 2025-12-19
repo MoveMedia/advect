@@ -163,8 +163,14 @@ export class AdvectElement extends HTMLElement {
         if (!this.isConnected) return null;
         if (this.$settings.watched[name as string]) {
           const type = AttrTypes[this.$settings.watched[name as string].type];
-          // @ts-ignore
-          return type?.parse(this.getAttribute(name as string) ?? "") ?? null;
+          const hasAttr = this.hasAttribute(name as string)
+          if (this.hasAttribute(name as string)){
+            // @ts-ignore
+            return type?.parse(this.getAttribute(name as string) ?? "") ?? null;
+          }else{
+            // @ts-ignore
+            return type?.parse(this.$settings.watched[name as string].defaultValue ?? "") ?? null;
+          }
         }
         return this.getAttribute(name as string);
       },
@@ -197,7 +203,7 @@ export class AdvectElement extends HTMLElement {
       this.#reactiveDispose = dispose;
       // @ts-ignore also a little sussy
       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
-        $: this.$state,
+        $state: this.$state,
         state: this.state,
         $el: this,
         $refs: this.$refs,
@@ -260,6 +266,10 @@ export class AdvectElement extends HTMLElement {
       $el: this,
       $: {},
       $$$refs: {} as Record<string, HydratedRef>,
+      $state: this.$state,
+      state: this.state,
+      $attr: this.$attr,
+      $self: this,
     };
     this.#state.entries().forEach(([key, s]) => {
       frame["$"][key as string] = s();
@@ -302,12 +312,15 @@ export class AdvectElement extends HTMLElement {
         try {
           // @ts-expect-error assigning event handlers by name nothing to see here
           refEl[name] = (_event) => {
-            new AsyncFunction("context","$self", "$event", "$this", "$refs", `${preScript} ${attr_val}`)(
+            new AsyncFunction("context","$self", "$event", "$this", "$refs"," $state","state", '$attr', `${preScript} ${attr_val}`)(
               context,
               this,
               _event,
               refEl,
-              this.$refs
+              this.$refs,
+              this.$state,
+              this.state,
+              this.$attr
             );
           };
         } catch (e) {
