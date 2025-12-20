@@ -61,20 +61,6 @@ export const Actions = {
     const results: CustomElementSettings[] = [];
 
     for (let root_node of root_nodes) {
-      const settings: CustomElementSettings = {
-        tagName: "",
-        module: "",
-        template: "",
-        templateNode: null,
-        refs: [],
-        root: "light",
-        shadow: "closed",
-        watched: {},
-        logs: [],
-        layout: null,
-        layoutNodes: [],
-        style: "",
-      };
       if (root_node.tagName.toLowerCase() === "template") {
         if (!root_node.attributes[AdvectSettings.attributes.template]) {
           AdvectLog.log.warn(
@@ -82,7 +68,22 @@ export const Actions = {
           );
           continue;
         }
-        const tagName = root_node.attributes[AdvectSettings.attributes.template];
+        const settings: CustomElementSettings = {
+          tagName: "",
+          module: "",
+          template: "",
+          templateNode: null,
+          refs: [],
+          root: "light",
+          shadow: "closed",
+          watched: {},
+          logs: [],
+          layout: null,
+          layoutNodes: [],
+          style: "",
+        };
+        const tagName =
+          root_node.attributes[AdvectSettings.attributes.template];
 
         if (tagName.indexOf("-") === -1) {
           AdvectLog.log.warn("advect Template tag name must contain a hyphen");
@@ -111,10 +112,10 @@ export const Actions = {
         while (childQueue.length > 0) {
           const currNode = childQueue.shift();
           if (!currNode) continue;
-          const is_root_child =
+          const template_root_child =
             currNode.parent?.tagName.toLocaleLowerCase() == "template";
 
-          if (is_root_child) {
+          if (template_root_child) {
             if (currNode.tagName === AdvectSettings.tags.settings) {
               currNode.children.forEach((child: HTMLNode) => {
                 if (
@@ -123,22 +124,21 @@ export const Actions = {
                 ) {
                   const name = child.attributes["name"];
                   let type = child.attributes?.["type"] ?? "string";
-                  if (type == '') type = 'string';
+                  if (type == "") type = "string";
                   const format = child.attributes?.["format"] ?? "none";
                   const defaultValue = child.attributes?.["value"] ?? "";
 
                   // const _set = child.attributes?.["set"] ?? "attribute";
-                  
+
                   const hasValidType = isValidAttrType(type);
 
                   if (hasValidType) {
                     settings.watched[name] = {
                       type: type as AttrTypeKey,
                       format,
-                      defaultValue
+                      defaultValue,
                     };
                   }
-                  
                 }
               });
             } // can be a
@@ -150,12 +150,15 @@ export const Actions = {
                 settings.module = currNode.text();
               }
             }
-            if (currNode.tagName.toLocaleLowerCase() === AdvectSettings.tags.layout) {
+            if (
+              currNode.tagName.toLocaleLowerCase() ===
+              AdvectSettings.tags.layout
+            ) {
               settings.layout = currNode.children.map((c) => c.html()).join("");
               settings.layoutNodes = currNode.children;
             }
             if (currNode.tagName.toLocaleLowerCase() === "style") {
-              settings.style = currNode.text()
+              settings.style = currNode.text();
             }
           }
 
@@ -164,15 +167,19 @@ export const Actions = {
           }
           childQueue.push(...currNode.children);
         }
+        const outerHtml = String.raw`${template}`;
+
+        settings.template = outerHtml;
+        results.push(settings);
       }
       // load dependant compmponents
-      if (root_node.tagName.toLowerCase() == 'script' && root_node.attributes['rel'] && root_node.attributes['type'] =='application/html'){
-        this.load({urls:root_node.attributes['rel']})
+      if (
+        root_node.tagName.toLowerCase() == "script" &&
+        root_node.attributes["rel"] &&
+        root_node.attributes["type"] == "application/html"
+      ) {
+        this.load({ urls: root_node.attributes["rel"] });
       }
-      const outerHtml = String.raw`${template}`;
-
-      settings.template = outerHtml;
-      results.push(settings);
     }
     return results;
   },

@@ -317,3 +317,39 @@ export function getScriptVars (context:Record<string | symbol, any>):string{
       })
       .join("\n");
 }
+
+const propertyBlockRegex =
+  /@property\s+(--[A-Za-z0-9-_]+)\s*\{([\s\S]*?)\}/g;
+
+export function decodePropertySyntax(css:string) {
+  return css.replace(propertyBlockRegex, (full, name, body) => {
+    const newBody = body.replace(
+      /syntax:\s*(['"])(.*?)\1/g,
+      // @ts-ignore
+      (match, quote, content) => {
+        const decoded = content
+          .replace(/\.\-/g, "<")
+          .replace(/\-\./g, ">");
+        return `syntax: ${quote}${decoded}${quote}`;
+      }
+    );
+
+    return `@property ${name} {${newBody}}`;
+  });
+}
+export function encodePropertySyntax(css:string) {
+  return css.replace(propertyBlockRegex, (full, name, body) => {
+    const newBody = body.replace(
+      /syntax:\s*(['"])(.*?)\1/g,
+      // @ts-ignore
+      (match, quote, content) => {
+        const encoded = content
+          .replace(/</g, ".-")
+          .replace(/>/g, "-.");
+        return `syntax: ${quote}${encoded}${quote}`;
+      }
+    );
+
+    return `@property ${name} {${newBody}}`;
+  });
+}

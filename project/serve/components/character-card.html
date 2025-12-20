@@ -5,7 +5,7 @@
       name="image"
       type="string"
     ></option>
-    <option value="Name Goes here" name="Name" type="string"></option>
+    <option name="name" type="string" value="Name Goes here" ></option>
   </datalist>
   <layout>
     <div class="char-card">
@@ -16,12 +16,16 @@
           width="200px"
           height="200px"
         />
-        <figcaption>{{$attr.caption}}</figcaption>
+        <figcaption>{{$attr.name}}</figcaption>
       </figure>
     </div>
   </layout>
   <style>
-    .char-card{
+    @property --sample-prop {
+      syntax: "<color>";
+      inherits: false;
+    }
+    .char-card {
       border: 2px solid white;
       border-radius: 1em;
       width: fit-content;
@@ -33,7 +37,6 @@
           font-size: 20px;
         }
       }
-
     }
   </style>
   <script type="module">

@@ -2,7 +2,7 @@
  * NO BROWSER ACCESS
  */
 
-import { AdvectSettings, getScriptVars } from "./lib";
+import { AdvectSettings, encodePropertySyntax, getScriptVars } from "./lib";
 
 /**
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
@@ -313,7 +313,8 @@ export class HTMLNode {
    * @returns {HTMLNodeInterface[]}
    */
   static create(input: string) {
-    const tokens = HTMLNode.tokenize(input);
+    const cssSyntaxReplaced = encodePropertySyntax(input)
+    const tokens = HTMLNode.tokenize(cssSyntaxReplaced);
     const refs: Map<string, string> = new Map();
     const nodes = [];
     const stack: HTMLNode[] = [];

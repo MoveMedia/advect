@@ -9,6 +9,7 @@ import {
   toModule,
   type AvectVMProvider,
   AdvectSettings,
+  decodePropertySyntax,
 } from "./lib";
 
 import { AdvectElement } from "./advect.element";
@@ -213,7 +214,7 @@ const createAdvect = async () => {
         // TODO fix change to module default
         //const moduleClass = module[moduleClassName];
         const stylesheet = new CSSStyleSheet()
-        stylesheet.replace($settings.style)
+        stylesheet.replace(decodePropertySyntax($settings.style))
         const newClass = class extends AdvectElement {
           static observedAttributes = Object.keys($settings.watched);
           static $settings = $settings;
@@ -270,6 +271,7 @@ const createAdvect = async () => {
         templateScriptUrls.push(e.getAttribute("rel") ?? "");
       }
     });
+    console.log(templateScriptUrls)
     load(templateScriptUrls);
 
     document.removeEventListener("DOMContentLoaded", onContent);
