@@ -14,10 +14,6 @@ import {
 
 import { AdvectElement } from "./advect.element";
 
-
-
-
-
 /**
  * Creates a shared worker for running advect
  * @returns a shared worker for running advect
@@ -172,20 +168,59 @@ const createAdvect = async () => {
       break;
   }
 
+  const initStorage = () => {
+    if (!localStorage.getItem(AdvectSettings.data.session_key)) {
+      saveStorage({ loaded: {} });
+    }
+  };
 
+  const getStorage = () => {
+    if (!localStorage.getItem(AdvectSettings.data.session_key)) {
+      initStorage();
+    }
+    return JSON.parse(
+      localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
+    );
+  };
+  const saveStorage = (storage: any) => {
+    localStorage.setItem(
+      AdvectSettings.data.session_key,
+      JSON.stringify(storage)
+    );
+  };
+  const addLoaded = (urls: string | string[]) => {
+    const storage = getStorage();
+    if (Array.isArray(urls)){
+      urls.forEach( url =>{
+        storage.loaded[url] = true;
+      })
+    }
+
+    if (typeof urls == "string") {
+      storage.loaded[urls] = true;
+    }
+    saveStorage(storage);
+  };
+
+  const isLoaded = (url: string) => {
+    const storage = getStorage();
+    return storage.loaded?.[url] === true;
+  };
   /**
    * Loads a webcomponent from a url or list of urls
    * @param urls
    * @returns
    */
-  const load = async (urls: string | string[]) => {
-  //  console.log('loading', urls)
+  const load = async (urls: string | string[], forceReload = false) => {
+    //  console.log('loading', urls)
     const buildMsg = (await messagePromise("load", { urls })) as MessageEvent<{
       result: CustomElementSettings[];
       id: string;
       action: ActionKey;
     }>;
+
     const buildSettings = buildMsg.data.result;
+    
     return createCustomElementClasses(buildSettings);
   };
 
@@ -205,16 +240,22 @@ const createAdvect = async () => {
       // for some reason ts thinks settings is used before being declared so let's add a pointer
       const $settings = settings;
 
-      if (customElements.get($settings.tagName)){
-        console.warn(`Already registered ${$settings.tagName}`)
+      $settings.loads.forEach( l => {
+        load(l);
+      })
+
+      if (customElements.get($settings.tagName)) {
+        console.warn(`Already registered ${$settings.tagName}`);
         continue;
       }
+
+      load($settings.loads, false);
 
       toModule(settings.module, []).then((module: any) => {
         // TODO fix change to module default
         //const moduleClass = module[moduleClassName];
-        const stylesheet = new CSSStyleSheet()
-        stylesheet.replace(decodePropertySyntax($settings.style))
+        const stylesheet = new CSSStyleSheet();
+        stylesheet.replace(decodePropertySyntax($settings.style));
         const newClass = class extends AdvectElement {
           static observedAttributes = Object.keys($settings.watched);
           static $settings = $settings;
@@ -252,6 +293,8 @@ const createAdvect = async () => {
       id: string;
       action: ActionKey;
     }>;
+
+    
     const buildSettings = buildMsg.data.result;
     return createCustomElementClasses(buildSettings);
   };
@@ -266,12 +309,11 @@ const createAdvect = async () => {
       .forEach((template) => build(template.outerHTML));
 
     let templateScriptUrls: string[] = [];
-    document.querySelectorAll('script[rel]').forEach((e) => {
+    document.querySelectorAll("script[rel]").forEach((e) => {
       if (e.hasAttribute("rel")) {
         templateScriptUrls.push(e.getAttribute("rel") ?? "");
       }
     });
-    console.log(templateScriptUrls)
     load(templateScriptUrls);
 
     document.removeEventListener("DOMContentLoaded", onContent);
@@ -288,9 +330,6 @@ const createAdvect = async () => {
     load,
   };
 };
-
-
-
 
 // This is necessary so that elements can
 

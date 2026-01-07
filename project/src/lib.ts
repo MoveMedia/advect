@@ -1,3 +1,4 @@
+import type { AdvectElement } from "./advect.element";
 import type { HTMLNode } from "./advect.HTMLNode";
 
 export type AttrTypeKey = keyof typeof AttrTypes;
@@ -131,6 +132,8 @@ export interface CustomElementSettings {
   style: string;
 
   logs: string[];
+
+  loads: string[];
 }
 
 export function isValidAttrType(attr: string) {
@@ -213,7 +216,11 @@ export interface AdvectVM {
 export type AvectVMProvider = () => AdvectVM;
 
 export const AdvectSettings = {
+  data:{
+    session_key : '$$$advect-loads'
+  },
   tags: {
+
     layout: "layout",
     settings: "datalist",
     options: "option",
@@ -300,20 +307,14 @@ export const AdvectSettings = {
     "ontransitioncancel",
     "ontoggle",
     "onbeforetoggle",
-    
-
   ],
- 
 };
 
-export interface HydratedRef {
-  ref: HTMLNode;
-  context: Record<string, any>;
-}
-export function getScriptVars (context:Record<string | symbol, any>):string{
+
+export function getScriptVars (context:Record<string | symbol, any>, objectName:string =  'context'):string{
   return Object.keys(context)
       .map((v) => {
-        return `let ${v} = context['${v}'];`;
+        return `let ${v} = ${objectName}['${v}'];`;
       })
       .join("\n");
 }
@@ -352,4 +353,27 @@ export function encodePropertySyntax(css:string) {
 
     return `@property ${name} {${newBody}}`;
   });
+}
+
+
+export interface HydratedRef {
+  ref: HTMLNode;
+  data: Record<string, any>;
+}
+export type AdvectContext = ReturnType<typeof createAdvectContext>;
+export function createAdvectContext(el:AdvectElement){
+  const context = {
+    $$$refs: new Map<string, HydratedRef>(),
+    $$$currentNode: null as HTMLNode | null,
+    $$$locals: {
+      $attr:el.$attr,
+      $state:el.$state,
+      state:el.state,
+      $refs: el.$refs,
+    }
+  }
+;
+  return new Proxy(context, {
+    ownKeys: () => Object.keys(context),
+  })
 }

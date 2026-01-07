@@ -2,7 +2,9 @@ import {
   AdvectSettings,
   AsyncFunction,
   AttrTypes,
+  createAdvectContext,
   getScriptVars,
+  type AdvectContext,
   type AdvectVM,
   type HydratedRef,
 } from "./lib";
@@ -201,6 +203,7 @@ export class AdvectElement extends HTMLElement {
     this.#internals = this.attachInternals();
     root((dispose) => {
       this.#reactiveDispose = dispose;
+      console.log(this.state)
       // @ts-ignore also a little sussy
       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
         $state: this.$state,
@@ -261,46 +264,32 @@ export class AdvectElement extends HTMLElement {
 
   render() {
     if (!this.isConnected || !this.$domRoot) return;
-
-    const frame: Record<string | number | symbol, any> = {
-      $el: this,
-      $: {},
-      $$$refs: {} as Record<string, HydratedRef>,
-      $state: this.$state,
-      state: this.state,
-      $attr: this.$attr,
-      $self: this,
-    };
-    this.#state.entries().forEach(([key, s]) => {
-      frame["$"][key as string] = s();
-    });
-    const hydradedRefs: Record<string, HydratedRef> = {};
-
+    const context = createAdvectContext(this);
+    
     const rendered = this.$settings.layoutNodes
       .map((ln) => {
-        const hydratedContext = ln.hydrate(frame);
-        Object.keys(hydratedContext?.context.$$$refs).forEach((key) => {
-          hydradedRefs[key] = hydratedContext?.context.$$$refs[key];
-        });
+        ln.hydrate(context);
         return ln.html();
       })
       .join("\n");
 
     this.$domRoot.innerHTML = rendered;
-    requestAnimationFrame(() => this.hook(hydradedRefs));
+    requestAnimationFrame(() => this.hook(context));
   }
-  hook(hydradedRefs: Record<string, HydratedRef>) {
+  hook(hydratedContext: AdvectContext) {
     const refEls = [
       // @ts-ignore
       ...this.querySelectorAll("[ref]"),
       // @ts-ignore
-      ...this.shadowRoot?.querySelectorAll("[ref]"),
+      ...(this.shadowRoot?.querySelectorAll("[ref]") || [] ),
     ];
     refEls.forEach((refEl) => {
-      if (!refEl) return;
-      const postCTX = hydradedRefs[refEl.getAttribute("ref") ?? ""];
-      const context = postCTX?.context ?? {};
-      const preScript = postCTX ? getScriptVars(context) : '';
+      const refId = refEl.getAttribute("ref");
+      if (!refId) return;
+      const hydratedRef = hydratedContext.$$$refs.get(refId)
+      if (!hydratedRef) return;
+      const {ref:refNode, data} =  hydratedRef;
+      const preScript = getScriptVars(data);
 
       const event_attrs = refEl
         .getAttributeNames()
@@ -312,15 +301,11 @@ export class AdvectElement extends HTMLElement {
         try {
           // @ts-expect-error assigning event handlers by name nothing to see here
           refEl[name] = (_event) => {
-            new AsyncFunction("context","$self", "$event", "$this", "$refs"," $state","state", '$attr', `${preScript} ${attr_val}`)(
-              context,
+            new AsyncFunction("context","$self", "$event", "$this", `${preScript} ${attr_val}`)(
+              data,
               this,
               _event,
               refEl,
-              this.$refs,
-              this.$state,
-              this.state,
-              this.$attr
             );
           };
         } catch (e) {

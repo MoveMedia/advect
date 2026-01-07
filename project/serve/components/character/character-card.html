@@ -1,0 +1,73 @@
+
+<template advect="character-card" root="shadow">
+  <datalist>
+    <option
+      value="https://picsum.photos/200/200"
+      name="image"
+      type="string"
+    ></option>
+    <option name="name" type="string" value="Name Goes here"></option>
+    <option name="age" type="string" value=""></option>
+    <option name="height" type="string" value=""></option>
+  </datalist>
+  <layout>
+    <div class="char-card">
+      <figure class="headshot">
+        <img ref="image" src="{$attr.image}" alt="image" width="200px" height="200px" />
+        <figcaption ref="name">{{$attr.name}}</figcaption>
+      </figure>
+    </div>
+  </layout>
+  <style>
+    @property --sample-prop {
+      syntax: "<color>";
+      inherits: false;
+    }
+
+    .char-card {
+      border: 2px solid white;
+      border-radius: 1em;
+      width: fit-content;
+      overflow: hidden;
+      padding-bottom: 20px;
+
+      figure.headshot {
+        margin: 0;
+
+        & figcaption {
+          font-size: 20px;
+        }
+      }
+
+      border: 4px solid transparent;
+      /* 2. Apply border-radius for rounded corners */
+      border-radius: 15px;
+
+      /* 3. Define the background layers */
+      background:
+      /* Inner solid background (matches page background) */ linear-gradient(
+            transparent,
+            transparent
+          )
+          padding-box,
+        /* Outer gradient background (the border itself) */
+          linear-gradient(to right, darkblue, darkorchid) border-box;
+
+      /* 4. Clip the backgrounds to their respective boxes */
+      background-clip: padding-box, border-box;
+
+      /* Other styles for demonstration */
+      width: 200px;
+      text-align: center;
+    }
+  </style>
+  <script type="module">
+    export default function ({ $state, $self, $attr, $refs, state }) {
+      return {
+        onWatchedAttrChanged: (name, newVal, oldVal) =>{
+          console.log(name, newVal, oldVal)
+        }
+      }
+    }
+  </script>
+</template>

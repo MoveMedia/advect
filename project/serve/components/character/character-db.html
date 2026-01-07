@@ -1,0 +1,119 @@
+<template advect="character-db" root="shadow" shadow="open">
+<script
+  rel="/components/character/character-card.html"
+  type="application/html"
+></script>
+  <layout>
+    <div class="character-db-container">
+      <h2>{{ $state.intro }}</h2>
+      <div class="root">
+        <div class="details-panel">
+          <character-card ref="characterCard"></character-card>
+        </div>
+        <div class="data-selection">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <td>#</td>
+                <td>Name</td>
+                <td>Age</td>
+                <td>Height</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                adv-for="d,di of $state.data"
+                ind="{di}"
+                onclick="$state.select(d, $self)"
+                ref="item"
+              >
+                <td>{{di}}</td>
+                <td>{{d.name}}</td>
+                <td>{{d.age}}</td>
+                <td>{{d.height}} cm</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <button class="button is-dark">Add New Character</button>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+    <link rel="stylesheet" href="/components/character/character.css" />
+    <style>
+      @import "https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css";
+    </style>
+  </layout>
+  <style>
+    :host {
+      display: block;
+      height: fit-content;
+      padding: 20px;
+    }
+    .character-db-container {
+      container: char-db / size;
+      --root-display: block;
+      & .root {
+        display: var(--root-display);
+      }
+      .data-selection {
+        flex: 1;
+        table tbody tr {
+          transition: all 0.2s;
+          &:hover {
+            background-color: blue;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+
+    @container char-db (width > 700px) {
+      .character-db-container {
+        & .root {
+          --root-display: flex;
+          display: var(--root-display);
+          gap: 20px;
+        }
+      }
+    }
+  </style>
+  <script type="module">
+    export default function ({ $state, $refs, $self, $fuzzyRefs }) {
+      const defaultData = { name: "", age: "", height: "", image: ""};
+      $state.selectedData = defaultData;
+      $state.selectedRow = null;
+      $state.intro = 'Hello'
+      $state.data = [
+        {
+          image: "https://picsum.photos/200/300?1",
+          name: "John",
+          age: 22,
+          height: "172",
+        },
+        {
+          image: "https://picsum.photos/200/300?2",
+          name: "Carl",
+          age: 22,
+          height: "142",
+        },
+        {
+          image: "https://picsum.photos/200/300?3",
+          name: "Laura",
+          age: 22,
+          height: "152",
+        },
+      ];
+      $state.select = (character, row) => {
+        $state.selectedRow = row;
+      };
+
+      $refs.characterCard.
+      $state.select($state.data[0], null)
+
+    }
+  </script>
+</template>

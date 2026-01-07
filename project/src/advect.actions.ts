@@ -81,6 +81,7 @@ export const Actions = {
           layout: null,
           layoutNodes: [],
           style: "",
+          loads: [],
         };
         const tagName =
           root_node.attributes[AdvectSettings.attributes.template];
@@ -149,6 +150,13 @@ export const Actions = {
               ) {
                 settings.module = currNode.text();
               }
+              // load dependant compmponents
+              if (
+                root_node.attributes["rel"] &&
+                root_node.attributes["type"] == "application/html"
+              ) {
+                settings.loads.push(root_node.attributes["rel"]);
+              }
             }
             if (
               currNode.tagName.toLocaleLowerCase() ===
@@ -171,14 +179,6 @@ export const Actions = {
 
         settings.template = outerHtml;
         results.push(settings);
-      }
-      // load dependant compmponents
-      if (
-        root_node.tagName.toLowerCase() == "script" &&
-        root_node.attributes["rel"] &&
-        root_node.attributes["type"] == "application/html"
-      ) {
-        this.load({ urls: root_node.attributes["rel"] });
       }
     }
     return results;
