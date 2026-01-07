@@ -203,7 +203,6 @@ export class AdvectElement extends HTMLElement {
     this.#internals = this.attachInternals();
     root((dispose) => {
       this.#reactiveDispose = dispose;
-      console.log(this.state)
       // @ts-ignore also a little sussy
       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
         $state: this.$state,

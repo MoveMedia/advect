@@ -218,9 +218,8 @@ const createAdvect = async () => {
       id: string;
       action: ActionKey;
     }>;
-
     const buildSettings = buildMsg.data.result;
-    
+    addLoaded(urls);
     return createCustomElementClasses(buildSettings);
   };
 
@@ -241,7 +240,7 @@ const createAdvect = async () => {
       const $settings = settings;
 
       $settings.loads.forEach( l => {
-        load(l);
+        if (!isLoaded(l)) load(l);
       })
 
       if (customElements.get($settings.tagName)) {
