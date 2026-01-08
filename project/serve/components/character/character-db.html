@@ -24,7 +24,7 @@
               <tr
                 adv-for="d,di of $state.data"
                 ind="{di}"
-                onclick="$state.select(d, $self)"
+                onclick="$state.select(d, $this)"
                 ref="item"
               >
                 <td>{{di}}</td>
@@ -82,8 +82,9 @@
     }
   </style>
   <script type="module">
-    export default function ({ $state, $refs, $self, $fuzzyRefs }) {
+    export default function ({ $state }) {
       const defaultData = { name: "", age: "", height: "", image: ""};
+      
       $state.selectedData = defaultData;
       $state.selectedRow = null;
       $state.intro = 'Hello'
@@ -109,9 +110,9 @@
       ];
       $state.select = (character, row) => {
         $state.selectedRow = row;
+        console.log(character)
       };
 
-      $state.select($state.data[0], null)
 
     }
   </script>

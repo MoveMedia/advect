@@ -356,21 +356,17 @@ export function encodePropertySyntax(css:string) {
 }
 
 
-export interface HydratedRef {
-  ref: HTMLNode;
-  data: Record<string, any>;
-}
+
 export type AdvectContext = ReturnType<typeof createAdvectContext>;
 export function createAdvectContext(el:AdvectElement){
   const context = {
-    $$$refs: new Map<string, HydratedRef>(),
-    $$$currentNode: null as HTMLNode | null,
-    $$$locals: {
-      $attr:el.$attr,
-      $state:el.$state,
-      state:el.state,
-      $refs: el.$refs,
-    }
+    refs: new Map<string, HTMLNode>(),
+    currentNode: null as HTMLNode | null,
+    $attr:el.$attr,
+    $state:el.$state,
+    state:el.state,
+    $refs: el.$refs,
+    $element:el
   }
 ;
   return new Proxy(context, {

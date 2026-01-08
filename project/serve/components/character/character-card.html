@@ -62,7 +62,7 @@
     }
   </style>
   <script type="module">
-    export default function ({ $state, $self, $attr, $refs, state }) {
+    export default function ({ $element }) {
       return {
         onWatchedAttrChanged: (name, newVal, oldVal) =>{
           console.log(name, newVal, oldVal)

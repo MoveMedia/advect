@@ -2,7 +2,12 @@
  * NO BROWSER ACCESS
  */
 
-import { AdvectSettings, encodePropertySyntax, getScriptVars, type AdvectContext } from "./lib";
+import {
+  AdvectSettings,
+  encodePropertySyntax,
+  getScriptVars,
+  type AdvectContext,
+} from "./lib";
 
 /**
  * PartyGodTroy here, I did not write this I found it on the internet and copied it. If you are the author thanks you rock and I want to buy you a beverage of your choosing
@@ -26,8 +31,6 @@ const TokenType = {
  * @property {string} value
  */
 
-
-
 export class HTMLNode {
   // addition
   $id: string = crypto.randomUUID();
@@ -39,47 +42,43 @@ export class HTMLNode {
   isRemoved: boolean;
   parent: HTMLNode | null;
   indexInParent: number = -1;
-
+  locals: Record<string, any> = {};
   // Changes from og
-  hydrateAttr(
-    context: AdvectContext,
-  ) {
-
-      Object.keys(this.attributes)
+  hydrateContent(context: AdvectContext) {
+    const contextScript = getScriptVars(context, "context");
+    const localsScript = ''// getScriptVars(this.locals, "ref.locals");
+    Object.keys(this.attributes)
       .filter((k) => !Object.hasOwn(AdvectSettings.attributes.directives, k))
       .forEach((k) => {
         const v = `${this.attributes[k]}`.trim();
         if (v.startsWith("{") && v.endsWith("}")) {
           const attrScript = v.substring(1, v.length - 1);
-          const finalAttrScript = ` ${getScriptVars(context.$$$locals, 'context.$$$locals')} return ${attrScript}`;
-          const res = new Function("context", finalAttrScript)(context);
+          const finalScript = `${contextScript}\n${localsScript}return ${attrScript}`;
+          const res = new Function("context", "ref", finalScript)(
+            context,
+            this
+          );
           this.attributes[k] = res;
         }
       });
-  }
-  hydrateContent(
-    context: AdvectContext
-  ) {
     const exp = this.content.matchAll(/\{\{(.*?)\}\}/g);
     exp.forEach((v) => {
       const contentScript = v[1].trim();
-      const res = new Function(
-        "context",
-        `${getScriptVars(context.$$$locals, 'context.$$$locals')} return ${contentScript}`
-      )(context);
+      const finalScript = `${contextScript}\n${localsScript}return ${contentScript}`;
+      const res = new Function("context", "ref", finalScript)(context, this);
       this.content = this.content.replace(v[0], res);
     });
   }
-  hydrate(context:AdvectContext) {
+  hydrate(context: AdvectContext) {
     if (this.isRemoved) return;
 
-    let preScript = getScriptVars(context.$$$locals, 'context.$$$locals')
     let ifStatementRes = true;
-
     // If Statement
     if (this.hasAttribute(AdvectSettings.attributes.directives.ifStatement)) {
-      context.$$$currentNode = this;
-      const script = this.attributes[AdvectSettings.attributes.directives.ifStatement];
+      context.currentNode = this;
+      let preScript = getScriptVars(context, "context");
+      const script =
+        this.attributes[AdvectSettings.attributes.directives.ifStatement];
       // TODO warn if there is no script
       if (script.length > 0) {
         const ifStatementRes = new Function(
@@ -94,13 +93,15 @@ export class HTMLNode {
     if (!ifStatementRes) return;
 
     if (this.hasAttribute(AdvectSettings.attributes.directives.forStatement)) {
-      context.$$$currentNode = this;
+      context.currentNode = this;
+      let preScript = getScriptVars(context, "context");
       // For Statement
-      const script = this.attributes[AdvectSettings.attributes.directives.forStatement];
-      delete this.attributes[AdvectSettings.attributes.directives.forStatement]
+      const script =
+        this.attributes[AdvectSettings.attributes.directives.forStatement];
+      delete this.attributes[AdvectSettings.attributes.directives.forStatement];
       // TODO warn if there is no script
       if (script.length > 0) {
-        this.remove()
+        this.remove();
         const sides = script.split(" of "); // expect name,index of array
         const left_side = sides[0].split(",");
         const valueName = left_side[0].trim();
@@ -113,37 +114,32 @@ export class HTMLNode {
 
         const finalScript = `
           ${preScript}
-          for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
-            let ${valueName} = ${arrayName}[${indexName}];
-              context.$$$locals['${valueName}'] = ${arrayName}[${indexName}];
-              context.$$$locals['${indexName}'] = ${indexName};
-              const newClone = context.$$$currentNode.clone();
-              context.$$$currentNode.parent.addChild(newClone);
-              newClone.hydrate(context);
-          }
+for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
+  let ${valueName} = ${arrayName}[${indexName}];
+  context['${indexName}'] = ${indexName};
+  context['${valueName}'] = ${valueName};
+  const newClone = context.currentNode.clone();
+  newClone.locals['${indexName}'] = ${indexName};
+  newClone.locals['${valueName}'] = ${valueName};
+  newClone.attributes['ref'] = context.currentNode.attributes['ref'] + '_' + ${indexName};
+  context.refs[newClone.attributes['ref']] = newClone;
+  context.currentNode.parent.addChild(newClone);
+  newClone.hydrate(context);
+}
           `;
         const res = new Function("context", finalScript)(context);
       }
     }
 
     if (!this.isRemoved) {
-      this.hydrateAttr(context);
       this.hydrateContent(context);
+      if (this.attributes["ref"]) {
+        let refId = this.attributes["ref"];
+        if (refId.length == 0 || !refId) refId = crypto.randomUUID();
+        context.refs.set(refId, this);
+      }
+      this.children.forEach((c) => c.hydrate(context));
     }
-
-    if (this.attributes['ref']){
-      let refId = this.attributes['ref'];
-      if (refId.length == 0 || !refId) refId = crypto.randomUUID();
-      context.$$$refs.set(refId, {
-        ref: this,
-        data: {...context.$$$locals}
-      });
-    }
-
-    this.children.forEach((c) => c.hydrate(context));
-    return {
-      context
-    };
   }
 
   addChild(node: HTMLNode) {
@@ -157,7 +153,7 @@ export class HTMLNode {
     attributes: Record<string, string>,
     children: HTMLNode[] = [],
     content: string = "",
-    parent: HTMLNode | null = null,
+    parent: HTMLNode | null = null
   ) {
     this.tagName = tagName;
     this.attributes = attributes;
@@ -312,7 +308,7 @@ export class HTMLNode {
    * @returns {HTMLNodeInterface[]}
    */
   static create(input: string) {
-    const cssSyntaxReplaced = encodePropertySyntax(input)
+    const cssSyntaxReplaced = encodePropertySyntax(input);
     const tokens = HTMLNode.tokenize(cssSyntaxReplaced);
     const refs: Map<string, string> = new Map();
     const nodes = [];
@@ -357,7 +353,6 @@ export class HTMLNode {
           if (Object.keys(currentNode.attributes).length === 0) {
             currentNode.attributes = currentAttributes;
           }
-
 
           if (!currentNode.content) {
             currentNode.content = currentContent;
@@ -462,7 +457,10 @@ export class HTMLNode {
             }
           }
 
-          if (AdvectSettings.tags.selfClosing.has(tagName.toLowerCase()) && input[j] === ">") {
+          if (
+            AdvectSettings.tags.selfClosing.has(tagName.toLowerCase()) &&
+            input[j] === ">"
+          ) {
             tokens.push({ type: TokenType.SELF_CLOSING_TAG, value: tagName });
           }
 
@@ -489,9 +487,8 @@ export class HTMLNode {
       { ...this.attributes },
       this.children.map((c) => c.clone()),
       this.content,
-      this.parent,
+      this.parent
     );
     return newNode;
   }
 }
-

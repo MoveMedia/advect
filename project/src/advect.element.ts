@@ -6,7 +6,6 @@ import {
   getScriptVars,
   type AdvectContext,
   type AdvectVM,
-  type HydratedRef,
 } from "./lib";
 import {
   root,
@@ -165,13 +164,16 @@ export class AdvectElement extends HTMLElement {
         if (!this.isConnected) return null;
         if (this.$settings.watched[name as string]) {
           const type = AttrTypes[this.$settings.watched[name as string].type];
-          const hasAttr = this.hasAttribute(name as string)
-          if (this.hasAttribute(name as string)){
+          const hasAttr = this.hasAttribute(name as string);
+          if (this.hasAttribute(name as string)) {
             // @ts-ignore
             return type?.parse(this.getAttribute(name as string) ?? "") ?? null;
-          }else{
+          } else {
             // @ts-ignore
-            return type?.parse(this.$settings.watched[name as string].defaultValue ?? "") ?? null;
+            return (type?.parse(
+                this.$settings.watched[name as string].defaultValue ?? ""
+              ) ?? null
+            );
           }
         }
         return this.getAttribute(name as string);
@@ -182,7 +184,7 @@ export class AdvectElement extends HTMLElement {
           if (this.$settings.watched[name as string]) {
             const type = AttrTypes[this.$settings.watched[name as string].type];
             // @ts-ignore
-            newValue =type?.store(this.getAttribute(name as string) ?? "") ?? null;
+            newValue = type?.store(this.getAttribute(name as string) ?? "") ?? null;
           }
           this.setAttribute(name as string, newValue);
           this.anyAttrChanged?.call(
@@ -264,48 +266,51 @@ export class AdvectElement extends HTMLElement {
   render() {
     if (!this.isConnected || !this.$domRoot) return;
     const context = createAdvectContext(this);
-    
-    const rendered = this.$settings.layoutNodes
-      .map((ln) => {
-        ln.hydrate(context);
-        return ln.html();
-      })
-      .join("\n");
 
-    this.$domRoot.innerHTML = rendered;
-    requestAnimationFrame(() => this.hook(context));
+    // try {
+      this.$domRoot.innerHTML = this.$settings.layoutNodes
+        .map((ln) => {
+          ln.hydrate(context);
+          return ln.html();
+        })
+        .join("\n");
+      requestAnimationFrame(() => this.hook(context));
+    // } catch (e) {
+    //   console.error(e);
+    // }
   }
-  hook(hydratedContext: AdvectContext) {
+  hook(context: AdvectContext) {
     const refEls = [
       // @ts-ignore
       ...this.querySelectorAll("[ref]"),
       // @ts-ignore
-      ...(this.shadowRoot?.querySelectorAll("[ref]") || [] ),
+      ...(this.shadowRoot?.querySelectorAll("[ref]") || []),
     ];
     refEls.forEach((refEl) => {
       const refId = refEl.getAttribute("ref");
       if (!refId) return;
-      const hydratedRef = hydratedContext.$$$refs.get(refId)
-      if (!hydratedRef) return;
-      const {ref:refNode, data} =  hydratedRef;
-      const preScript = getScriptVars(data);
+      const refNode = context.refs.get(refId);
+      if (!refNode) return;
+      const finalObj = { ...context, ...refNode.locals };
+      const preScript = getScriptVars(finalObj);
+      console.log(finalObj, preScript)
 
       const event_attrs = refEl
         .getAttributeNames()
-        .filter((name:string) => AdvectSettings.events.indexOf(name) != -1);
+        .filter((name: string) => AdvectSettings.events.indexOf(name) != -1);
       // todo maybe make this a setting, I could see this causing unnecessary rendering
 
-      event_attrs.forEach((name:string) => {
+      event_attrs.forEach((name: string) => {
         const attr_val = refEl.getAttribute(name) ?? "";
         try {
           // @ts-expect-error assigning event handlers by name nothing to see here
           refEl[name] = (_event) => {
-            new AsyncFunction("context","$self", "$event", "$this", `${preScript} ${attr_val}`)(
-              data,
-              this,
-              _event,
-              refEl,
-            );
+            new AsyncFunction(
+              "context",
+              "$event",
+              "$this",
+              `${preScript} ${attr_val}`
+            )(finalObj, _event, refEl);
           };
         } catch (e) {
           console.error(e, attr_val, this);
