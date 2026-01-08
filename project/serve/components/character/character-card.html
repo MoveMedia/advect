@@ -13,8 +13,8 @@
   <layout>
     <div class="char-card">
       <figure class="headshot">
-        <img ref="image" src="{$attr.image}" alt="image" width="200px" height="200px" />
-        <figcaption ref="name">{{$attr.name}}</figcaption>
+        <img ref="image" src="" alt="image" width="200px" height="200px" />
+        <figcaption ref="name"></figcaption>
       </figure>
     </div>
   </layout>
@@ -62,10 +62,15 @@
     }
   </style>
   <script type="module">
-    export default function ({ $element }) {
+    export default function ({ $element, $refs }) {
       return {
         onWatchedAttrChanged: (name, newVal, oldVal) =>{
-          console.log(name, newVal, oldVal)
+          if ( name == 'name'){
+            $refs.name.textContent = newVal;
+          }
+          if ( name == 'image'){
+            $refs.image.src = newVal; 
+          }
         }
       }
     }

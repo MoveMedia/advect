@@ -82,7 +82,7 @@
     }
   </style>
   <script type="module">
-    export default function ({ $state }) {
+    export default function ({ $state, $refs }) {
       const defaultData = { name: "", age: "", height: "", image: ""};
       
       $state.selectedData = defaultData;
@@ -90,19 +90,19 @@
       $state.intro = 'Hello'
       $state.data = [
         {
-          image: "https://picsum.photos/200/300?1",
+          image: "https://picsum.photos/id/1/200/300",
           name: "John",
           age: 22,
           height: "172",
         },
         {
-          image: "https://picsum.photos/200/300?2",
+          image: "https://picsum.photos/id/2/200/300",
           name: "Carl",
           age: 22,
           height: "142",
         },
         {
-          image: "https://picsum.photos/200/300?3",
+          image: "https://picsum.photos/id/3/200/300",
           name: "Laura",
           age: 22,
           height: "152",
@@ -110,10 +110,11 @@
       ];
       $state.select = (character, row) => {
         $state.selectedRow = row;
-        console.log(character)
+        console.log(character, row)
+        const characterCard = $refs.characterCard;
+        characterCard.setAttribute("name", character.name)
+        characterCard.setAttribute("image", character.image)
       };
-
-
     }
   </script>
 </template>

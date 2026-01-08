@@ -75,6 +75,10 @@ export class AdvectElement extends HTMLElement {
     return this.constructor.$settings as CustomElementSettings;
   }
   #shadow!: ShadowRoot;
+  get $shadow() {
+    return this.#shadow;
+  }
+
   get $domRoot(): HTMLElement | ShadowRoot {
     const root = this.$settings.root === "shadow" ? this.#shadow : this;
     return root;
@@ -134,10 +138,8 @@ export class AdvectElement extends HTMLElement {
     {
       get: (_, key) => {
         const ref =
-          this.querySelector(`[ref="${key as string}"]`) ||
-          this?.shadowRoot?.querySelector(`[ref="${key as string}"]`);
-        if (ref) return ref;
-        return null;
+          this.$domRoot.querySelector(`[ref="${key as string}"]`)
+        return ref;
       },
     }
   );
@@ -161,38 +163,35 @@ export class AdvectElement extends HTMLElement {
     {},
     {
       get: (_, name) => {
-        if (!this.isConnected) return null;
-        if (this.$settings.watched[name as string]) {
-          const type = AttrTypes[this.$settings.watched[name as string].type];
-          const hasAttr = this.hasAttribute(name as string);
-          if (this.hasAttribute(name as string)) {
-            // @ts-ignore
-            return type?.parse(this.getAttribute(name as string) ?? "") ?? null;
-          } else {
-            // @ts-ignore
-            return (type?.parse(
-                this.$settings.watched[name as string].defaultValue ?? ""
-              ) ?? null
-            );
-          }
-        }
+        // if (!this.isConnected) return null;
+        // if (this.$settings.watched[name as string]) {
+        //   const type = AttrTypes[this.$settings.watched[name as string].type];
+        //   const hasAttr = this.hasAttribute(name as string);
+        //   if (this.hasAttribute(name as string)) {
+        //     // @ts-ignore
+        //     return type?.parse(this.getAttribute(name as string) ?? "") ?? null;
+        //   } else {
+        //     // @ts-ignore
+        //     return (type?.parse(
+        //         this.$settings.watched[name as string].defaultValue ?? ""
+        //       ) ?? null
+        //     );
+        //   }
+        // }
         return this.getAttribute(name as string);
       },
       set: (_, name, value) => {
         let newValue = value;
+        let oldValue = this.getAttribute(name as string);
         if (this.isConnected) {
           if (this.$settings.watched[name as string]) {
             const type = AttrTypes[this.$settings.watched[name as string].type];
             // @ts-ignore
-            newValue = type?.store(this.getAttribute(name as string) ?? "") ?? null;
+            newValue =type?.store(this.getAttribute(name as string) ?? "") ?? null;
           }
           this.setAttribute(name as string, newValue);
-          this.anyAttrChanged?.call(
-            this,
-            name as string,
-            newValue,
-            this.getAttribute(name as string) ?? ""
-          );
+            this.anyAttrChanged?.call(this, name as string, newValue, oldValue);
+
           return true;
         }
         return false;
@@ -209,7 +208,7 @@ export class AdvectElement extends HTMLElement {
       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
         $state: this.$state,
         state: this.state,
-        $el: this,
+        $element: this,
         $refs: this.$refs,
         $attr: this.$attr,
         $internals: this.#internals,
@@ -230,7 +229,7 @@ export class AdvectElement extends HTMLElement {
   }
 
   anyAttrChanged:
-    | ((name: string, value: string, oldValue: string) => void)
+    | ((name: string, value: string | null, oldValue: string | null) => void)
     | null = null;
 
   connectedCallback() {
@@ -267,14 +266,17 @@ export class AdvectElement extends HTMLElement {
     if (!this.isConnected || !this.$domRoot) return;
     const context = createAdvectContext(this);
 
-    // try {
+    requestAnimationFrame(() => {
+      // try {
       this.$domRoot.innerHTML = this.$settings.layoutNodes
         .map((ln) => {
           ln.hydrate(context);
           return ln.html();
         })
         .join("\n");
-      requestAnimationFrame(() => this.hook(context));
+    });
+
+    requestAnimationFrame(() => this.hook(context));
     // } catch (e) {
     //   console.error(e);
     // }
@@ -293,7 +295,6 @@ export class AdvectElement extends HTMLElement {
       if (!refNode) return;
       const finalObj = { ...context, ...refNode.locals };
       const preScript = getScriptVars(finalObj);
-      console.log(finalObj, preScript)
 
       const event_attrs = refEl
         .getAttributeNames()

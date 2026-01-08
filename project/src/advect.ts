@@ -212,7 +212,6 @@ const createAdvect = async () => {
    * @returns
    */
   const load = async (urls: string | string[], forceReload = false) => {
-    //  console.log('loading', urls)
     const buildMsg = (await messagePromise("load", { urls })) as MessageEvent<{
       result: CustomElementSettings[];
       id: string;
