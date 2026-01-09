@@ -1,5 +1,4 @@
-
-<template advect="character-card" root="shadow">
+<template advect="character-card" root="shadow" shadow="open">
   <datalist>
     <option
       value="https://picsum.photos/200/200"
@@ -13,8 +12,14 @@
   <layout>
     <div class="char-card">
       <figure class="headshot">
-        <img ref="image" src="" alt="image" width="200px" height="200px" />
-        <figcaption ref="name"></figcaption>
+        <img
+          src="{ $attr.image }"
+          alt="image"
+          width="200px"
+          height="200px"
+          ref="image"
+        />
+        <figcaption ref="name">{{ $attr.name }}</figcaption>
       </figure>
     </div>
   </layout>
@@ -62,17 +67,26 @@
     }
   </style>
   <script type="module">
-    export default function ({ $element, $refs }) {
+    export default function ({ $element, $refs, $state, state }) {
       return {
-        onWatchedAttrChanged: (name, newVal, oldVal) =>{
-          if ( name == 'name'){
-            $refs.name.textContent = newVal;
-          }
-          if ( name == 'image'){
-            $refs.image.src = newVal; 
-          }
-        }
-      }
+        onConnect: async () => {},
+        // onWatchedAttrChanged: async (attrName, newValue, oldValue) => {
+        //   if (attrName === "image") {
+        //     $refs.image.then((img) => {
+        //       if (img) {
+        //         img.src = newValue;
+        //       }
+        //     });
+        //   }
+        //   if (attrName === "name") {
+        //     $refs.name.then((name) => {
+        //       if (name) {
+        //         name.innerText = newValue;
+        //       }
+        //     });
+        //   }
+        // },
+      };
     }
   </script>
 </template>

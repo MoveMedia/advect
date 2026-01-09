@@ -1,14 +1,11 @@
 <template advect="character-db" root="shadow" shadow="open">
-<script
-  rel="/components/character/character-card.html"
-  type="application/html"
-></script>
+
   <layout>
     <div class="character-db-container">
-      <h2>{{ $state.intro }}</h2>
+      <h2 ref="intro" onclick="console.log(context)">{{ $state.intro }}</h2>
       <div class="root">
         <div class="details-panel">
-          <character-card ref="characterCard"></character-card>
+          <character-card name="{$state.selectedData.name}" image="{$state.selectedData.image}" ref="characterCard"></character-card>
         </div>
         <div class="data-selection">
           <table class="table is-fullwidth">
@@ -108,13 +105,19 @@
           height: "152",
         },
       ];
-      $state.select = (character, row) => {
-        $state.selectedRow = row;
-        console.log(character, row)
-        const characterCard = $refs.characterCard;
-        characterCard.setAttribute("name", character.name)
-        characterCard.setAttribute("image", character.image)
+      $state.select = async (character, row) => {
+        console.log('selected', character)
+        //$state.selectedRow = row;
+        const characterCard = await $refs.characterCard;
+        characterCard.$attr.image = character.image
+        characterCard.$attr.name = character.name
+        console.log(characterCard.$vm)
       };
+      return {
+        onConnect() {
+         $state.select(defaultData,null)
+        }
+      }
     }
   </script>
 </template>

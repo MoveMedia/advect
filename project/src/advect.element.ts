@@ -137,24 +137,8 @@ export class AdvectElement extends HTMLElement {
     {},
     {
       get: (_, key) => {
-        const ref =
-          this.$domRoot.querySelector(`[ref="${key as string}"]`)
-        return ref;
-      },
-    }
-  );
-  /**
-   * Refs of custom web elements returns a promise to the ref
-   */
-  fuzzyRefs = new Proxy(
-    {},
-    {
-      get: (_, key) => {
-        const ref =
-          this.querySelector(`[ref="${key as string}"]`) ||
-          this?.shadowRoot?.querySelector(`[ref="${key as string}"]`);
-        if (ref) return refHandle(ref as HTMLElement);
-        return null;
+        const ref = this.$domRoot.querySelector(`[ref="${key as string}"]`);
+        return refHandle(ref as HTMLElement);
       },
     }
   );
@@ -183,18 +167,18 @@ export class AdvectElement extends HTMLElement {
       set: (_, name, value) => {
         let newValue = value;
         let oldValue = this.getAttribute(name as string);
-        if (this.isConnected) {
-          if (this.$settings.watched[name as string]) {
-            const type = AttrTypes[this.$settings.watched[name as string].type];
-            // @ts-ignore
-            newValue =type?.store(this.getAttribute(name as string) ?? "") ?? null;
-          }
-          this.setAttribute(name as string, newValue);
-            this.anyAttrChanged?.call(this, name as string, newValue, oldValue);
+        // if (this.isConnected) {
+        //if (this.$settings.watched[name as string]) {
+        //  const type = AttrTypes[this.$settings.watched[name as string].type];
+        // @ts-ignore
+        //  newValue =type?.store(this.getAttribute(name as string) ?? "") ?? null;
+        //}
+        this.setAttribute(name as string, newValue);
+        this.anyAttrChanged?.call(this, name as string, newValue, oldValue);
 
-          return true;
-        }
-        return false;
+        return true;
+        // }
+        // return false;
       },
     }
   );
@@ -226,6 +210,7 @@ export class AdvectElement extends HTMLElement {
     });
 
     this.render.bind(this);
+    this.hook.bind(this);
   }
 
   anyAttrChanged:
@@ -236,50 +221,70 @@ export class AdvectElement extends HTMLElement {
     if (this.$settings.root == "shadow") {
       this.#shadow = this.attachShadow({ mode: this.$settings.shadow });
       this.#shadow.adoptedStyleSheets = [this.$stylesheet];
-      this.render();
     } else {
       if (document.adoptedStyleSheets.indexOf(this.$stylesheet) == -1) {
         document.adoptedStyleSheets.push(this.$stylesheet);
       }
     }
-    this?.$vm?.onConnect?.call(this);
+    requestAnimationFrame(() => {
+      try {
+        this?.$vm?.onConnect?.call(this);
+        this.render();
+
+      } catch (e) {
+        console.warn(e);
+      }
+    });
   }
 
   connectedMoveCallback() {
-    this.$vm?.onMove?.call(this);
+    try{
+      this.$vm?.onMove?.call(this); 
+    }catch(e){
+        console.warn(e);
+    }
   }
 
   disconnectedCallback() {
     this.#reactiveDispose();
-    this?.$vm?.onDisconnect?.call(this);
+     try{
+       this?.$vm?.onDisconnect?.call(this);
+    }catch(e){
+        console.warn(e);
+    }
   }
 
   adoptedCallback() {
-    this.$vm?.onAdopt?.call(this);
+     try{
+      this.$vm?.onAdopt?.call(this);
+    }catch(e){
+        console.warn(e);
+    }
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    this.$vm?.onWatchedAttrChanged?.call(this, name, newValue, oldValue);
+    requestAnimationFrame(() => {
+      this.$vm?.onWatchedAttrChanged?.call(this, name, newValue, oldValue);
+    });
   }
 
   render() {
-    if (!this.isConnected || !this.$domRoot) return;
-    const context = createAdvectContext(this);
-
     requestAnimationFrame(() => {
-      // try {
-      this.$domRoot.innerHTML = this.$settings.layoutNodes
+      const context = createAdvectContext(this);
+      const markup = this.$settings.layoutNodes
+        // try {
         .map((ln) => {
           ln.hydrate(context);
           return ln.html();
         })
         .join("\n");
-    });
+      this.$domRoot.innerHTML = markup;
 
-    requestAnimationFrame(() => this.hook(context));
-    // } catch (e) {
-    //   console.error(e);
-    // }
+      requestAnimationFrame(() => this.hook(context));
+      // } catch (e) {
+      //   console.error(e);
+      // }
+    });
   }
   hook(context: AdvectContext) {
     const refEls = [
@@ -288,12 +293,10 @@ export class AdvectElement extends HTMLElement {
       // @ts-ignore
       ...(this.shadowRoot?.querySelectorAll("[ref]") || []),
     ];
-    refEls.forEach((refEl) => {
+    for (let refEl of refEls) {
       const refId = refEl.getAttribute("ref");
-      if (!refId) return;
       const refNode = context.refs.get(refId);
-      if (!refNode) return;
-      const finalObj = { ...context, ...refNode.locals };
+      const finalObj = { ...context, ...(refNode?.locals ?? {}) };
       const preScript = getScriptVars(finalObj);
 
       const event_attrs = refEl
@@ -303,19 +306,15 @@ export class AdvectElement extends HTMLElement {
 
       event_attrs.forEach((name: string) => {
         const attr_val = refEl.getAttribute(name) ?? "";
-        try {
-          // @ts-expect-error assigning event handlers by name nothing to see here
-          refEl[name] = (_event) => {
-            new AsyncFunction(
-              "context",
-              "$event",
-              "$this",
-              `${preScript} ${attr_val}`
-            )(finalObj, _event, refEl);
-          };
-        } catch (e) {
-          console.error(e, attr_val, this);
-        }
+        // @ts-expect-error assigning event handlers by name nothing to see here
+        refEl[name] = (_event) => {
+          new AsyncFunction(
+            "context",
+            "$event",
+            "$this",
+            `${preScript} ${attr_val}`
+          )(finalObj, _event, refEl);
+        };
       });
       if (
         refEl.matches("[onload]") &&
@@ -329,6 +328,6 @@ export class AdvectElement extends HTMLElement {
           })
         );
       }
-    });
+    }
   }
 }

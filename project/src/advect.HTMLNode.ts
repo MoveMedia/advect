@@ -46,14 +46,13 @@ export class HTMLNode {
   // Changes from og
   hydrateContent(context: AdvectContext) {
     const contextScript = getScriptVars(context, "context");
-    const localsScript = ''// getScriptVars(this.locals, "ref.locals");
     Object.keys(this.attributes)
       .filter((k) => !Object.hasOwn(AdvectSettings.attributes.directives, k))
       .forEach((k) => {
         const v = `${this.attributes[k]}`.trim();
         if (v.startsWith("{") && v.endsWith("}")) {
           const attrScript = v.substring(1, v.length - 1);
-          const finalScript = `${contextScript}\n${localsScript}return ${attrScript}`;
+          const finalScript = `${contextScript}\nreturn ${attrScript}`;
           const res = new Function("context", "ref", finalScript)(
             context,
             this
@@ -64,7 +63,7 @@ export class HTMLNode {
     const exp = this.content.matchAll(/\{\{(.*?)\}\}/g);
     exp.forEach((v) => {
       const contentScript = v[1].trim();
-      const finalScript = `${contextScript}\n${localsScript}return ${contentScript}`;
+      const finalScript = `${contextScript}\nreturn ${contentScript}`;
       const res = new Function("context", "ref", finalScript)(context, this);
       this.content = this.content.replace(v[0], res);
     });
@@ -138,8 +137,8 @@ for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
         if (refId.length == 0 || !refId) refId = crypto.randomUUID();
         context.refs.set(refId, this);
       }
-      this.children.forEach((c) => c.hydrate(context));
     }
+    this.children.forEach((c) => c.hydrate(context));
   }
 
   addChild(node: HTMLNode) {

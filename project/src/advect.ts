@@ -211,12 +211,13 @@ const createAdvect = async () => {
    * @param urls
    * @returns
    */
-  const load = async (urls: string | string[], forceReload = false) => {
+  const load = async (urls: string | string[]) => {
     const buildMsg = (await messagePromise("load", { urls })) as MessageEvent<{
       result: CustomElementSettings[];
       id: string;
       action: ActionKey;
     }>;
+    
     const buildSettings = buildMsg.data.result;
     addLoaded(urls);
     return createCustomElementClasses(buildSettings);
@@ -237,18 +238,10 @@ const createAdvect = async () => {
     for (let settings of buildSettings) {
       // for some reason ts thinks settings is used before being declared so let's add a pointer
       const $settings = settings;
-
-      $settings.loads.forEach( l => {
-        if (!isLoaded(l)) load(l);
-      })
-
       if (customElements.get($settings.tagName)) {
         console.warn(`Already registered ${$settings.tagName}`);
         continue;
       }
-
-      load($settings.loads, false);
-
       toModule(settings.module, []).then((module: any) => {
         // TODO fix change to module default
         //const moduleClass = module[moduleClassName];

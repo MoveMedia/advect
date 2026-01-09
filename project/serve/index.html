@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <script src="../src/advect.ts" type="module"></script>
-    <script rel="/components/character/character-db.html" type="application/html"></script>
-    <script rel="/components/character/character-card.html" type="application/html"></script>
 
-    <!-- <script rel="/components/my-component.html" type="application/html"></script> -->
-  </head>
-  <body>
-   <character-db></character-db>
-   <!-- <my-component></my-component> -->
-   <style>
-      :root{
-        --fg-root: white;
-        --bg-root: #222;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-      body{
-        background-color: var(--bg-root);
-        color: var(--fg-root);
-      }
-      .content-section {
-        background-color: hsl(from var(--bg-root) h s calc(l + 2));
-        padding: 2em;
-      }
-   </style>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <script src="../src/advect.ts" type="module"></script>
+  <script rel="/components/character/character-db.html" type="application/html"></script>
+  <script rel="/components/character/character-card.html" type="application/html"></script>
+</head>
+
+<body>
+
+  <character-db></character-db>
+  <!-- <my-component></my-component> -->
+  <style>
+    :root {
+      --fg-root: white;
+      --bg-root: #222;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-root);
+      color: var(--fg-root);
+    }
+
+    .content-section {
+      background-color: hsl(from var(--bg-root) h s calc(l + 2));
+      padding: 2em;
+    }
+  </style>
+</body>
+
 </html>
