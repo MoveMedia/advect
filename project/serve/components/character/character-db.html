@@ -1,11 +1,11 @@
-<template advect="character-db" root="shadow" shadow="open">
+<template advect="character-db" root="light">
 
   <layout>
     <div class="character-db-container">
-      <h2 ref="intro" onclick="console.log(context)">{{ $state.intro }}</h2>
+      <h2 ref="intro">{{ $state.intro }}</h2>
       <div class="root">
         <div class="details-panel">
-          <character-card name="{$state.selectedData.name}" image="{$state.selectedData.image}" ref="characterCard"></character-card>
+          <character-card  ref="characterCard"></character-card>
         </div>
         <div class="data-selection">
           <table class="table is-fullwidth">
@@ -106,12 +106,10 @@
         },
       ];
       $state.select = async (character, row) => {
-        console.log('selected', character)
         //$state.selectedRow = row;
         const characterCard = await $refs.characterCard;
-        characterCard.$attr.image = character.image
-        characterCard.$attr.name = character.name
-        console.log(characterCard.$vm)
+        $state.selectedData = character;  
+        characterCard.$vm.setCharacter(character)
       };
       return {
         onConnect() {

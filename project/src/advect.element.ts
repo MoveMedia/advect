@@ -27,7 +27,7 @@ import type { HTMLNode } from "./advect.HTMLNode";
 // so lets wrap all of them
 export function refHandle(el: HTMLElement): Promise<HTMLElement | null> {
   return new Promise((resolve, reject) => {
-    if (!el.isConnected) {
+    if (!el || !el.isConnected) {
       resolve(null);
       return;
     }
@@ -106,11 +106,10 @@ export class AdvectElement extends HTMLElement {
         if (this.#state.has(p)) {
           const _signal = this.#state.get(p);
           _signal?.set(newValue);
-          return true;
         } else {
-          this.#state.set(p, signal(newValue));
-          return true;
+         this.#state.set(p, signal(newValue));
         }
+        return true
       },
     }
   );
@@ -186,8 +185,10 @@ export class AdvectElement extends HTMLElement {
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    root((dispose) => {
-      this.#reactiveDispose = dispose;
+
+    this.render.bind(this);
+    this.hook.bind(this);
+    //  this.#reactiveDispose = dispose;
       // @ts-ignore also a little sussy
       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
         $state: this.$state,
@@ -196,7 +197,7 @@ export class AdvectElement extends HTMLElement {
         $refs: this.$refs,
         $attr: this.$attr,
         $internals: this.#internals,
-        $dispose: dispose,
+     //   $dispose: dispose,
         $computed: computed,
         $getContext: getContext,
         $tick: tick,
@@ -207,10 +208,6 @@ export class AdvectElement extends HTMLElement {
       effect(() => {
         this.render();
       });
-    });
-
-    this.render.bind(this);
-    this.hook.bind(this);
   }
 
   anyAttrChanged:
@@ -230,7 +227,6 @@ export class AdvectElement extends HTMLElement {
       try {
         this?.$vm?.onConnect?.call(this);
         this.render();
-
       } catch (e) {
         console.warn(e);
       }
@@ -238,27 +234,27 @@ export class AdvectElement extends HTMLElement {
   }
 
   connectedMoveCallback() {
-    try{
-      this.$vm?.onMove?.call(this); 
-    }catch(e){
-        console.warn(e);
+    try {
+      this.$vm?.onMove?.call(this);
+    } catch (e) {
+      console.warn(e);
     }
   }
 
   disconnectedCallback() {
-    this.#reactiveDispose();
-     try{
-       this?.$vm?.onDisconnect?.call(this);
-    }catch(e){
-        console.warn(e);
+    //this.#reactiveDispose();
+    try {
+      this?.$vm?.onDisconnect?.call(this);
+    } catch (e) {
+      console.warn(e);
     }
   }
 
   adoptedCallback() {
-     try{
+    try {
       this.$vm?.onAdopt?.call(this);
-    }catch(e){
-        console.warn(e);
+    } catch (e) {
+      console.warn(e);
     }
   }
 
@@ -269,22 +265,27 @@ export class AdvectElement extends HTMLElement {
   }
 
   render() {
-    requestAnimationFrame(() => {
-      const context = createAdvectContext(this);
-      const markup = this.$settings.layoutNodes
-        // try {
-        .map((ln) => {
-          ln.hydrate(context);
-          return ln.html();
-        })
-        .join("\n");
-      this.$domRoot.innerHTML = markup;
+    if (!this.isConnected) return;
+    const context = createAdvectContext(this);
 
-      requestAnimationFrame(() => this.hook(context));
-      // } catch (e) {
-      //   console.error(e);
-      // }
+    const markup = this.$settings.layoutNodes
+      // try {
+      .map((ln) => {
+        ln.hydrate(context);
+        return ln.html();
+      })
+      .join("\n");
+
+    requestAnimationFrame(() => {
+      this.$domRoot.innerHTML = markup;
+      //  if (this.tagName == 'CHARACTER-CARD') console.log(this.tagName, "rendering", markup);
+
+      this.hook(context);
     });
+
+    // } catch (e) {
+    //   console.error(e);
+    // }
   }
   hook(context: AdvectContext) {
     const refEls = [
@@ -292,12 +293,13 @@ export class AdvectElement extends HTMLElement {
       ...this.querySelectorAll("[ref]"),
       // @ts-ignore
       ...(this.shadowRoot?.querySelectorAll("[ref]") || []),
-    ];
+    ] as HTMLElement[];
     for (let refEl of refEls) {
-      const refId = refEl.getAttribute("ref");
+      const refId = refEl.getAttribute("ref") as string;
       const refNode = context.refs.get(refId);
+      if (!refNode) continue;
       const finalObj = { ...context, ...(refNode?.locals ?? {}) };
-      const preScript = getScriptVars(finalObj);
+      const contextScript = getScriptVars(finalObj);
 
       const event_attrs = refEl
         .getAttributeNames()
@@ -312,10 +314,45 @@ export class AdvectElement extends HTMLElement {
             "context",
             "$event",
             "$this",
-            `${preScript} ${attr_val}`
+            `${contextScript} ${attr_val}`
           )(finalObj, _event, refEl);
         };
       });
+         const exp = refEl.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
+      exp.forEach((v) => {
+        const contentScript = v[1].trim();
+        const finalScript = `${contextScript}\nreturn ${contentScript}`;
+        const res = new Function("context", "ref", finalScript)(
+          finalObj,
+          refNode
+        );
+        refEl.innerHTML = refEl.innerHTML.replace(v[0], res);
+      });
+      Object.keys(refNode.attributes)
+        .filter(
+          (k: string) => !Object.hasOwn(AdvectSettings.attributes.directives, k)
+        )
+        .filter((name: string) => AdvectSettings.events.indexOf(name) == -1)
+        .forEach((k: string) => {
+          const v = `${refNode.attributes[k]}`.trim();
+          if (v.startsWith("{") && v.endsWith("}")) {
+            const attrScript = v.substring(1, v.length - 1);
+            const finalScript = `${contextScript}\nreturn ${attrScript}`;
+            const res = new Function("context", "ref", finalScript)(
+              finalObj,
+              refNode
+            );
+            if (this.tagName == "CHARACTER-CARD") {
+              console.log({ k, v, res, finalScript, refEl });
+            }
+            setTimeout(() => {
+              refEl.setAttribute(k, res);
+              
+            }, 200);
+          }
+        });
+   
+
       if (
         refEl.matches("[onload]") &&
         !AdvectSettings.tags.onloadElements.find(

@@ -46,20 +46,7 @@ export class HTMLNode {
   // Changes from og
   hydrateContent(context: AdvectContext) {
     const contextScript = getScriptVars(context, "context");
-    Object.keys(this.attributes)
-      .filter((k) => !Object.hasOwn(AdvectSettings.attributes.directives, k))
-      .forEach((k) => {
-        const v = `${this.attributes[k]}`.trim();
-        if (v.startsWith("{") && v.endsWith("}")) {
-          const attrScript = v.substring(1, v.length - 1);
-          const finalScript = `${contextScript}\nreturn ${attrScript}`;
-          const res = new Function("context", "ref", finalScript)(
-            context,
-            this
-          );
-          this.attributes[k] = res;
-        }
-      });
+ 
     const exp = this.content.matchAll(/\{\{(.*?)\}\}/g);
     exp.forEach((v) => {
       const contentScript = v[1].trim();
@@ -131,7 +118,7 @@ for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
     }
 
     if (!this.isRemoved) {
-      this.hydrateContent(context);
+     // this.hydrateContent(context);
       if (this.attributes["ref"]) {
         let refId = this.attributes["ref"];
         if (refId.length == 0 || !refId) refId = crypto.randomUUID();

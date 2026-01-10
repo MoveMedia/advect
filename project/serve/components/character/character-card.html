@@ -1,4 +1,4 @@
-<template advect="character-card" root="shadow" shadow="open">
+<template advect="character-card" root="light">
   <datalist>
     <option
       value="https://picsum.photos/200/200"
@@ -10,16 +10,16 @@
     <option name="height" type="string" value=""></option>
   </datalist>
   <layout>
-    <div class="char-card">
+    <div class="char-card" ref="card">
       <figure class="headshot">
         <img
-          src="{ $attr.image }"
+          src="{$state?.character?.image}"
           alt="image"
           width="200px"
           height="200px"
           ref="image"
         />
-        <figcaption ref="name">{{ $attr.name }}</figcaption>
+        <figcaption ref="name">{{ $state?.character?.name ?? 'NO Data Selected' }}</figcaption>
       </figure>
     </div>
   </layout>
@@ -30,6 +30,7 @@
     }
 
     .char-card {
+      min-height: 300px;
       border: 2px solid white;
       border-radius: 1em;
       width: fit-content;
@@ -67,9 +68,24 @@
     }
   </style>
   <script type="module">
-    export default function ({ $element, $refs, $state, state }) {
+    export default function ({ $element, $refs, $state, state, $tick }) {
+     
       return {
         onConnect: async () => {},
+        setCharacter(character){
+          $state.character = character
+          $element.render();
+          // $refs.image.then((img) => {
+          //   if (img) {
+          //     img.src = character.image;
+          //   }
+          // });
+          // $refs.name.then((name) => {
+          //   if (name) {
+          //     name.innerText = character.name;
+          //   }
+          // });
+        }
         // onWatchedAttrChanged: async (attrName, newValue, oldValue) => {
         //   if (attrName === "image") {
         //     $refs.image.then((img) => {
