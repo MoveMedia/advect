@@ -10,10 +10,10 @@
     <option name="height" type="string" value=""></option>
   </datalist>
   <layout>
-    <div class="char-card" ref="card">
+    <div class="char-card" ref="card" name="{state?.character?.image}">
       <figure class="headshot">
         <img
-          src="{$state?.character?.image}"
+          src="{state?.character?.image}"
           alt="image"
           width="200px"
           height="200px"
@@ -74,34 +74,13 @@
         onConnect: async () => {},
         setCharacter(character){
           $state.character = character
-          $element.render();
-          // $refs.image.then((img) => {
-          //   if (img) {
-          //     img.src = character.image;
-          //   }
-          // });
-          // $refs.name.then((name) => {
-          //   if (name) {
-          //     name.innerText = character.name;
-          //   }
-          // });
+        $refs.image.then((img) => {
+          if (img) {
+            img.src = character.image;
+          }
+        });
+    
         }
-        // onWatchedAttrChanged: async (attrName, newValue, oldValue) => {
-        //   if (attrName === "image") {
-        //     $refs.image.then((img) => {
-        //       if (img) {
-        //         img.src = newValue;
-        //       }
-        //     });
-        //   }
-        //   if (attrName === "name") {
-        //     $refs.name.then((name) => {
-        //       if (name) {
-        //         name.innerText = newValue;
-        //       }
-        //     });
-        //   }
-        // },
       };
     }
   </script>

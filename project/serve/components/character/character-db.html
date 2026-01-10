@@ -2,7 +2,7 @@
 
   <layout>
     <div class="character-db-container">
-      <h2 ref="intro">{{ $state.intro }}</h2>
+      <input ref="dbNameInput" type="text" value="{state.dbName}">
       <div class="root">
         <div class="details-panel">
           <character-card  ref="characterCard"></character-card>
@@ -79,13 +79,14 @@
     }
   </style>
   <script type="module">
-    export default function ({ $state, $refs }) {
+    export default function ({ $state, $refs, state}) {
       const defaultData = { name: "", age: "", height: "", image: ""};
-      
-      $state.selectedData = defaultData;
-      $state.selectedRow = null;
-      $state.intro = 'Hello'
-      $state.data = [
+
+      state.dbName = 'Character Database';
+
+      state.selectedData = defaultData;
+      state.selectedRow = null;
+      state.data = [
         {
           image: "https://picsum.photos/id/1/200/300",
           name: "John",
@@ -105,16 +106,13 @@
           height: "152",
         },
       ];
-      $state.select = async (character, row) => {
+      state.select = async (character, row) => {
         //$state.selectedRow = row;
         const characterCard = await $refs.characterCard;
-        $state.selectedData = character;  
         characterCard.$vm.setCharacter(character)
       };
       return {
-        onConnect() {
-         $state.select(defaultData,null)
-        }
+     
       }
     }
   </script>

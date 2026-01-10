@@ -7,18 +7,7 @@ import {
   type AdvectContext,
   type AdvectVM,
 } from "./lib";
-import {
-  root,
-  signal,
-  computed,
-  effect,
-  tick,
-  getScope,
-  type Dispose,
-  getContext,
-  type Scope,
-  type WriteSignal,
-} from "@maverick-js/signals";
+
 import { type CustomElementSettings } from "./lib";
 import type { HTMLNode } from "./advect.HTMLNode";
 
@@ -85,31 +74,38 @@ export class AdvectElement extends HTMLElement {
   }
 
   //#eta = createEta();
-  #reactiveDispose!: Dispose;
-  #getScope!: () => Scope | null;
-  #state: Map<string | Symbol, WriteSignal<any>> = new Map();
-  get state() {
-    return this.#state;
+  #stateMap: Map<string | Symbol, Record<string,any>>= new Map();
+  get stateMap() {
+    return this.#stateMap;
   }
   $state = new Proxy(
     {},
     {
-      get: (_, key) => {
-        if (this.#state.has(key)) {
-          const _signal = this.#state.get(key);
-          if (!_signal) return null;
-          return _signal();
-        }
-        return null;
+      get: (_, key,) => {
+          return this.#stateMap.get(key);
       },
       set: (_, p, newValue) => {
-        if (this.#state.has(p)) {
-          const _signal = this.#state.get(p);
-          _signal?.set(newValue);
-        } else {
-         this.#state.set(p, signal(newValue));
-        }
+        this.#stateMap.set(p, newValue);
+        this.render()
         return true
+      },
+      ownKeys: () => {
+        return Array.from(this.#stateMap.keys()) as string[];
+      },
+    }
+  );
+  state = new Proxy(
+    {},
+    {
+      get: (_, key,) => {
+          return this.#stateMap.get(key);
+      },
+      set: (_, p, newValue) => {
+        this.#stateMap.set(p, newValue);
+        return true
+      },
+      ownKeys: () => {
+        return Array.from(this.#stateMap.keys()) as string[];
       },
     }
   );
@@ -174,6 +170,7 @@ export class AdvectElement extends HTMLElement {
         //}
         this.setAttribute(name as string, newValue);
         this.anyAttrChanged?.call(this, name as string, newValue, oldValue);
+        this.render()
 
         return true;
         // }
@@ -185,12 +182,15 @@ export class AdvectElement extends HTMLElement {
   constructor() {
     super();
     this.#internals = this.attachInternals();
-
     this.render.bind(this);
     this.hook.bind(this);
-    //  this.#reactiveDispose = dispose;
       // @ts-ignore also a little sussy
-      this.$vm = this.constructor?.$advectVMProvider?.call(this, {
+   
+  }
+  $initiated = false
+  initVM(){
+    // @ts-ignore
+       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
         $state: this.$state,
         state: this.state,
         $element: this,
@@ -198,16 +198,8 @@ export class AdvectElement extends HTMLElement {
         $attr: this.$attr,
         $internals: this.#internals,
      //   $dispose: dispose,
-        $computed: computed,
-        $getContext: getContext,
-        $tick: tick,
-        $scope: getScope,
       });
-
-      this.#getScope = () => getScope();
-      effect(() => {
-        this.render();
-      });
+      this.$initiated = true
   }
 
   anyAttrChanged:
@@ -215,6 +207,7 @@ export class AdvectElement extends HTMLElement {
     | null = null;
 
   connectedCallback() {
+    this.initVM()
     if (this.$settings.root == "shadow") {
       this.#shadow = this.attachShadow({ mode: this.$settings.shadow });
       this.#shadow.adoptedStyleSheets = [this.$stylesheet];
@@ -265,7 +258,7 @@ export class AdvectElement extends HTMLElement {
   }
 
   render() {
-    if (!this.isConnected) return;
+    if (!this.isConnected || !this.$initiated) return;
     const context = createAdvectContext(this);
 
     const markup = this.$settings.layoutNodes
@@ -276,12 +269,11 @@ export class AdvectElement extends HTMLElement {
       })
       .join("\n");
 
-    requestAnimationFrame(() => {
       this.$domRoot.innerHTML = markup;
-      //  if (this.tagName == 'CHARACTER-CARD') console.log(this.tagName, "rendering", markup);
 
-      this.hook(context);
-    });
+      requestAnimationFrame(() =>{
+        this.hook(context);
+      })
 
     // } catch (e) {
     //   console.error(e);
@@ -314,21 +306,14 @@ export class AdvectElement extends HTMLElement {
             "context",
             "$event",
             "$this",
+            "$state",
+            "state",
             `${contextScript} ${attr_val}`
-          )(finalObj, _event, refEl);
+          )(finalObj, _event, refEl, this.$state, this.state);
         };
       });
-         const exp = refEl.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
-      exp.forEach((v) => {
-        const contentScript = v[1].trim();
-        const finalScript = `${contextScript}\nreturn ${contentScript}`;
-        const res = new Function("context", "ref", finalScript)(
-          finalObj,
-          refNode
-        );
-        refEl.innerHTML = refEl.innerHTML.replace(v[0], res);
-      });
-      Object.keys(refNode.attributes)
+
+   Object.keys(refNode.attributes)
         .filter(
           (k: string) => !Object.hasOwn(AdvectSettings.attributes.directives, k)
         )
@@ -338,19 +323,29 @@ export class AdvectElement extends HTMLElement {
           if (v.startsWith("{") && v.endsWith("}")) {
             const attrScript = v.substring(1, v.length - 1);
             const finalScript = `${contextScript}\nreturn ${attrScript}`;
-            const res = new Function("context", "ref", finalScript)(
+            const res = new Function("context", "ref", "$state", "state", finalScript)(
               finalObj,
-              refNode
+              refNode,
+              this.$state,
+              this.state
             );
-            if (this.tagName == "CHARACTER-CARD") {
-              console.log({ k, v, res, finalScript, refEl });
-            }
-            setTimeout(() => {
-              refEl.setAttribute(k, res);
-              
-            }, 200);
+           refEl.setAttribute(k, res);
           }
         });
+
+         const exp = refEl.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
+      exp.forEach((v) => {
+        const contentScript = v[1].trim();
+        const finalScript = `${contextScript}\nreturn ${contentScript}`;
+        const res = new Function("context", "ref","$state", "state", finalScript)(
+          finalObj,
+          refNode,
+          this.$state,
+          this.state
+        );
+        refEl.innerHTML = refEl.innerHTML.replace(v[0], res);
+      });
+   
    
 
       if (

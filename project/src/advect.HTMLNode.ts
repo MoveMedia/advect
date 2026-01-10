@@ -111,9 +111,11 @@ for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
   context.refs[newClone.attributes['ref']] = newClone;
   context.currentNode.parent.addChild(newClone);
   newClone.hydrate(context);
+  
 }
           `;
-        const res = new Function("context", finalScript)(context);
+            const res = new Function("context","$state", finalScript)(context, context.$element.$state);
+
       }
     }
 

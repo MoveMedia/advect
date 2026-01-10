@@ -23,7 +23,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@maverick-js/signals": "^6.0.0",
     "crossoriginworker": "^1.1.0"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",

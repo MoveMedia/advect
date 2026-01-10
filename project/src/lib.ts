@@ -362,11 +362,7 @@ export function createAdvectContext(el:AdvectElement){
   const context = {
     refs: new Map<string, HTMLNode>(),
     currentNode: null as HTMLNode | null,
-    $attr:el.$attr,
-    $state:el.$state,
-    state:el.state,
-    $refs: el.$refs,
-    $element:el
+    $element:el,
   }
 ;
   return new Proxy(context, {
