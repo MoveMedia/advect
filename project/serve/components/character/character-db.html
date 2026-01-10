@@ -1,4 +1,4 @@
-<template advect="character-db" root="light">
+<template advect="character-db" root="shadow">
 
   <layout>
     <div class="character-db-container">
@@ -109,6 +109,7 @@
       state.select = async (character, row) => {
         //$state.selectedRow = row;
         const characterCard = await $refs.characterCard;
+        state.selectedData = character;
         characterCard.$vm.setCharacter(character)
       };
       return {

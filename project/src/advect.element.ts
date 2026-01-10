@@ -284,7 +284,7 @@ export class AdvectElement extends HTMLElement {
       // @ts-ignore
       ...this.querySelectorAll("[ref]"),
       // @ts-ignore
-      ...(this.shadowRoot?.querySelectorAll("[ref]") || []),
+      ...( this.#shadow ? this.#shadow?.querySelectorAll("[ref]") : []),
     ] as HTMLElement[];
     for (let refEl of refEls) {
       const refId = refEl.getAttribute("ref") as string;
