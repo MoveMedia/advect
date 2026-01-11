@@ -1,8 +1,10 @@
-<template advect="character-db" root="shadow">
-
+<template advect="character-db" root="light">
+  <script rel="/components/character/character-card.html"></script>
   <layout>
     <div class="character-db-container">
-      <input ref="dbNameInput" type="text" value="{state.dbName}">
+      <nav class="navbar">
+        <input class="input" ref="dbNameInput" type="text" value="{state.dbName}">
+      </nav>
       <div class="root">
         <div class="details-panel">
           <character-card  ref="characterCard"></character-card>
@@ -52,9 +54,13 @@
     }
     .character-db-container {
       container: char-db / size;
+      nav{
+        padding: 10px;
+      }
       --root-display: block;
       & .root {
         display: var(--root-display);
+        padding: 10px;
       }
       .data-selection {
         flex: 1;
@@ -81,9 +87,8 @@
   <script type="module">
     export default function ({ $state, $refs, state}) {
       const defaultData = { name: "", age: "", height: "", image: ""};
-
       state.dbName = 'Character Database';
-
+      
       state.selectedData = defaultData;
       state.selectedRow = null;
       state.data = [
@@ -116,5 +121,6 @@
      
       }
     }
+
   </script>
 </template>

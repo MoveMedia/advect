@@ -168,58 +168,61 @@ const createAdvect = async () => {
       break;
   }
 
-  const initStorage = () => {
-    if (!localStorage.getItem(AdvectSettings.data.session_key)) {
-      saveStorage({ loaded: {} });
+  const AdvectStorage = new Proxy(
+    {
+      // Default stuff here I guess
+      loaded: {} as Record<string, any>,
+      clear: () => {
+        AdvectStorage.loaded = {};
+      },
+    },
+    {
+      set: (_, p, newValue) => {
+        const storage = JSON.parse(
+          localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
+        );
+        storage[p] = newValue;
+        localStorage.setItem(
+          AdvectSettings.data.session_key,
+          JSON.stringify(storage)
+        );
+        return true;
+      },
+      get: (_, p) => {
+        if (p == "clear") return _.clear;
+        const storage = JSON.parse(
+          localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
+        );
+        return storage[p];
+      },
+      ownKeys: () => {
+        return Object.keys(localStorage);
+      },
     }
-  };
+  );
 
-  const getStorage = () => {
-    if (!localStorage.getItem(AdvectSettings.data.session_key)) {
-      initStorage();
-    }
-    return JSON.parse(
-      localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
-    );
-  };
-  const saveStorage = (storage: any) => {
-    localStorage.setItem(
-      AdvectSettings.data.session_key,
-      JSON.stringify(storage)
-    );
-  };
-  const addLoaded = (urls: string | string[]) => {
-    const storage = getStorage();
-    if (Array.isArray(urls)){
-      urls.forEach( url =>{
-        storage.loaded[url] = true;
-      })
-    }
+  AdvectStorage.clear();
 
-    if (typeof urls == "string") {
-      storage.loaded[urls] = true;
-    }
-    saveStorage(storage);
-  };
+  // const notLoaded =(url: string | string[]) => {
+  //   const newLoaded = { ...AdvectStorage.loaded }
+  //   newLoaded[url] = false;
+  //   AdvectStorage.loaded = newLoaded;
+  //   return AdvectStorage.loaded[url] ? true : false
+  // }
 
-  const isLoaded = (url: string) => {
-    const storage = getStorage();
-    return storage.loaded?.[url] === true;
-  };
   /**
    * Loads a webcomponent from a url or list of urls
    * @param urls
    * @returns
    */
   const load = async (urls: string | string[]) => {
+    if (urls.length == 0) return [];
     const buildMsg = (await messagePromise("load", { urls })) as MessageEvent<{
       result: CustomElementSettings[];
       id: string;
       action: ActionKey;
     }>;
-    
     const buildSettings = buildMsg.data.result;
-    addLoaded(urls);
     return createCustomElementClasses(buildSettings);
   };
 
@@ -234,6 +237,7 @@ const createAdvect = async () => {
     register = true
   ) => {
     const buildClasses: any[] = [];
+
     // todo try here
     for (let settings of buildSettings) {
       // for some reason ts thinks settings is used before being declared so let's add a pointer
@@ -267,6 +271,11 @@ const createAdvect = async () => {
         buildClasses.push(newClass);
       });
     }
+    const loaded = { ...AdvectStorage.loaded };
+    const buildLoads = buildSettings.map((s) => s.loads).flat().filter( f  => !loaded[f] );
+    buildLoads.forEach((l) => (loaded[l] = true));
+    AdvectStorage.loaded = loaded;
+    load(buildLoads);
 
     return buildClasses;
   };
@@ -285,7 +294,6 @@ const createAdvect = async () => {
       action: ActionKey;
     }>;
 
-    
     const buildSettings = buildMsg.data.result;
     return createCustomElementClasses(buildSettings);
   };

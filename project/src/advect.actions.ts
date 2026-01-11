@@ -3,7 +3,6 @@
  * This file contains all of the actions advect can use on a worker no browser access.
  */
 
-import { set } from "lodash";
 import { HTMLNode } from "./advect.HTMLNode";
 import AdvectLog from "./advect.log";
 import {
@@ -152,10 +151,9 @@ export const Actions = {
               }
               // load dependant compmponents
               if (
-                root_node.attributes["rel"] &&
-                root_node.attributes["type"] == "application/html"
+                currNode.attributes["rel"] 
               ) {
-                settings.loads.push(root_node.attributes["rel"]);
+                settings.loads.push(currNode.attributes["rel"]);
               }
             }
             if (
