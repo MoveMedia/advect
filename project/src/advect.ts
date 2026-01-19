@@ -1,335 +1,209 @@
-/**
- * Advect web component library.
- */
-// @ts-ignore There are no TS definitions for this lib
-import getCrossOriginWorkerURL from "crossoriginworker";
-import { Actions, type ActionKey } from "./advect.actions";
+import { range, set } from "lodash";
 import {
-  type CustomElementSettings,
-  toModule,
-  type AvectVMProvider,
   AdvectSettings,
   decodePropertySyntax,
-} from "./lib";
-
+  getDefaultElementSettings,
+  toModule,
+  type AvectVMProvider,
+  type CustomElementSettings,
+} from "./advect.lib";
 import { AdvectElement } from "./advect.element";
+import { root } from "postcss";
 
-/**
- * Creates a shared worker for running advect
- * @returns a shared worker for running advect
- */
-const createAdvectSharedWorker = async () => {
-  const openPromises = new Map<
-    string,
-    { resolve: Function; reject: Function }
-  >();
-  const workerUrl = await getCrossOriginWorkerURL(
-    new URL("advect.sharedworker.js", import.meta.url).href
-  );
-  const worker = new SharedWorker(workerUrl, { type: "module" });
-  worker.onerror = (e) => {
-    console.warn("error", e);
-  };
-  worker.port.onmessage = (e) => {
-    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
-    if (e.data?.isError === true && pr) {
-      pr.reject(e);
-    }
-    if (pr) {
-      pr.resolve(e);
-      openPromises.delete(e.data.$id);
-    }
-  };
-  const messagePromise = async (
-    action: string,
-    data: Record<string, any> | any
-  ) => {
-    return new Promise((resolve, reject) => {
-      const $id = Math.random().toString(36).substr(2, 9);
-      openPromises.set($id, { resolve, reject });
-      worker.port.postMessage({ action, data, $id });
-    });
-  };
-  return {
-    messagePromise,
-    worker,
-    type: "shared",
-  };
-};
-
-/**
- * Creates a dedicated worker for running advect
- * @returns a dedicated worker for running advect
- */
-const createAdvectDedicatedWorker = async () => {
-  const openPromises = new Map<
-    string,
-    { resolve: Function; reject: Function }
-  >();
-
-  const workerUrl = await getCrossOriginWorkerURL(
-    new URL("advect.worker.js", import.meta.url).href
-  );
-  const worker = new Worker(workerUrl, { type: "module" });
-  worker.onerror = (e) => {
-    console.error("error", e);
-  };
-  worker.onmessage = (e) => {
-    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
-    if (e.data?.isError === true && pr) {
-      pr.reject(e);
-    }
-    if (pr) {
-      pr.resolve(e);
-      openPromises.delete(e.data.$id);
-    }
-  };
-  const messagePromise = async (action: string, data: Record<string, any>) => {
-    return new Promise((resolve, reject) => {
-      const $id = Math.random().toString(36).substr(2, 9);
-      openPromises.set($id, { resolve, reject });
-      worker.postMessage({ action, data, $id });
-    });
-  };
-  return {
-    messagePromise,
-    worker,
-    type: "dedicated",
-  };
-};
-
-/**
- * Creates a no worker for running advect
- * @returns a shared worker for running advect
- */
-const createAdvectNoWorker = () => {
-  // to keep the workflow the same we use 2  broadcast channels noWorker2 sends to noWorker
-  const noWorker = new BroadcastChannel("advect:noworker");
-  const noWorker2 = new BroadcastChannel("advect:noworker");
-
-  noWorker.onmessageerror = (ev) => console.error(ev);
-  noWorker.onmessage = (e) => {
-    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
-    if (e.data?.isError === true && pr) {
-      pr.reject(e);
-    }
-    if (pr) {
-      // @ts-ignore
-      Actions[e.data.action as ActionKey]
-        .call(null, e.data.data)
-        .then((result) => {
-          e.data.result = result;
-          pr.resolve(e);
-          openPromises.delete(e.data.$id);
-        });
-    }
-  };
-  const openPromises = new Map<
-    string,
-    { resolve: Function; reject: Function }
-  >();
-  const messagePromise = async (action: string, data: Record<string, any>) => {
-    return new Promise((resolve, reject) => {
-      const $id = crypto.randomUUID();
-      openPromises.set($id, { resolve, reject });
-      noWorker2.postMessage({ action, data, $id });
-    });
-  };
-  return {
-    messagePromise,
-    worker: null,
-    type: "no-worker",
-  };
-};
-
-/**
- * Creates the advect instance with the correct worker type
- * @returns
- */
-const createAdvect = async () => {
-  (window as any).AdvectElement = AdvectElement;
-
-  const workerType = new URL(import.meta.url).searchParams
-    .get("type")
-    ?.toLocaleLowerCase(); // 5
-  let messagePromise: (
-    action: string,
-    data: Record<string, any>
-  ) => Promise<unknown> | null;
-  switch (workerType) {
-    case "d":
-      messagePromise = (await createAdvectDedicatedWorker()).messagePromise;
-      break;
-    case "s":
-      messagePromise = (await createAdvectSharedWorker()).messagePromise;
-      break;
-    default:
-      messagePromise = createAdvectNoWorker().messagePromise;
-      break;
-  }
-
-  const AdvectStorage = new Proxy(
-    {
-      // Default stuff here I guess
-      loaded: {} as Record<string, any>,
-      clear: () => {
-        AdvectStorage.loaded = {};
-      },
+export const AdvectStorage = new Proxy(
+  {
+    // Default stuff here I guess
+    loaded: {} as Record<string, any>,
+    clear: () => {
+      AdvectStorage.loaded = {};
     },
-    {
-      set: (_, p, newValue) => {
-        const storage = JSON.parse(
-          localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
-        );
-        storage[p] = newValue;
-        localStorage.setItem(
-          AdvectSettings.data.session_key,
-          JSON.stringify(storage)
-        );
-        return true;
-      },
-      get: (_, p) => {
-        if (p == "clear") return _.clear;
-        const storage = JSON.parse(
-          localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
-        );
-        return storage[p];
-      },
-      ownKeys: () => {
-        return Object.keys(localStorage);
-      },
-    }
-  );
-
-  AdvectStorage.clear();
-
-  // const notLoaded =(url: string | string[]) => {
-  //   const newLoaded = { ...AdvectStorage.loaded }
-  //   newLoaded[url] = false;
-  //   AdvectStorage.loaded = newLoaded;
-  //   return AdvectStorage.loaded[url] ? true : false
-  // }
-
-  /**
-   * Loads a webcomponent from a url or list of urls
-   * @param urls
-   * @returns
-   */
-  const load = async (urls: string | string[]) => {
-    if (urls.length == 0) return [];
-    const buildMsg = (await messagePromise("load", { urls })) as MessageEvent<{
-      result: CustomElementSettings[];
-      id: string;
-      action: ActionKey;
-    }>;
-    const buildSettings = buildMsg.data.result;
-    return createCustomElementClasses(buildSettings);
-  };
-
-  /**
-   * Creates the "Class" that will be used to register users custom components
-   * @param buildSettings
-   * @param register
-   * @returns
-   */
-  const createCustomElementClasses = (
-    buildSettings: CustomElementSettings[],
-    register = true
-  ) => {
-    const buildClasses: any[] = [];
-
-    // todo try here
-    for (let settings of buildSettings) {
-      // for some reason ts thinks settings is used before being declared so let's add a pointer
-      const $settings = settings;
-      if (customElements.get($settings.tagName)) {
-        console.warn(`Already registered ${$settings.tagName}`);
-        continue;
-      }
-      toModule(settings.module, []).then((module: any) => {
-        // TODO fix change to module default
-        //const moduleClass = module[moduleClassName];
-        const stylesheet = new CSSStyleSheet();
-        stylesheet.replace(decodePropertySyntax($settings.style));
-        const newClass = class extends AdvectElement {
-          static observedAttributes = Object.keys($settings.watched);
-          static $settings = $settings;
-          static $stylesheet = stylesheet;
-          static $advectVMProvider: AvectVMProvider = module.default;
-          connectedCallback(): void {
-            super.connectedCallback();
-          }
-        };
-        if (
-          register &&
-          $settings.tagName.length >= 3 &&
-          $settings.tagName.indexOf("-") &&
-          customElements.get($settings.tagName) === undefined
-        ) {
-          customElements.define($settings.tagName, newClass as any);
-        }
-        buildClasses.push(newClass);
-      });
-    }
-    const loaded = { ...AdvectStorage.loaded };
-    const buildLoads = buildSettings.map((s) => s.loads).flat().filter( f  => !loaded[f] );
-    buildLoads.forEach((l) => (loaded[l] = true));
-    AdvectStorage.loaded = loaded;
-    load(buildLoads);
-
-    return buildClasses;
-  };
-
-  /**
-   *
-   * @param template
-   * @returns
-   */
-  const build = async (template: string) => {
-    const buildMsg = (await messagePromise("build", {
-      template,
-    })) as MessageEvent<{
-      result: CustomElementSettings[];
-      id: string;
-      action: ActionKey;
-    }>;
-
-    const buildSettings = buildMsg.data.result;
-    return createCustomElementClasses(buildSettings);
-  };
-
-  /**
-   * Loads Elements that are inlined in the document
-   * @param _ the DOMContentLoaded Event
-   */
-  const onContent = (_: Event | null) => {
-    document
-      .querySelectorAll(`template[${AdvectSettings.attributes.template}]`)
-      .forEach((template) => build(template.outerHTML));
-
-    let templateScriptUrls: string[] = [];
-    document.querySelectorAll("script[rel]").forEach((e) => {
-      if (e.hasAttribute("rel")) {
-        templateScriptUrls.push(e.getAttribute("rel") ?? "");
-      }
-    });
-    load(templateScriptUrls);
-
-    document.removeEventListener("DOMContentLoaded", onContent);
-  };
-
-  if (document.readyState !== "loading") {
-    onContent(null);
-  } else {
-    document.addEventListener("DOMContentLoaded", onContent);
+  },
+  {
+    set: (_, p, newValue) => {
+      const storage = JSON.parse(
+        localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
+      );
+      storage[p] = newValue;
+      localStorage.setItem(
+        AdvectSettings.data.session_key,
+        JSON.stringify(storage)
+      );
+      return true;
+    },
+    get: (_, p) => {
+      if (p == "clear") return _.clear;
+      const storage = JSON.parse(
+        localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
+      );
+      return storage[p];
+    },
+    ownKeys: () => {
+      return Object.keys(localStorage);
+    },
   }
+);
 
-  return {
-    build,
-    load,
-  };
+AdvectStorage.clear();
+
+export const cweSettingsFromDoc = (doc: Document) => {
+  if (!doc) return [];
+  const settings: CustomElementSettings[] = [];
+  const templates = Array.from(doc.querySelectorAll(`template[${AdvectSettings.attributes.template}]`)) as HTMLTemplateElement[];
+
+  for (let template of templates) {
+    const content = template.content.cloneNode(true) as HTMLElement;
+    const setting = getDefaultElementSettings();
+    setting.tagName = template.getAttribute(AdvectSettings.attributes.template) ?? "";
+    if (template.hasAttribute('root')) {
+      setting.root = template.getAttribute('root') as 'light' | 'shadow' | 'none';
+    }
+    if (template.hasAttribute('shadow')) {
+      setting.shadow = template.getAttribute('shadow') as 'open' | 'closed';
+    }
+
+    for (const rootChild of Array.from(content.children)) {
+      if (rootChild.nodeName == 'LAYOUT') {
+        setting.layout = rootChild.cloneNode(true) as HTMLElement;
+      }
+      if (rootChild.nodeName == 'DATALIST') {
+        Array.from(rootChild.children)
+          .map((child) => {
+            if (child.nodeName == 'OPTION') {
+              return {
+                name: child.getAttribute('name'),
+                type: child.getAttribute('type'),
+              }
+            }
+          }).filter(v => v?.name)
+          .forEach(v => {
+            setting.watched[v?.name ?? ''] = {
+              type: (v?.type ?? 'string') as any,
+            }
+          })
+
+      }
+      if (rootChild.nodeName == 'SCRIPT' && rootChild.getAttribute('type') == 'module') {
+        setting.module = rootChild.textContent ?? '';
+      }
+      if (rootChild.nodeName == 'SCRIPT' && rootChild.getAttribute('rel')) {
+        setting.loads.push(rootChild.getAttribute('rel') ?? '');
+      }
+      if (rootChild.nodeName == 'STYLE') {
+        setting.style = rootChild.textContent ?? '';
+      }
+    }
+    settings.push(setting);
+  }
+  return settings;
 };
 
-// This is necessary so that elements can
+export const cweSettingsFromString = (htmlString: string) => {
+  // Create a Range object
+  // Use createContextualFragment to parse the HTML string
+  try {
+    const docParser = new DOMParser();
+    const doc = docParser.parseFromString(htmlString, "text/html");
+    return cweSettingsFromDoc(doc);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
 
-export const advect = await createAdvect();
+export const cweFromTemplate = (template: HTMLTemplateElement) => {
+  return cweSettingsFromString(template.outerHTML);
+};
+
+export const createCustomElementClasses = (
+  buildSettings: CustomElementSettings[],
+  register = true
+) => {
+  const buildClasses: any[] = [];
+
+  // todo try here
+  for (let settings of buildSettings) {
+    // for some reason ts thinks settings is used before being declared so let's add a pointer
+    const $settings = settings;
+    if (customElements.get($settings.tagName)) {
+      console.warn(`Already registered ${$settings.tagName}`);
+      continue;
+    }
+    toModule(settings.module, []).then((module: any) => {
+      // TODO fix change to module default
+      //const moduleClass = module[moduleClassName];
+      const stylesheet = new CSSStyleSheet();
+      stylesheet.replace(decodePropertySyntax($settings.style));
+      const newClass = class extends AdvectElement {
+        static observedAttributes = Object.keys($settings.watched);
+        static $settings = $settings;
+        static $stylesheet = stylesheet;
+        static $advectVMProvider: AvectVMProvider = module.default;
+        connectedCallback(): void {
+          super.connectedCallback();
+        }
+      };
+      if (
+        register &&
+        $settings.tagName.length >= 3 &&
+        $settings.tagName.indexOf("-") &&
+        customElements.get($settings.tagName) === undefined
+      ) {
+        customElements.define($settings.tagName, newClass as any);
+      }
+      buildClasses.push(newClass);
+    });
+  }
+  const loaded = { ...AdvectStorage.loaded };
+  const buildLoads = buildSettings.map((s) => s.loads).flat().filter(f => !loaded[f]);
+  buildLoads.forEach((l) => (loaded[l] = true));
+  AdvectStorage.loaded = loaded;
+  cweFromUrls(buildLoads);
+
+  return buildClasses;
+};
+
+
+const cweFromUrls = async (urls: string | string[]) => {
+  const settingResults: CustomElementSettings[] = [];
+  const _urls: string[] = [];
+
+  if (Array.isArray(urls)) {
+    _urls.push(...urls);
+  }
+  if (typeof urls == "string") {
+    _urls.push(urls);
+  }
+
+  const results = await Promise.all(_urls.map((url) => fetch(url)
+    .then((r) => r.text())
+    .then(t => cweSettingsFromString(t)))
+  ).then(r => r.flat());
+
+  settingResults.push(...results)
+  return settingResults;
+}
+
+const onContent = (_: Event | null) => {
+  const settingsFromTemplates = Array.from(document
+    .querySelectorAll(`template[${AdvectSettings.attributes.template}]`))
+    .map((template) => cweFromTemplate(template as HTMLTemplateElement)).flat()
+
+  createCustomElementClasses(settingsFromTemplates);
+
+
+  let settingsFromUrls: string[] =
+    Array.from(document.querySelectorAll("script[rel]"))
+      .map((script) => script.getAttribute("rel") ?? "")
+      .filter(v => v.length > 0)
+
+  cweFromUrls(settingsFromUrls).then(s => {
+    createCustomElementClasses(s);
+  });
+  document.removeEventListener("DOMContentLoaded", onContent);
+};
+
+if (document.readyState !== "loading") {
+  onContent(null);
+} else {
+  document.addEventListener("DOMContentLoaded", onContent);
+}

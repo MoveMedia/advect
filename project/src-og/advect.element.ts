@@ -2,10 +2,12 @@ import {
   AdvectSettings,
   AsyncFunction,
   createAdvectContext,
+  getScriptVars,
+  type AdvectContext,
   type AdvectVM,
-  type CustomElementSettings,
-} from "./advect.lib";
+} from "./lib";
 
+import { type CustomElementSettings } from "./lib";
 
 // custom elements my not be defined or ready when you access them
 // the same is not true for regular dom elements
@@ -50,9 +52,7 @@ export class AdvectElement extends HTMLElement {
     // @ts-ignore
     return this.constructor.$stylesheet;
   }
-  get $internals() {
-    return this.#internals;
-  }
+
   #internals: ElementInternals;
   /**
    *
@@ -110,6 +110,18 @@ export class AdvectElement extends HTMLElement {
   //  onMutation = (_: MutationRecord[]) => {};
   //  onIntersect = (_: IntersectionObserverEntry[]) => {};
 
+  /**
+   * The original markup for the custom web element
+   */
+  get html() {
+    return this.$settings.template;
+  }
+  /**
+   * The original list of refs in the component
+   */
+  get refs_list() {
+    return this.$settings.refs;
+  }
 
   /**
    * References
@@ -237,77 +249,21 @@ export class AdvectElement extends HTMLElement {
   }
 
   render() {
-    const context = createAdvectContext(this)
-    const cloneNode = this.$settings.layout?.cloneNode(true) as HTMLElement;
-    const queue: Node[] = [...Array.from(cloneNode.children)] as HTMLElement[];
+    const context = createAdvectContext(this);
+    
+    const newNodes = this.$settings.layoutNodes.map( n => n.clone() )
+    const markup = newNodes
+      .map((ln) => {
+        ln.hydrate(context);
+        const html = ln.html();
+        return html;
+      })
+      .join("\n");
 
-    while (queue.length > 0) {
-      const el = queue.shift();
-      const isHtmlElement = el instanceof HTMLElement;
-      if (!isHtmlElement) continue;
-      const refId = el?.getAttribute('ref');
-      const isRef = refId != null && refId.length > 0;
-      const hasIfStatement = el?.hasAttribute('adv-if');
-      const hasForStatement = el?.hasAttribute('adv-for');
-
-      if (isRef){
-        context.$$$refs.set(refId, {});
-      }
-
-      let ifResult = true
-      if (hasIfStatement && isRef){
-        const ifStatement = el.getAttribute('adv-if') ?? '';
-        const ifFunction = new Function(ifStatement);
-        ifResult = ifFunction.call(this, context);
-      }
-
-      if (!ifResult) continue;
-
-
-      if (hasForStatement && isRef){
-        const forStatement = el.getAttribute('adv-for');
-        el.removeAttribute('adv-for');
-        if (!forStatement) continue;
-        const split = forStatement?.split('of') ?? [];
-        const arrayName = split.at(-1)
-        const dataName = split.at(0)?.indexOf(',') != -1
-          ? split.at(0)?.split(',')[0].trim()
-          : split.at(0)?.trim();        
-        const indexName = split.at(0)?.indexOf(',') != -1
-          ? split.at(0)?.split(',')[1].trim()
-          : '';
-
-        const nodeDestination = el.parentElement;
-        nodeDestination?.removeChild(el);
-        
-        const forClone = el.cloneNode(true);
-        
-        const forScript = `
-        const state = $$$context.state;
-        const $state = $$$context.$state;
-        const $element = $$$context.$element;
-        const $refs = $$$context.$refs;
-        const $attr = $$$context.$attr
-        for(let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++){
-          const ${dataName} = ${arrayName}[${indexName}];
-          const $$$newNode = $$$forClone.cloneNode(true);
-          $$$newNode.setAttribute('ref', '${refId}_' + ${indexName});
-          $$$nodeDestination.appendChild($$$newNode);
-        }`;
-        const forFunction = new Function("$$$context", "$$$nodeDestination", "$$$forClone", forScript)
-        forFunction.call(this, context, nodeDestination, forClone)
-
-      }
-
-      queue.push(...(Array.from(el.children)))
-
-    }
-
-    while (this.$domRoot.firstChild) {
-      this.$domRoot.removeChild(this.$domRoot.firstChild);
-    }
-    this.$domRoot.appendChild(cloneNode)
-  
+      this.$domRoot.innerHTML = markup;
+      requestAnimationFrame(() =>{
+        this.hook(context);
+      })
 
   }
   module( url : string | string[], cb: (module: any[]) => void){
@@ -322,7 +278,7 @@ export class AdvectElement extends HTMLElement {
 
   }
 
-  hook(context:{ refs:Map<string,any>}) {
+  hook(context: AdvectContext) {
 
     const refEls = [
       // @ts-ignore
@@ -337,7 +293,7 @@ export class AdvectElement extends HTMLElement {
       const refNode = context.refs.get(refId);
       if (!refNode) continue;
       const finalObj = { ...context, ...(refNode?.locals || {}) };
-      const contextScript = ''//getScriptVars(finalObj);
+      const contextScript = getScriptVars(finalObj);
 
       const event_attrs = refEl
         .getAttributeNames()

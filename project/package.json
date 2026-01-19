@@ -7,7 +7,7 @@
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ./dist --target browser  --minify",
+    "build": "bun build --entrypoints ./src/advect.ts --outdir ./dist --target browser  --minify",
     "build-site": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ../advect.org/public --target browser --minify",
     "debug": "bun --hot serve/index.ts",
     "debug-site": "bun run build-site --watch",
