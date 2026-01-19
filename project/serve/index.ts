@@ -34,13 +34,7 @@ Bun.serve({
         "/components/*": async req => {
             const url = new URL(req.url);
             const file = Bun.file(`${import.meta.dir}/${url.pathname}`)
-            if (await file.exists()){
-                const mimeType=  mimeTypes[file.name?.split('.').at(-1)?.toLowerCase()]
-                return new Response(await file.text(),{
-                    "Content-Type":`${mimeType}`
-
-                })
-            }
+                return new Response(file)
             
             return new Response('', {
                 status: 404,

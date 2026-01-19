@@ -366,6 +366,9 @@ export function createAdvectContext(el:AdvectElement){
   }
 ;
   return new Proxy(context, {
+    get: (target, p) => {
+      return target[p as keyof typeof target];
+    },
     ownKeys: () => Object.keys(context),
   })
 }

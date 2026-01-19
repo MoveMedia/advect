@@ -51,7 +51,7 @@ export class HTMLNode {
     exp.forEach((v) => {
       const contentScript = v[1].trim();
       const finalScript = `${contextScript}\nreturn ${contentScript}`;
-      const res = new Function("context", "ref", finalScript)(context, this);
+      const res = new Function("context", "ref", "$state", "state", finalScript)(context, this, context.$element.$state, context.$element.state);
       this.content = this.content.replace(v[0], res);
     });
   }
@@ -97,7 +97,6 @@ export class HTMLNode {
         }
         const arrayName = sides[1];
         this.children.forEach((n) => n.remove());
-
         const finalScript = `
           ${preScript}
 for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
@@ -108,25 +107,23 @@ for (let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++) {
   newClone.locals['${indexName}'] = ${indexName};
   newClone.locals['${valueName}'] = ${valueName};
   newClone.attributes['ref'] = context.currentNode.attributes['ref'] + '_' + ${indexName};
-  context.refs[newClone.attributes['ref']] = newClone;
   context.currentNode.parent.addChild(newClone);
-  newClone.hydrate(context);
-  
+        console.log(newClone.locals)
 }
           `;
-            const res = new Function("context","$state", finalScript)(context, context.$element.$state);
+            const res = new Function("context","$state", 'state', finalScript)(context, context.$element.$state, context.$element.state);
 
       }
     }
 
     if (!this.isRemoved) {
-     // this.hydrateContent(context);
       if (this.attributes["ref"]) {
         let refId = this.attributes["ref"];
-        if (refId.length == 0 || !refId) refId = crypto.randomUUID();
+        if (!refId ||refId.length == 0) refId = crypto.randomUUID();
         context.refs.set(refId, this);
       }
     }
+
     this.children.forEach((c) => c.hydrate(context));
   }
 

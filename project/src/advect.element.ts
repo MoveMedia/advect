@@ -1,7 +1,6 @@
 import {
   AdvectSettings,
   AsyncFunction,
-  AttrTypes,
   createAdvectContext,
   getScriptVars,
   type AdvectContext,
@@ -9,7 +8,6 @@ import {
 } from "./lib";
 
 import { type CustomElementSettings } from "./lib";
-import type { HTMLNode } from "./advect.HTMLNode";
 
 // custom elements my not be defined or ready when you access them
 // the same is not true for regular dom elements
@@ -187,7 +185,6 @@ export class AdvectElement extends HTMLElement {
       // @ts-ignore also a little sussy
    
   }
-  $initiated = false
   initVM(){
     // @ts-ignore
        this.$vm = this.constructor?.$advectVMProvider?.call(this, {
@@ -199,7 +196,6 @@ export class AdvectElement extends HTMLElement {
         $internals: this.#internals,
      //   $dispose: dispose,
       });
-      this.$initiated = true
   }
 
   anyAttrChanged:
@@ -216,14 +212,9 @@ export class AdvectElement extends HTMLElement {
         document.adoptedStyleSheets.push(this.$stylesheet);
       }
     }
-    requestAnimationFrame(() => {
-      try {
-        this?.$vm?.onConnect?.call(this);
-        this.render();
-      } catch (e) {
-        console.warn(e);
-      }
-    });
+    this.render();
+    this?.$vm?.onConnect?.call(this);
+   
   }
 
   connectedMoveCallback() {
@@ -258,39 +249,50 @@ export class AdvectElement extends HTMLElement {
   }
 
   render() {
-    if (!this.isConnected || !this.$initiated) return;
     const context = createAdvectContext(this);
-
-    const markup = this.$settings.layoutNodes
-      // try {
+    
+    const newNodes = this.$settings.layoutNodes.map( n => n.clone() )
+    const markup = newNodes
       .map((ln) => {
         ln.hydrate(context);
-        return ln.html();
+        const html = ln.html();
+        return html;
       })
       .join("\n");
 
       this.$domRoot.innerHTML = markup;
-
       requestAnimationFrame(() =>{
         this.hook(context);
       })
 
-    // } catch (e) {
-    //   console.error(e);
-    // }
   }
+  module( url : string | string[], cb: (module: any[]) => void){
+    const _urls = Array.isArray(url) ? url : [url];
+    const results = Promise.all(_urls.map(async (u) => {
+      return await import(u);
+    }));
+    results.then((modules) => {
+      cb.call(this,modules);
+    });
+    
+
+  }
+
   hook(context: AdvectContext) {
+
     const refEls = [
       // @ts-ignore
       ...this.querySelectorAll("[ref]"),
       // @ts-ignore
       ...( this.#shadow ? this.#shadow?.querySelectorAll("[ref]") : []),
     ] as HTMLElement[];
+
+    
     for (let refEl of refEls) {
       const refId = refEl.getAttribute("ref") as string;
       const refNode = context.refs.get(refId);
       if (!refNode) continue;
-      const finalObj = { ...context, ...(refNode?.locals ?? {}) };
+      const finalObj = { ...context, ...(refNode?.locals || {}) };
       const contextScript = getScriptVars(finalObj);
 
       const event_attrs = refEl
@@ -333,7 +335,7 @@ export class AdvectElement extends HTMLElement {
           }
         });
 
-         const exp = refEl.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
+      const exp = refEl.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
       exp.forEach((v) => {
         const contentScript = v[1].trim();
         const finalScript = `${contextScript}\nreturn ${contentScript}`;
@@ -345,7 +347,6 @@ export class AdvectElement extends HTMLElement {
         );
         refEl.innerHTML = refEl.innerHTML.replace(v[0], res);
       });
-   
    
 
       if (

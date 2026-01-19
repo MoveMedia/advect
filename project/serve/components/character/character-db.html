@@ -1,13 +1,19 @@
 <template advect="character-db" root="light">
+  <script rel="/components/character/new-character-modal.html"></script>
   <script rel="/components/character/character-card.html"></script>
   <layout>
     <div class="character-db-container">
       <nav class="navbar">
-        <input class="input" ref="dbNameInput" type="text" value="{state.dbName}">
+        <input
+          class="input"
+          ref="dbNameInput"
+          type="text"
+          value="{state.dbName}"
+        />
       </nav>
       <div class="root">
         <div class="details-panel">
-          <character-card  ref="characterCard"></character-card>
+          <character-card ref="characterCard"></character-card>
         </div>
         <div class="data-selection">
           <table class="table is-fullwidth">
@@ -21,7 +27,7 @@
             </thead>
             <tbody>
               <tr
-                adv-for="d,di of $state.data"
+                adv-for="d,di of state.data"
                 ind="{di}"
                 onclick="$state.select(d, $this)"
                 ref="item"
@@ -34,16 +40,35 @@
             </tbody>
             <tfoot>
               <tr>
-                <button class="button is-dark">Add New Character</button>
+                <button
+                  class="button is-dark"
+                  onclick="state.showNewCharacterModal()"
+                  ref="newCharacterButton"
+                >
+                  Add New Character
+                </button>
+                <button
+                  class="button is-dark"
+                  onclick="state.refresh()"
+                  ref="refreshDB"
+                >
+                  <span class="icon is-small">
+                    <i class="fas fa-sync-alt"></i>
+                  </span>
+                </button>
+                
               </tr>
             </tfoot>
           </table>
         </div>
       </div>
+      <new-character-modal ref="newCharacterModal"></new-character-modal>
     </div>
-    <link rel="stylesheet" href="/components/character/character.css" />
+
     <style>
       @import "https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css";
+      @import "/components/character/character.css";
+      @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
     </style>
   </layout>
   <style>
@@ -52,20 +77,28 @@
       height: fit-content;
       padding: 20px;
     }
+
     .character-db-container {
       container: char-db / size;
-      nav{
+
+      nav {
         padding: 10px;
       }
-      --root-display: block;
+
+      --root-display: flex;
+
       & .root {
         display: var(--root-display);
         padding: 10px;
+        gap: 20px;
       }
+
       .data-selection {
         flex: 1;
+
         table tbody tr {
           transition: all 0.2s;
+
           &:hover {
             background-color: blue;
             cursor: pointer;
@@ -79,48 +112,39 @@
         & .root {
           --root-display: flex;
           display: var(--root-display);
-          gap: 20px;
         }
       }
     }
   </style>
   <script type="module">
-    export default function ({ $state, $refs, state}) {
-      const defaultData = { name: "", age: "", height: "", image: ""};
-      state.dbName = 'Character Database';
-      
-      state.selectedData = defaultData;
+    export default function ({ $element, $state, $refs, state }) {
+      let CharacterDB = null;
+      let createCharacterRecord = null;
+      $element.module("/components/character/character.js", (mods) => {
+        CharacterDB = mods[0].CharacterDB;
+        createCharacterRecord = mods[0].createCharacterRecord;
+        state.refresh();
+      });
+      state.dbName = "Character Database";
       state.selectedRow = null;
-      state.data = [
-        {
-          image: "https://picsum.photos/id/1/200/300",
-          name: "John",
-          age: 22,
-          height: "172",
-        },
-        {
-          image: "https://picsum.photos/id/2/200/300",
-          name: "Carl",
-          age: 22,
-          height: "142",
-        },
-        {
-          image: "https://picsum.photos/id/3/200/300",
-          name: "Laura",
-          age: 22,
-          height: "152",
-        },
-      ];
+      state.data = [];
+      state.refresh = () => {
+        CharacterDB.getCharacters()
+        .then( result => {
+          $state.data = result.data;
+        });
+      };
+      
       state.select = async (character, row) => {
-        //$state.selectedRow = row;
         const characterCard = await $refs.characterCard;
         state.selectedData = character;
-        characterCard.$vm.setCharacter(character)
+        characterCard.$vm.setCharacter(character);
       };
-      return {
-     
-      }
+      state.showNewCharacterModal = async () => {
+        const newCharacterModal = await $refs.newCharacterModal;
+        newCharacterModal.$vm.showModal();
+      };
+      return {};
     }
-
   </script>
 </template>

@@ -1,0 +1,137 @@
+<template advect="new-character-modal" root="shadow" shadow="open">
+  <layout>
+    <dialog class="box" ref="dialog">
+      <div>
+        <h2 class="title">New Character</h2>
+      </div>
+      <form ref="form" onsubmit="state.submitCharacter($event)">
+        <div class="field">
+          <label class="label">Name</label>
+          <div class="control">
+            <input
+              name="name"
+              class="input"
+              type="text"
+              placeholder="Text input"
+              required
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Age (Yrs)</label>
+          <div class="control">
+            <input
+              name="age"
+              class="input"
+              type="number"
+              placeholder="Text input"
+              required
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Height (cm)</label>
+          <div class="control">
+            <input
+              name="height"
+              class="input"
+              type="number"
+              placeholder="Text input"
+              required
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Image</label>
+          <div class="control">
+            <input
+              name="image"
+              accept="image/*"
+              class="input"
+              type="file"
+              placeholder="Text input"
+            />
+          </div>
+        </div>
+        <div class="field is-grouped">
+          <div class="control">
+            <button class="button is-link" type="submit">Submit</button>
+          </div>
+          <div class="control">
+            <button
+              class="button is-link is-light"
+              ref="cancelBtn"
+              onclick="state.hideModal()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </form>
+      <style>
+        @scope {
+          :scope {
+            transition-property: opacity, display, left;
+            transition-duration: 0.25s;
+            transition-behavior: allow-discrete;
+            --diag-width: max(360px, 33vw);
+            width: var(--diag-width);
+            height: 100dvh;
+            opacity: 0;
+            position: fixed;
+            left: calc(100vw   + var(--diag-width));
+            border-width: 1px;
+            display: none;
+            &:open {
+              opacity: 1;
+              left: calc(100vw - var(--diag-width));
+              display: block;
+            }
+          }
+        }
+      </style>
+    </dialog>
+    <style>
+      @import "/components/character/character.css";
+      @import "https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css";
+      @import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css";
+    </style>
+  </layout>
+  <script type="module">
+    export default function ({ $element, state, $refs }) {
+      let CharacterDB = null;
+      let createCharacterRecord = null;
+      $element.module("/components/character/character.js",function (mods) {
+        CharacterDB = mods[0].CharacterDB;
+        createCharacterRecord = mods[0].createCharacterRecord;
+      });
+
+      state.submitCharacter = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        const newCharacter = createCharacterRecord(data);
+        await CharacterDB.addCharacter(newCharacter);
+        state.hideModal();
+
+      };
+      state.showModal = () => {
+        $refs.dialog.then((dialog) => {
+          dialog.showModal();
+        });
+      };
+      state.hideModal = () => {
+        $refs.dialog.then((dialog) => {
+          dialog.close();
+        });
+      };
+
+
+      return {
+        showModal: state.showModal,
+        hideModal: state.hideModal,
+      };
+    }
+  </script>
+</template>
