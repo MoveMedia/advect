@@ -348,32 +348,24 @@ export function encodePropertySyntax(css:string) {
 
 
 export function createAdvectContext(el:AdvectElement){
-  return new Proxy({
-    $$$refs: new Map<string, Record<string,Record<string, any>>>()
-  },
-  {
-    get: (_, p) => {
-      if (p === '$element'){
-        return el
-      }
-      if (p === '$refs'){
-        return el.$refs
-      }
-      if (p === '$attr'){
-        return el.$attr
-      }
-      if (p === '$state'){
-        return el.$state
-      }
-      if (p == 'state'){
-        return el.state
-      }
-      if (p === '$internals'){
-        return el.$internals
-      }
-      if (p === '$$$refs'){
-        return _.$$$refs;
-      }
-    }
-  })
+
+  return {
+    $$$refs: new Map<string, Record<string,Record<string, any>>>(),
+    $$$locals: {} as Record<string,any>,
+    $element: el,
+    $refs: el.$refs,
+    $attr: el.$attr,
+    $state: el.$state,
+    state: el.state,
+    $internals: el.$internals,
+  }
+ 
+}
+
+export function getScriptVars (context:Record<string | symbol, any>, objectName:string =  'context'):string{
+  return Object.keys(context)
+      .map((v) => {
+        return `let ${v} = ${objectName}['${v}'];`;
+      })
+      .join("\n");
 }

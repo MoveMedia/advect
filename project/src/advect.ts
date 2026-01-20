@@ -1,4 +1,4 @@
-import { range, set } from "lodash";
+import { filter, range, set } from "lodash";
 import {
   AdvectSettings,
   decodePropertySyntax,
@@ -8,42 +8,10 @@ import {
   type CustomElementSettings,
 } from "./advect.lib";
 import { AdvectElement } from "./advect.element";
-import { root } from "postcss";
+import { $ } from "bun";
 
-export const AdvectStorage = new Proxy(
-  {
-    // Default stuff here I guess
-    loaded: {} as Record<string, any>,
-    clear: () => {
-      AdvectStorage.loaded = {};
-    },
-  },
-  {
-    set: (_, p, newValue) => {
-      const storage = JSON.parse(
-        localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
-      );
-      storage[p] = newValue;
-      localStorage.setItem(
-        AdvectSettings.data.session_key,
-        JSON.stringify(storage)
-      );
-      return true;
-    },
-    get: (_, p) => {
-      if (p == "clear") return _.clear;
-      const storage = JSON.parse(
-        localStorage.getItem(AdvectSettings.data.session_key) ?? "{}"
-      );
-      return storage[p];
-    },
-    ownKeys: () => {
-      return Object.keys(localStorage);
-    },
-  }
-);
+const loaded = new Set<string>();
 
-AdvectStorage.clear();
 
 export const cweSettingsFromDoc = (doc: Document) => {
   if (!doc) return [];
@@ -98,8 +66,6 @@ export const cweSettingsFromDoc = (doc: Document) => {
 };
 
 export const cweSettingsFromString = (htmlString: string) => {
-  // Create a Range object
-  // Use createContextualFragment to parse the HTML string
   try {
     const docParser = new DOMParser();
     const doc = docParser.parseFromString(htmlString, "text/html");
@@ -148,16 +114,18 @@ export const createCustomElementClasses = (
         $settings.tagName.indexOf("-") &&
         customElements.get($settings.tagName) === undefined
       ) {
+        console.log('defining', $settings.tagName)
         customElements.define($settings.tagName, newClass as any);
       }
       buildClasses.push(newClass);
     });
   }
-  const loaded = { ...AdvectStorage.loaded };
-  const buildLoads = buildSettings.map((s) => s.loads).flat().filter(f => !loaded[f]);
-  buildLoads.forEach((l) => (loaded[l] = true));
-  AdvectStorage.loaded = loaded;
-  cweFromUrls(buildLoads);
+  const newLoads = buildSettings.map( bs => bs.loads).flat()
+  if (newLoads.length > 0){
+    cweFromUrls(newLoads).then(s => {
+      createCustomElementClasses(s, true);
+    });
+  }
 
   return buildClasses;
 };
@@ -174,12 +142,17 @@ const cweFromUrls = async (urls: string | string[]) => {
     _urls.push(urls);
   }
 
-  const results = await Promise.all(_urls.map((url) => fetch(url)
+  const results = await Promise.all(_urls.filter(u => !loaded.has(u)).map((url) => fetch(url)
     .then((r) => r.text())
     .then(t => cweSettingsFromString(t)))
   ).then(r => r.flat());
 
   settingResults.push(...results)
+
+  _urls.forEach( u => {
+    loaded.add(u);
+  })
+  
   return settingResults;
 }
 
@@ -189,7 +162,6 @@ const onContent = (_: Event | null) => {
     .map((template) => cweFromTemplate(template as HTMLTemplateElement)).flat()
 
   createCustomElementClasses(settingsFromTemplates);
-
 
   let settingsFromUrls: string[] =
     Array.from(document.querySelectorAll("script[rel]"))

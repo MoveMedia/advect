@@ -2,6 +2,7 @@ import {
   AdvectSettings,
   AsyncFunction,
   createAdvectContext,
+  getScriptVars,
   type AdvectVM,
   type CustomElementSettings,
 } from "./advect.lib";
@@ -169,7 +170,7 @@ export class AdvectElement extends HTMLElement {
     super();
     this.#internals = this.attachInternals();
     this.render.bind(this);
-    this.hook.bind(this);
+    //this.hook.bind(this);
       // @ts-ignore also a little sussy
    
   }
@@ -237,7 +238,67 @@ export class AdvectElement extends HTMLElement {
   }
 
   render() {
+    if (this.$vm == null) return;
     const context = createAdvectContext(this)
+    const hook = (ref:HTMLElement) =>{
+      const refData = context.$$$refs.get(ref.getAttribute('ref') ?? '');
+      if (!refData) return;
+      const event_attrs = ref
+        .getAttributeNames()
+        .filter((name: string) => AdvectSettings.events.indexOf(name) != -1);
+      const eventScript = getScriptVars(refData, '$$$refData')
+
+      event_attrs.forEach((name: string) => {
+        const attr_val = ref.getAttribute(name) ?? "";
+        // @ts-expect-error assigning event handlers by name nothing to see here
+        ref[name] = (_event) => {
+          new AsyncFunction(
+            "$$$context",
+            "$$$refData",
+            "$event",
+            "$this",
+            "$state",
+            "state",
+            `${eventScript}; ${attr_val}`
+          )(context,refData, _event, this, this.$state, this.state);
+        };
+      });
+      
+
+      Array.from(ref.attributes)
+        .filter( a => !Object.hasOwn(AdvectSettings.attributes.directives, a.name) && AdvectSettings.events.indexOf(a.name) == -1)
+        .forEach((a: Attr) => {
+            if (a.value.startsWith("{") && a.value.endsWith("}")) {
+                const contextScript = getScriptVars(refData, '$$$refData')
+                const attrScript = a.value.substring(1, a.value.length - 1);
+                const finalScript = `${contextScript}; return ${attrScript}`;
+                const res = new Function("$$$context","$$$refData", "ref", "$state", "state", finalScript)(
+                    context,
+                    refData,
+                    ref,
+                    this.$state,
+                    this.state
+                  );
+                a.value  = res;
+            }
+        });
+
+      const exp = ref.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
+      exp.forEach((v) => {
+        const contentScript = v[1].trim();
+        const contextScript = getScriptVars(refData, '$$$refData')
+        const finalScript = `${contextScript}\nreturn ${contentScript}`;
+        const res = new Function("$$$context",'$$$refData', "ref","$state", "state", finalScript)(
+          context,
+          refData,
+          ref,
+          this.$state,
+          this.state
+        );
+        ref.innerHTML = ref.innerHTML.replace(v[0], res);
+      });
+
+    }
     const cloneNode = this.$settings.layout?.cloneNode(true) as HTMLElement;
     const queue: Node[] = [...Array.from(cloneNode.children)] as HTMLElement[];
 
@@ -245,7 +306,8 @@ export class AdvectElement extends HTMLElement {
       const el = queue.shift();
       const isHtmlElement = el instanceof HTMLElement;
       if (!isHtmlElement) continue;
-      const refId = el?.getAttribute('ref');
+  
+      const refId = el?.getAttribute('ref') ?? '';
       const isRef = refId != null && refId.length > 0;
       const hasIfStatement = el?.hasAttribute('adv-if');
       const hasForStatement = el?.hasAttribute('adv-for');
@@ -257,7 +319,15 @@ export class AdvectElement extends HTMLElement {
       let ifResult = true
       if (hasIfStatement && isRef){
         const ifStatement = el.getAttribute('adv-if') ?? '';
-        const ifFunction = new Function(ifStatement);
+        const ifScript =`
+        const state = $$$context.state;
+        const $state = $$$context.$state;
+        const $element = $$$context.$element;
+        const $refs = $$$context.$refs;
+        const $attr = $$$context.$attr;
+        return ${ifStatement}};
+        `
+        const ifFunction = new Function(ifScript);
         ifResult = ifFunction.call(this, context);
       }
 
@@ -279,6 +349,7 @@ export class AdvectElement extends HTMLElement {
 
         const nodeDestination = el.parentElement;
         nodeDestination?.removeChild(el);
+        context.$$$refs.delete(refId)
         
         const forClone = el.cloneNode(true);
         
@@ -287,19 +358,27 @@ export class AdvectElement extends HTMLElement {
         const $state = $$$context.$state;
         const $element = $$$context.$element;
         const $refs = $$$context.$refs;
-        const $attr = $$$context.$attr
+        const $attr = $$$context.$attr;
         for(let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++){
           const ${dataName} = ${arrayName}[${indexName}];
           const $$$newNode = $$$forClone.cloneNode(true);
-          $$$newNode.setAttribute('ref', '${refId}_' + ${indexName});
+          const $$$newRefId = '${refId}_' + ${indexName};
+          $$$newNode.setAttribute('ref', $$$newRefId);
+          const newLocals = {...$$$context.$$$locals, ${indexName},${dataName}}
+          $$$context.$$$locals = newLocals;
+          $$$context.$$$refs.set($$$newRefId, newLocals);
+          $$$queue.push(...Array.from($$$newNode.children));
           $$$nodeDestination.appendChild($$$newNode);
+          $$$hook($$$newNode);
+        
         }`;
-        const forFunction = new Function("$$$context", "$$$nodeDestination", "$$$forClone", forScript)
-        forFunction.call(this, context, nodeDestination, forClone)
+        const forFunction = new Function("$$$context", "$$$nodeDestination", "$$$forClone",'$$$queue', '$$$hook', forScript)
+        forFunction.call(this, context, nodeDestination, forClone, queue,hook)
 
       }
+      if (isRef) hook(el);
+      if (!hasForStatement) queue.push(...(Array.from(el.children)));
 
-      queue.push(...(Array.from(el.children)))
 
     }
 
@@ -307,8 +386,6 @@ export class AdvectElement extends HTMLElement {
       this.$domRoot.removeChild(this.$domRoot.firstChild);
     }
     this.$domRoot.appendChild(cloneNode)
-  
-
   }
   module( url : string | string[], cb: (module: any[]) => void){
     const _urls = Array.isArray(url) ? url : [url];
@@ -318,93 +395,6 @@ export class AdvectElement extends HTMLElement {
     results.then((modules) => {
       cb.call(this,modules);
     });
-    
-
   }
 
-  hook(context:{ refs:Map<string,any>}) {
-
-    const refEls = [
-      // @ts-ignore
-      ...this.querySelectorAll("[ref]"),
-      // @ts-ignore
-      ...( this.#shadow ? this.#shadow?.querySelectorAll("[ref]") : []),
-    ] as HTMLElement[];
-
-    
-    for (let refEl of refEls) {
-      const refId = refEl.getAttribute("ref") as string;
-      const refNode = context.refs.get(refId);
-      if (!refNode) continue;
-      const finalObj = { ...context, ...(refNode?.locals || {}) };
-      const contextScript = ''//getScriptVars(finalObj);
-
-      const event_attrs = refEl
-        .getAttributeNames()
-        .filter((name: string) => AdvectSettings.events.indexOf(name) != -1);
-      // todo maybe make this a setting, I could see this causing unnecessary rendering
-
-      event_attrs.forEach((name: string) => {
-        const attr_val = refEl.getAttribute(name) ?? "";
-        // @ts-expect-error assigning event handlers by name nothing to see here
-        refEl[name] = (_event) => {
-          new AsyncFunction(
-            "context",
-            "$event",
-            "$this",
-            "$state",
-            "state",
-            `${contextScript} ${attr_val}`
-          )(finalObj, _event, refEl, this.$state, this.state);
-        };
-      });
-
-   Object.keys(refNode.attributes)
-        .filter(
-          (k: string) => !Object.hasOwn(AdvectSettings.attributes.directives, k)
-        )
-        .filter((name: string) => AdvectSettings.events.indexOf(name) == -1)
-        .forEach((k: string) => {
-          const v = `${refNode.attributes[k]}`.trim();
-          if (v.startsWith("{") && v.endsWith("}")) {
-            const attrScript = v.substring(1, v.length - 1);
-            const finalScript = `${contextScript}\nreturn ${attrScript}`;
-            const res = new Function("context", "ref", "$state", "state", finalScript)(
-              finalObj,
-              refNode,
-              this.$state,
-              this.state
-            );
-           refEl.setAttribute(k, res);
-          }
-        });
-
-      const exp = refEl.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
-      exp.forEach((v) => {
-        const contentScript = v[1].trim();
-        const finalScript = `${contextScript}\nreturn ${contentScript}`;
-        const res = new Function("context", "ref","$state", "state", finalScript)(
-          finalObj,
-          refNode,
-          this.$state,
-          this.state
-        );
-        refEl.innerHTML = refEl.innerHTML.replace(v[0], res);
-      });
-   
-
-      if (
-        refEl.matches("[onload]") &&
-        !AdvectSettings.tags.onloadElements.find(
-          (ole) => ole === refEl.tagName.toLocaleLowerCase()
-        )
-      ) {
-        refEl.dispatchEvent(
-          new Event("load", {
-            bubbles: false,
-          })
-        );
-      }
-    }
-  }
 }
