@@ -1,57 +1,48 @@
- <template advect="my-todo" root="shadow" shadow="open" >
-      <datalist>
-        <option name="message" value="Unset Message" type="string" set="attr"></option>
-      </datalist>
-      <layout>
-        <h1>Hello World</h1>
-        <slot name="stuff">
-          <h2>No content</h2>
-        </slot>
-        <table ref="mytable">
-          <thead>
-            <tr>
-              <td>#</td>
-              <td>Name</td>
-              <td>Age</td>
-              <td>Height</td>
-            </tr>
-          </thead>
-          <tbody>
-              <tr adv-for="d,di of $.data" ind="{di}">
-                <td onclick="console.log(di)" ref="{ 'item_' + di }">{{di}}</td>
-                <td>{{d.name}}</td>
-                <td>{{d.age}}</td>
-                <td>{{d.height}} cm</td>
-              </tr>
-          </tbody>
-          <tfoot></tfoot>
-        </table>
-      </layout>
-      <style>
-        td{
-          padding:0;
-        }
-        tr{
-          &:hover{
-            background-color: blue;
+<template advect="my-component" root="light" >
+  <datalist>
+    <option name="message" value="Unset Message" type="string" set="attr"></option>
+  </datalist>
+  <h1>Hello World</h1>
+    <slot name="stuff">
+      <h2>No content</h2>
+    </slot>
+    <table ref="mytable">
+      <thead>
+        <tr>
+          <td>#</td>
+          <td>Name</td>
+          <td>Age</td>
+          <td>Height</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(p, pi) in people" :key="pi" :ind="pi">
+          <td @click="console.log(di)" :ref="'item_' + di">{{di}}</td>
+          <td>{{p.name}}</td>
+          <td>{{p.age}}</td>
+          <td>{{p.height}} cm</td>
+        </tr>
+      </tbody>
+    <tfoot></tfoot>
+  </table>
+</template>
 
-          }
-        }
-        
-      </style>
-      <script type="module">
-        export default function ({ $state, $el, $props, $refs, $attr, $internals }) {
-          $state.data = [
-            {name : 'John', age: 22, height: '172'},
-            {name : 'Carl', age: 22, height: '142'},
-            {name : 'Laura', age: 22, height: '152'},
-          ]
+<style>
+  td {
+    padding: 0;
+  }
+  tr {
+    &:hover {
+      background-color: blue;
+    }
+  }
+</style>
 
-          return {
-            onWatchedAttrChanged(){
-              console.log('attr changed')
-            }
-          }
-        }
-      </script>
-    </template>
+<script setup>
+ const people = [
+  {name: "john", age:11, height:49 },
+  {name: "Jawn", age:51, height:49 },
+  {name: "Cown", age:71, height:49 },
+
+ ]
+</script>

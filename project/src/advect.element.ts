@@ -1,16 +1,16 @@
 import {
   AdvectSettings,
-  AsyncFunction,
-  createAdvectContext,
-  getScriptVars,
   type AdvectVM,
   type CustomElementSettings,
 } from "./advect.lib";
+import { AdvectRenderer, runHook } from "./advect.render";
 
 
-// custom elements my not be defined or ready when you access them
-// the same is not true for regular dom elements
-// so lets wrap all of them
+/**
+ * Resolves an element ref, waiting for a custom element to be defined.
+ * Custom elements may not be defined/ready when accessed; regular DOM
+ * elements are returned immediately.
+ */
 export function refHandle(el: HTMLElement): Promise<HTMLElement | null> {
   return new Promise((resolve, reject) => {
     if (!el || !el.isConnected) {
@@ -41,42 +41,51 @@ export function refHandle(el: HTMLElement): Promise<HTMLElement | null> {
  * Base class for custom web elements
  */
 export class AdvectElement extends HTMLElement {
+  /** The component VM (lifecycle hooks auto-detected from setup), if any. */
   $vm: AdvectVM | null = null;
 
+  /** Top-level bindings returned by the component's `<script setup>`. */
+  $setup: Record<string, any> = {};
+
+  /** The raw CSS text declared by the component's `<style>` blocks. */
   get $style() {
     return this.$settings.style;
   }
 
+  /** The constructed stylesheet shared by all instances of this component. */
   get $stylesheet(): CSSStyleSheet {
-    // @ts-ignore
-    return this.constructor.$stylesheet;
+    return (this.constructor as unknown as AdvectElement).$stylesheet;
   }
+  /** The element internals (form association, ARIAM etc.) for this host. */
   get $internals() {
     return this.#internals;
   }
   #internals: ElementInternals;
-  /**
-   *
-   */
+  /** The parsed settings assigned to this component's class by the builder. */
   get $settings() {
     // @ts-ignore Assigned by componnet builder
     return this.constructor.$settings as CustomElementSettings;
   }
   #shadow!: ShadowRoot;
+  /** The shadow root when `root="shadow"`, otherwise undefined. */
   get $shadow() {
     return this.#shadow;
   }
 
+  /** The node the component renders into: the shadow root or the host itself. */
   get $domRoot(): HTMLElement | ShadowRoot {
     const root = this.$settings.root === "shadow" ? this.#shadow : this;
     return root;
   }
 
   //#eta = createEta();
+  /** Backing store for `$state`/`state`. */
   #stateMap: Map<string | Symbol, Record<string,any>>= new Map();
+  /** Direct access to the reactive state map. */
   get stateMap() {
     return this.#stateMap;
   }
+  /** Reactive state proxy that schedules a render on every write. */
   $state = new Proxy(
     {},
     {
@@ -85,7 +94,7 @@ export class AdvectElement extends HTMLElement {
       },
       set: (_, p, newValue) => {
         this.#stateMap.set(p, newValue);
-        this.render()
+        this.$scheduleRender()
         return true
       },
       ownKeys: () => {
@@ -93,6 +102,7 @@ export class AdvectElement extends HTMLElement {
       },
     }
   );
+  /** Reactive state proxy that writes without scheduling a render. */
   state = new Proxy(
     {},
     {
@@ -113,7 +123,7 @@ export class AdvectElement extends HTMLElement {
 
 
   /**
-   * References
+   * References: accessing a key returns a promise for the matching `ref` element.
    */
   $refs = new Proxy(
     {},
@@ -125,6 +135,7 @@ export class AdvectElement extends HTMLElement {
     }
   );
 
+  /** Attribute proxy: reads/writes host attributes and schedules a render on write. */
   $attr = new Proxy(
     {},
     {
@@ -157,7 +168,7 @@ export class AdvectElement extends HTMLElement {
         //}
         this.setAttribute(name as string, newValue);
         this.anyAttrChanged?.call(this, name as string, newValue, oldValue);
-        this.render()
+        this.$scheduleRender()
 
         return true;
         // }
@@ -166,33 +177,65 @@ export class AdvectElement extends HTMLElement {
     }
   );
 
+  /** Per-element renderer that compiles and patches the layout. */
+  #renderer = new AdvectRenderer(this);
+  /** Guards against queuing more than one microtask render. */
+  #renderQueued = false;
+
+  /** Queues a render on the next microtask, coalescing repeated calls. */
+  $scheduleRender() {
+    if (this.#renderQueued) return;
+    this.#renderQueued = true;
+    queueMicrotask(() => {
+      this.#renderQueued = false;
+      this.render();
+    });
+  }
+
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    this.render.bind(this);
-    //this.hook.bind(this);
-      // @ts-ignore also a little sussy
-   
   }
+  /**
+   * Runs the component's compiled `<script setup>`, stores its bindings on
+   * `$setup`, and wires any top-level lifecycle functions into `$vm`.
+   */
   initVM(){
-    // @ts-ignore
-       this.$vm = this.constructor?.$advectVMProvider?.call(this, {
-        $state: this.$state,
-        state: this.state,
-        $element: this,
-        $refs: this.$refs,
-        $attr: this.$attr,
-        $internals: this.#internals,
-     //   $dispose: dispose,
-      });
+    const provider = (this.constructor as unknown as {
+      $advectVMProvider?: (ctx: any) => Record<string, any>;
+    })?.$advectVMProvider;
+    if (typeof provider !== "function") {
+      this.$vm = null;
+      this.$setup = {};
+      return;
+    }
+    const bindings = provider.call(this, {
+      $state: this.$state,
+      state: this.state,
+      $element: this,
+      $refs: this.$refs,
+      $attr: this.$attr,
+      $internals: this.#internals,
+    //   $dispose: dispose,
+    }) ?? {};
+    this.$setup = bindings;
+    const vm: AdvectVM = {};
+    for (const hook of AdvectSettings.setup.lifecycleHooks) {
+      if (typeof bindings[hook] === "function") {
+        (vm as Record<string, any>)[hook] = bindings[hook];
+      }
+    }
+    this.$vm = vm;
   }
 
+  /** Optional callback invoked whenever any attribute changes via `$attr`. */
   anyAttrChanged:
     | ((name: string, value: string | null, oldValue: string | null) => void)
     | null = null;
 
+  /** Attaches the shadow root/adopted stylesheet, renders and fires `onConnect`. */
   connectedCallback() {
-    this.initVM()
+    this.initVM();
     if (this.$settings.root == "shadow") {
       this.#shadow = this.attachShadow({ mode: this.$settings.shadow });
       this.#shadow.adoptedStyleSheets = [this.$stylesheet];
@@ -202,206 +245,40 @@ export class AdvectElement extends HTMLElement {
       }
     }
     this.render();
-    this?.$vm?.onConnect?.call(this);
-   
+    runHook(this, "onConnect", this.$vm?.onConnect);
   }
 
+  /** Fires the VM `onMove` hook when the element is moved in the document. */
   connectedMoveCallback() {
-    try {
-      this.$vm?.onMove?.call(this);
-    } catch (e) {
-      console.warn(e);
-    }
+    runHook(this, "onMove", this.$vm?.onMove);
   }
 
+  /** Fires the VM `onDisconnect` hook when the element leaves the DOM. */
   disconnectedCallback() {
-    //this.#reactiveDispose();
-    try {
-      this?.$vm?.onDisconnect?.call(this);
-    } catch (e) {
-      console.warn(e);
-    }
+    runHook(this, "onDisconnect", this.$vm?.onDisconnect);
   }
 
+  /** Fires the VM `onAdopt` hook when the element is adopted into a new document. */
   adoptedCallback() {
-    try {
-      this.$vm?.onAdopt?.call(this);
-    } catch (e) {
-      console.warn(e);
-    }
+    runHook(this, "onAdopt", this.$vm?.onAdopt);
   }
 
+  /** Fires the VM `onWatchedAttrChanged` hook and schedules a render. */
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     requestAnimationFrame(() => {
-      this.$vm?.onWatchedAttrChanged?.call(this, name, newValue, oldValue);
+      runHook(this, "onWatchedAttrChanged", () =>
+        this.$vm?.onWatchedAttrChanged?.call(this, name, newValue, oldValue)
+      );
+      this.$scheduleRender();
     });
   }
 
+  /** Clears the queued flag and runs a render pass. */
   render() {
-    if (this.$vm == null) return;
-    const context = createAdvectContext(this)
-    const hook = (ref:HTMLElement) =>{
-      const refData = context.$$$refs.get(ref.getAttribute('ref') ?? '');
-      if (!refData) return;
-      const event_attrs = ref
-        .getAttributeNames()
-        .filter((name: string) => AdvectSettings.events.indexOf(name) != -1);
-      const eventScript = getScriptVars(refData, '$$$refData')
-
-      event_attrs.forEach((name: string) => {
-        const attr_val = ref.getAttribute(name) ?? "";
-        // @ts-expect-error assigning event handlers by name nothing to see here
-        ref[name] = (_event) => {
-          new AsyncFunction(
-            "$$$context",
-            "$$$refData",
-            "$event",
-            "$this",
-            "$state",
-            "state",
-            "$attr",
-            `${eventScript}; ${attr_val}`
-          )(context,refData, _event, this, this.$state, this.state, this.$attr);
-        };
-      });
-      
-
-      Array.from(ref.attributes)
-        .filter( a => !Object.hasOwn(AdvectSettings.attributes.directives, a.name) && AdvectSettings.events.indexOf(a.name) == -1)
-        .forEach((a: Attr) => {
-            if (a.value.startsWith("{") && a.value.endsWith("}")) {
-                const contextScript = getScriptVars(refData, '$$$refData')
-                const attrScript = a.value.substring(1, a.value.length - 1);
-                const finalScript = `${contextScript}; return ${attrScript}`;
-                const res = new Function("$$$context","$$$refData", "ref", "$state", "state", "$attr", finalScript)(
-                    context,
-                    refData,
-                    ref,
-                    this.$state,
-                    this.state,
-                    this.$attr
-                  );
-                  const boolAttr = AdvectSettings.attributes.booleans.find( att => att.toLocaleLowerCase() == a.name.toLocaleLowerCase());
-                  if (boolAttr){
-                    if (!res){
-                      ref.attributes.removeNamedItem(a.name)  
-                    }else{
-                      ref.setAttribute(a.name,'');
-                    }
-                    
-                  }else{
-                  a.value  = res;
-                  ref.setAttribute(a.name, a.value);
-                }
-            }
-        });
-
-      const exp = ref.innerHTML.matchAll(/\{\{(.*?)\}\}/g);
-      exp.forEach((v) => {
-        const contentScript = v[1].trim();
-        const contextScript = getScriptVars(refData, '$$$refData')
-        const finalScript = `${contextScript}\nreturn ${contentScript}`;
-        const res = new Function("$$$context",'$$$refData', "ref","$state", "state", "$attr", finalScript)(
-          context,
-          refData,
-          ref,
-          this.$state,
-          this.state,
-          this.$attr
-
-        );
-        ref.innerHTML = ref.innerHTML.replace(v[0], res);
-      });
-
-    }
-    const cloneNode = this.$settings.layout?.cloneNode(true) as HTMLElement;
-    const queue: Node[] = [...Array.from(cloneNode.children)] as HTMLElement[];
-
-    while (queue.length > 0) {
-      const el = queue.shift();
-      const isHtmlElement = el instanceof HTMLElement;
-      if (!isHtmlElement) continue;
-  
-      const refId = el?.getAttribute('ref') ?? '';
-      const isRef = refId != null && refId.length > 0;
-      const hasIfStatement = el?.hasAttribute('adv-if');
-      const hasForStatement = el?.hasAttribute('adv-for');
-
-      if (isRef){
-        context.$$$refs.set(refId, {});
-      }
-
-      let ifResult = true
-      if (hasIfStatement && isRef){
-        const ifStatement = el.getAttribute('adv-if') ?? '';
-        const ifScript =`
-        const state = $$$context.state;
-        const $state = $$$context.$state;
-        const $element = $$$context.$element;
-        const $refs = $$$context.$refs;
-        const $attr = $$$context.$attr;
-        return ${ifStatement}};
-        `
-        const ifFunction = new Function(ifScript);
-        ifResult = ifFunction.call(this, context);
-      }
-
-      if (!ifResult) continue;
-
-
-      if (hasForStatement && isRef){
-        const forStatement = el.getAttribute('adv-for');
-        el.removeAttribute('adv-for');
-        if (!forStatement) continue;
-        const split = forStatement?.split('of') ?? [];
-        const arrayName = split.at(-1)
-        const dataName = split.at(0)?.indexOf(',') != -1
-          ? split.at(0)?.split(',')[0].trim()
-          : split.at(0)?.trim();        
-        const indexName = split.at(0)?.indexOf(',') != -1
-          ? split.at(0)?.split(',')[1].trim()
-          : '';
-
-        const nodeDestination = el.parentElement;
-        nodeDestination?.removeChild(el);
-        context.$$$refs.delete(refId)
-        
-        const forClone = el.cloneNode(true);
-        
-        const forScript = `
-        const state = $$$context.state;
-        const $state = $$$context.$state;
-        const $element = $$$context.$element;
-        const $refs = $$$context.$refs;
-        const $attr = $$$context.$attr;
-        for(let ${indexName} = 0; ${indexName} < ${arrayName}.length; ${indexName}++){
-          const ${dataName} = ${arrayName}[${indexName}];
-          const $$$newNode = $$$forClone.cloneNode(true);
-          const $$$newRefId = '${refId}_' + ${indexName};
-          $$$newNode.setAttribute('ref', $$$newRefId);
-          const newLocals = {...$$$context.$$$locals, ${indexName},${dataName}}
-          $$$context.$$$locals = newLocals;
-          $$$context.$$$refs.set($$$newRefId, newLocals);
-          $$$queue.push(...Array.from($$$newNode.children));
-          $$$nodeDestination.appendChild($$$newNode);
-          $$$hook($$$newNode);
-        
-        }`;
-        const forFunction = new Function("$$$context", "$$$nodeDestination", "$$$forClone",'$$$queue', '$$$hook', forScript)
-        forFunction.call(this, context, nodeDestination, forClone, queue,hook)
-
-      }
-      if (isRef) hook(el);
-      if (!hasForStatement) queue.push(...(Array.from(el.children)));
-
-
-    }
-
-    while (this.$domRoot.firstChild) {
-      this.$domRoot.removeChild(this.$domRoot.firstChild);
-    }
-    this.$domRoot.appendChild(cloneNode)
+    this.#renderQueued = false;
+    this.#renderer.render();
   }
+  /** Dynamically imports one or more modules and invokes `cb` with the results. */
   module( url : string | string[], cb: (module: any[]) => void){
     const _urls = Array.isArray(url) ? url : [url];
     const results = Promise.all(_urls.map(async (u) => {

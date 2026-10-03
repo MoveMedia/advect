@@ -7,12 +7,25 @@
   <title>Document</title>
   <link rel="stylesheet" href="/components/character/character.css" />
   <script src="/advect/advect.js" type="module"></script>
-  <script rel="/components/character/character-db.html" type="application/html"></script>
+  <script type="advect">
+    import "/components/my-component.vue";
+  </script>
 </head>
 
 <body>
-  <character-db></character-db>
-  <!-- <my-component></my-component> -->
+  <my-component></my-component>
+  <table>
+    <thead>
+      <tr><td>
+        World
+      </td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Hello</td>
+      </tr>
+    </tbody>
+  </table>
   <style>
     :root {
       --fg-root: white;

@@ -7,6 +7,7 @@
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "test": "bun test",
     "build": "bun build --entrypoints ./src/advect.ts --outdir ./dist --target browser  --minify",
     "build-site": "bun build --entrypoints ./src/advect.ts --outdir ./site/static/advect --target browser --minify",
     "debug": "bun run build-site && cd ./site && bun --hot index.ts",
@@ -22,7 +23,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "crossoriginworker": "^1.1.0"
+    "crossoriginworker": "^1.1.0",
+    "effect": "^4.0.0"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
   "main": "dist/advect.js",

@@ -1,7 +1,10 @@
 import type { AdvectElement } from "./advect.element";
 
+/** Names of the supported watched-attribute types. */
 export type AttrTypeKey = keyof typeof AttrTypes;
+/** The watched-attribute type descriptor map. */
 export type AttrType = typeof AttrTypes;
+/** Parse/store implementations for each watched-attribute type. */
 export const AttrTypes = {
   int: {
     parse: (val: string) => {
@@ -50,8 +53,11 @@ export const AttrTypes = {
   color: {},
 };
 
+/** Names of the supported attribute format hints. */
 export type FormatTypeKey = keyof typeof FormatTypes;
+/** The attribute format hint map. */
 export type FormatType = typeof FormatTypes;
+/** Placeholder format hints used by attribute declarations. */
 const FormatTypes = {
   none: {},
   rgb: {},
@@ -74,13 +80,15 @@ export interface CustomElementSettings {
    */
   tagName: string;
   /**
-   * The JS module of the component
-   * will be the first <script type="module"> with no "src" atttribute
+   * The compiled JS module of the component.
+   * Generated from the first top-level `<script setup>` with no "src" attribute;
+   * it wraps the authored setup body and returns its top-level declarations.
+   * Optional - a component renders without it.
    */
   module: string;
   /**
-   * Reference to the HTMLNode interface.
-   * This can be used to reference the original component markup without needing access the the browser APIs
+   * The template content (minus any <datalist>) used as the component layout.
+   * This can be used to reference the original component markup without needing to access the browser APIs
    */
   layout: DocumentFragment | HTMLElement | Element | null;
 
@@ -95,11 +103,9 @@ export interface CustomElementSettings {
   root: "light" | "shadow" | "none";
   /**
    * An object containing the watched attributes
-   * Watched attributes are defined inside the
-   * <settings>
-   * <attr name="ting" type="string" />
-   * </settings> tags
-   * these are not added to the mark up
+   * Watched attributes are declared inside the template with
+   * <datalist><option name="..." type="..."></datalist>
+   * and are not added to the markup.
    */
   watched: {
     [key: string]: {
@@ -114,10 +120,22 @@ export interface CustomElementSettings {
 
   logs: string[];
 
-  loads: string[];
+  /**
+   * Component import specifiers found in the module script.
+   * These are side-effect imports (eg. `import "./child.vue"`) that
+   * reference other Advect component files.
+   */
+  imports: string[];
+
+  /**
+   * Absolute URL the component was loaded from.
+   * Used to resolve relative component imports and for diagnostics.
+   */
+  sourceUrl: string;
 }
 
 
+/** Returns a fresh settings object with all fields at their defaults. */
 export function getDefaultElementSettings(){
   return  {
       tagName: "",
@@ -128,10 +146,12 @@ export function getDefaultElementSettings(){
       logs: [],
       layout: null,
       style: "",
-      loads: [],
+      imports: [],
+      sourceUrl: "",
     } as CustomElementSettings;
 }
 
+/** True when `attr` names a known watched-attribute type (case-insensitive). */
 export function isValidAttrType(attr: string) {
   return (
     Object.keys(AttrTypes).find((t) => t.toLowerCase() == attr.toLowerCase()) !=
@@ -169,6 +189,7 @@ export function toModule(script: string, inject: string[]) {
  * Broadcast channel for console logs
  */
 
+/** Removes all HTML comment nodes from a string. */
 export function stripHtmlComments(htmlString: string) {
   return htmlString.replace(/<!--[\s\S]*?-->/g, "");
 }
@@ -209,11 +230,39 @@ export interface AdvectVM {
   onAdopt?: () => void;
 }
 
-export type AvectVMProvider = () => AdvectVM;
+/**
+ * Factory generated from a component's `<script setup>`.
+ * It receives the element context and returns the setup bindings
+ * (auto-exposed values, including lifecycle hook functions).
+ */
+export type AvectVMProvider = (context: Record<string, any>) => Record<string, any>;
 
+/** Global naming/settings constants used by the runtime and parser. */
 export const AdvectSettings = {
+  setup: {
+    /**
+     * Values injected as locals into a component's `<script setup>` body.
+     * Declared names shadow these.
+     */
+    context: ["$state", "state", "$element", "$refs", "$attr", "$internals"],
+    /**
+     * Top-level setup functions automatically wired as the element's VM hooks.
+     */
+    lifecycleHooks: [
+      "onConnect",
+      "onDisconnect",
+      "onMove",
+      "onAdopt",
+      "onWatchedAttrChanged",
+    ],
+  },
   data:{
-    session_key : '$$$advect-loads'
+    session_key : '$$$advect-loads',
+    /**
+     * Component files are plain html documents with a single
+     * <template advect="..."> block plus a sibling script/style
+     */
+    componentExtensions: [".vue", ".html"],
   },
   tags: {
     layout: "layout",
@@ -249,13 +298,34 @@ export const AdvectSettings = {
   },
   attributes: {
     booleans: ["checked", "disabled", "readonly", "popover"],
+    /**
+     * This will be the components name ie my-component
+     */
     template: "advect",
+    /**
+     * The type used by the entry script that imports root components
+     * eg. <script type="advect">import "./root.vue";</script>
+     */
+    scriptType: "advect",
     props_prefix: "prop-",
     ref_key: "ref",
     directives: {
-      forStatement: "adv-for",
-      ifStatement:  "adv-if",
-      ofStatement:  "adv-of",
+      ifStatement: "v-if",
+      elseIfStatement: "v-else-if",
+      elseStatement: "v-else",
+      forStatement: "v-for",
+      showStatement: "v-show",
+      modelStatement: "v-model",
+      htmlStatement: "v-html",
+      textStatement: "v-text",
+      onceStatement: "v-once",
+      preStatement: "v-pre",
+      bindPrefix: "v-bind",
+      onPrefix: "v-on",
+      keyStatement: "v-bind:key",
+      bindShort: ":",
+      onShort: "@",
+      slotShort: "#",
     },
   },
   events: [
@@ -308,9 +378,11 @@ export const AdvectSettings = {
 
 
 
+/** Matches a single CSS `@property` block with its name and body. */
 const propertyBlockRegex =
   /@property\s+(--[A-Za-z0-9-_]+)\s*\{([\s\S]*?)\}/g;
 
+/** Decodes the `.-`/`-.` escapes back to `<`/`>` inside `@property` syntax values. */
 export function decodePropertySyntax(css:string) {
   return css.replace(propertyBlockRegex, (full, name, body) => {
     const newBody = body.replace(
@@ -327,6 +399,7 @@ export function decodePropertySyntax(css:string) {
     return `@property ${name} {${newBody}}`;
   });
 }
+/** Encodes `<`/`>` as `.-`/`-.` inside `@property` syntax values. */
 export function encodePropertySyntax(css:string) {
   return css.replace(propertyBlockRegex, (full, name, body) => {
     const newBody = body.replace(
@@ -347,6 +420,7 @@ export function encodePropertySyntax(css:string) {
 
 
 
+/** Builds the evaluation context object passed into compiled expressions and the VM. */
 export function createAdvectContext(el:AdvectElement){
 
   return {
@@ -362,8 +436,15 @@ export function createAdvectContext(el:AdvectElement){
  
 }
 
-export function getScriptVars (context:Record<string | symbol, any>, objectName:string =  'context'):string{
+/**
+ * Builds `let` declarations that destructure each context key from `objectName`.
+ * @param context object whose keys become local bindings
+ * @param objectName identifier the bindings read from
+ * @param exclude keys to skip (eg. names the script declares itself)
+ */
+export function getScriptVars (context:Record<string | symbol, any>, objectName:string =  'context', exclude:string[] = []):string{
   return Object.keys(context)
+      .filter((v) => !exclude.includes(v))
       .map((v) => {
         return `let ${v} = ${objectName}['${v}'];`;
       })
