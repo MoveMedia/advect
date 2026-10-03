@@ -1,0 +1,79 @@
+<template advect="character-card" root="shadow" shadow="open">
+  <layout>
+    <div class="char-card" ref="card" name="{state?.character?.name}">
+      <figure class="headshot">
+        <img
+          alt="image"
+          width="200px"
+          height="200px"
+          src="{state?.character?.image || 'https://picsum.photos/200/200' }"
+          ref="image"
+        />
+        <figcaption ref="name">
+          {{ $state?.character?.name ?? 'No Data Selected' }}
+        </figcaption>
+      </figure>
+    </div>
+
+    <style>
+      @import "https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css";
+    </style>
+  </layout>
+  <style>
+    @property --sample-prop {
+      syntax: "<color>";
+      inherits: false;
+    }
+
+    .char-card {
+      min-height: 300px;
+      border: 2px solid white;
+      border-radius: 1em;
+      width: fit-content;
+      overflow: hidden;
+      padding-bottom: 20px;
+
+      figure.headshot {
+        margin: 0;
+        & figcaption {
+          font-size: 20px;
+        }
+      }
+
+      border: 4px solid transparent;
+      /* 2. Apply border-radius for rounded corners */
+      border-radius: 15px;
+
+      /* 3. Define the background layers */
+      background:
+      /* Inner solid background (matches page background) */ linear-gradient(
+            transparent,
+            transparent
+          )
+          padding-box,
+        /* Outer gradient background (the border itself) */
+          linear-gradient(to right, darkblue, darkorchid) border-box;
+
+      /* 4. Clip the backgrounds to their respective boxes */
+      background-clip: padding-box, border-box;
+
+      /* Other styles for demonstration */
+      width: 200px;
+      text-align: center;
+    }
+  </style>
+  <script type="module">
+    export default function ({ $element, $refs, $state, state }) {
+      return {
+        setCharacter(character) {
+          $state.character = character;
+          $refs.image.then((img) => {
+            if (img) {
+              img.src = character.image;
+            }
+          });
+        },
+      };
+    }
+  </script>
+</template>

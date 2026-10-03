@@ -1,0 +1,55 @@
+/* 
+:has(character-card:not(:defined)){
+
+}
+:has(character-db:not(:defined)){
+
+}
+:has(new-character-modal:not(:defined)){
+
+}
+ */
+
+character-db:not(:defined) {
+  /* 32px, blue, 0.8s */
+  display:none;
+  --side-length: 32px;
+  display: block;
+  width: var(--side-length);
+  height: var(--side-length);
+  &::after {
+  --side-length: 32px;
+  --spinner-color: blue;
+  --duration: 0.8s;
+  --timing: ease-in-out;
+  content: "";
+  display: block;
+  margin: 10px;
+  width: var(--side-length);
+  height: var(--side-length);
+  border-radius: 50%;
+  border-left-color: var(--spinner-color);
+  animation-name: spin;
+  animation-duration: var(--duration);
+  animation-iteration-count: infinite;
+  animation-fill-mode: fowards;
+  animation-delay: 0;
+  animation-timing-function: var(--timing);
+  border-style: solid;
+  border-width: thick;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+}
+
+
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(359deg);
+  }
+}

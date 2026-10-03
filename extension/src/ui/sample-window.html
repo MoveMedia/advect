@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--advect-->
+    <title>Advect Sample Window</title>
+  </head>
+  <body>
+    <h1>Sample Window</h1>
+	<h2>Components:</h2>
+    <div id="message-out"></div>
+    <script>
+      const vscode = acquireVsCodeApi();
+      const messageOut = document.getElementById("message-out");
+      window.addEventListener("message", function (event) {
+        messageOut.innerText = JSON.stringify(event.data, null, 4);
+
+		if (!window.advect){
+			vscode.postMessage({
+				action:'LOG',
+				data: 'ADVECT NOT LOADED'
+			})
+			return;
+		}
+
+		switch (event.data.action) {
+			case "SETTINGS_FROM_STRING":
+				const cwes = window.advect.cweSettingsFromString(event.data);
+        vscode.postMessage({
+          action: 'LOADED_CWE',
+          data: cwes
+        })
+				break;
+			default:
+				break;
+		}
+      });
+    </script>
+  </body>
+</html>

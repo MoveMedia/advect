@@ -254,8 +254,8 @@ export const AdvectSettings = {
     ref_key: "ref",
     directives: {
       forStatement: "adv-for",
-      ifStatement:  "adv-if",
-      ofStatement:  "adv-of",
+      ifStatement: "adv-if",
+      ofStatement: "adv-of",
     },
   },
   events: [

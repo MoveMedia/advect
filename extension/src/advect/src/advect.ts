@@ -14,7 +14,8 @@ const components = new Map<string, CustomElementSettings>();
 export function getAllComponents(){
   return components;
 }
-
+// @ts-ignore
+window.advectGetComponents = getAllComponents;
 
 
 
@@ -183,11 +184,4 @@ if (document.readyState !== "loading") {
   onContent(null);
 } else {
   document.addEventListener("DOMContentLoaded", onContent);
-}
-//@ts-ignore
-window.advect = {
-  getAllComponents,
-  createCustomElementClasses,
-  cweSettingsFromString,
-  cweFromUrls
 }
