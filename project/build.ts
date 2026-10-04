@@ -1,7 +1,11 @@
-Bun.build({
-    entrypoints: ['./src/advect.ts','./src/advect.actions.ts','./src/advect.sharedworker.ts', './src/advect.worker.ts','./src/advect.worker.ts',],
+await Bun.build({
+    entrypoints: ['./src/advect.ts'],
     outdir: './dist',
     minify:true,
     sourcemap:"external",
     target: "browser",
   });
+
+const file = Bun.file("./dist/advect.js");
+await Bun.write("/site/static/advect/advect.js", file);
+

@@ -1,16 +1,16 @@
 {
   "name": "@advect/advect",
   "displayName": "advect",
-  "private": false,
+  "private": true,
   "version": "2.1.1",
   "type": "module",
   "author": "PartyGodTroy <move.app.2k@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ./dist --target browser  --minify",
-    "build-site": "bun build --entrypoints ./src/advect.ts ./src/advect.actions.ts ./src/advect.sharedworker.ts ./src/advect.worker.ts --outdir ../advect.org/public --target browser --minify",
-    "debug": "bun run build --watch",
-    "debug-site": "bun run build-site --watch",
+    "test": "bun test",
+    "build": "bun build --entrypoints ./src/advect.ts --outdir ./dist --target browser  --minify",
+    "build-site": "bun build --entrypoints ./src/advect.ts --outdir ./site/static/advect --target browser --minify",
+    "debug": "bun run build-site && cd ./site && bun --hot index.ts",
     "publish-npm": "npm publish",
     "publish-jsr": "bunx jsr publish",
     "publish": "bun run build && bun run publish-npm || bun run publish-jsr"
@@ -24,8 +24,7 @@
   },
   "dependencies": {
     "crossoriginworker": "^1.1.0",
-    "eta": "^3.5.0",
-    "zustand": "^5.0.1"
+    "effect": "^4.0.0"
   },
   "description": "Write plain html and unlock the power of web components NO BUILD STEP, and with as little \"Magic\" as possible,",
   "main": "dist/advect.js",

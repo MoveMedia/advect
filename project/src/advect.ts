@@ -1,874 +1,587 @@
-/**
- * Advect web component library. 
- */
-// @ts-ignore There are no TS definitions for this lib
-import getCrossOriginWorkerURL from 'crossoriginworker';
-import { Actions, type ActionKey } from "./advect.actions";
-import { adv_log, adv_warn, AsyncFunction, type CustomElementSettings, onloadElements, toModule, toUpperCamelCase, AttrTypes } from "./lib";
-import { Eta } from "eta";
-import { cleanTemplate, convertTables } from "./advect.render";
-import * as zustand from  "zustand/vanilla" 
-import type { StoreApi } from "zustand";
+import {
+  AdvectSettings,
+  decodePropertySyntax,
+  getDefaultElementSettings,
+  getScriptVars,
+  toModule,
+  type AvectVMProvider,
+  type CustomElementSettings,
+} from "./advect.lib";
+import { AdvectElement } from "./advect.element";
 
+/** URLs of component files that have already been fetched, so circular imports terminate. */
+const loaded = new Set<string>();
+/** Registry of every parsed component, keyed by its custom element tag name. */
+const components = new Map<string, CustomElementSettings>();
 
-/**
- * Creates a shared worker for running advect
- * @returns a shared worker for running advect
- */
-const createAdvectSharedWorker = async () => {
-  const openPromises = new Map<
-    string,
-    { resolve: Function; reject: Function }
-  >();
-  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.sharedworker.js", import.meta.url).href);
-  const worker = new SharedWorker(workerUrl, { type: "module" });
-  worker.onerror = (e) => {
-    console.warn("error", e);
-  };
-  worker.port.onmessage = (e) => {
-    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
-    if (e.data?.isError === true && pr) {
-      pr.reject(e);
-    }
-    if (pr) {
-      pr.resolve(e);
-      openPromises.delete(e.data.$id);
-    }
-  };
-  const messagePromise = async (
-    action: string,
-    data: Record<string, any> | any
-  ) => {
-    return new Promise((resolve, reject) => {
-      const $id = Math.random().toString(36).substr(2, 9);
-      openPromises.set($id, { resolve, reject });
-      worker.port.postMessage({ action, data, $id });
-    });
-  };
-  return {
-    messagePromise,
-    worker,
-    type: "shared",
-  };
-};
-
-
-/**
- * Creates a dedicated worker for running advect
- * @returns a dedicated worker for running advect
- */
-const createAdvectDedicatedWorker = async () => {
-  const openPromises = new Map<
-    string,
-    { resolve: Function; reject: Function }
-  >();
-
-  const workerUrl = await getCrossOriginWorkerURL(new URL("advect.worker.js", import.meta.url).href);
-  const worker = new Worker(workerUrl, { type: "module" });
-  worker.onerror = (e) => {
-    console.error("error", e);
-  };
-  worker.onmessage = (e) => {
-    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
-    if (e.data?.isError === true && pr) {
-      pr.reject(e);
-    }
-    if (pr) {
-      pr.resolve(e);
-      openPromises.delete(e.data.$id);
-    }
-  };
-  const messagePromise = async (action: string, data: Record<string, any>) => {
-    return new Promise((resolve, reject) => {
-      const $id = Math.random().toString(36).substr(2, 9);
-      openPromises.set($id, { resolve, reject });
-      worker.postMessage({ action, data, $id });
-    });
-  };
-  return {
-    messagePromise,
-    worker,
-    type: "dedicated",
-  };
-};
-
-/**
- * Creates a no worker for running advect
- * @returns a shared worker for running advect
- */
-const createAdvectNoWorker = () => {
-  // to keep the workflow the same we use 2  broadcast channels noWorker2 sends to noWorker
-  const noWorker = new BroadcastChannel("advect:noworker");
-  const noWorker2 = new BroadcastChannel("advect:noworker");
-
-  noWorker.onmessageerror = (ev) => console.error(ev);
-  noWorker.onmessage = (e) => {
-
-    const pr = openPromises.has(e.data.$id) && openPromises.get(e.data.$id);
-    if (e.data?.isError === true && pr) {
-      pr.reject(e);
-    }
-    if (pr) {
-     // @ts-ignore
-     Actions[e.data.action as ActionKey].call(null, e.data.data).then (result => {
-      e.data.result = result;
-      pr.resolve(e);
-      openPromises.delete(e.data.$id);
-    })
-    }
-  };
-  const openPromises = new Map<string,{ resolve: Function; reject: Function }>();
-  const messagePromise = async (action: string, data: Record<string, any>) => {
-    return new Promise((resolve, reject) => {
-      const $id = Math.random().toString(36).substr(2, 9);
-      openPromises.set($id, { resolve, reject });
-      noWorker2.postMessage({ action, data, $id });
-    });
-  }
-  return {
-    messagePromise,
-    worker: null,
-    type: "no-worker",
-  };
-};
-
-/**
- * Creates the advect instance with the correct worker type
- * @returns 
- */
-const createAdvect = async () => {
-
-  const workerType = new URL(import.meta.url).searchParams.get("type")?.toLocaleLowerCase(); // 5
-  let messagePromise: (action: string, data: Record<string, any>) => Promise<unknown> | null;
-  switch(workerType){
-    case 'd':
-      messagePromise = (await createAdvectDedicatedWorker()).messagePromise;
-      break;
-    case 's':
-      messagePromise = (await createAdvectSharedWorker()).messagePromise;
-      break;
-    default:
-      messagePromise = createAdvectNoWorker().messagePromise;
-      break;
-  }
-
-  const render = async (data: Record<string, any>) => {
-    return messagePromise("prerender", data);
-  };
-
-  /**
-   * Loads a webcomponent from a url or list of urls
-   * @param urls 
-   * @returns 
-   */
-const load  = async (urls:string|string[]) =>{
-  const buildMsg = await messagePromise("load", { urls }) as MessageEvent<{result: CustomElementSettings[], id:string, action:ActionKey}>;
-  const buildSettings = buildMsg.data.result;
-  return createCustomElementClasses(buildSettings)
+/** Returns the registry of all parsed component settings keyed by tag name. */
+export function getAllComponents() {
+  return components;
 }
 
 /**
- * Creates the "Class" that will be used to register users custom components
- * @param buildSettings 
- * @param register 
- * @returns 
+ * A static import statement discovered in a module script
  */
-const createCustomElementClasses = (buildSettings:CustomElementSettings[], register = true) =>{
+export interface StaticImport {
+  specifier: string;
+  full: string;
+  index: number;
+}
+
+/** True when a module specifier points at an Advect component file, judged by its extension. */
+export function isComponentSpecifier(specifier: string): boolean {
+  const clean = specifier.split(/[?#]/)[0].toLowerCase();
+  return AdvectSettings.data.componentExtensions.some((ext) => clean.endsWith(ext));
+}
+
+/**
+ * Finds the end of an import statement starting at `start`.
+ * Tracks strings, comments and bracket depth so multi-line binding imports
+ * work without ever crossing into a following statement.
+ */
+function findStatementEnd(source: string, start: number): number {
+  let i = start;
+  let depth = 0;
+  let string: string | null = null;
+  while (i < source.length) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (string) {
+      if (ch === "\\") {
+        i += 2;
+        continue;
+      }
+      if (ch === string) string = null;
+      i++;
+      continue;
+    }
+    if (ch === "/" && next === "/") {
+      while (i < source.length && source[i] !== "\n") i++;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (i < source.length && !(source[i] === "*" && source[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      string = ch;
+      i++;
+      continue;
+    }
+    if (ch === "{" || ch === "(" || ch === "[") depth++;
+    else if (ch === "}" || ch === ")" || ch === "]") depth--;
+    else if (ch === ";" && depth === 0) {
+      i++;
+      break;
+    } else if (ch === "\n" && depth === 0) {
+      break;
+    }
+    i++;
+  }
+  return i;
+}
+
+/**
+ * Parses static `import` statements (side-effect and binding imports).
+ * Dynamic `import()` and `import.meta` are intentionally ignored.
+ */
+export function parseStaticImports(source: string): StaticImport[] {
+  const out: StaticImport[] = [];
+  const re = /^[ \t]*import\b/gm;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(source))) {
+    const start = match.index;
+    const after = source.slice(start + match[0].length).replace(/^[ \t]+/, "");
+    if (after.startsWith("(") || after.startsWith(".")) {
+      re.lastIndex = findStatementEnd(source, start);
+      continue;
+    }
+    const end = findStatementEnd(source, start);
+    const full = source.slice(start, end);
+    const specMatch = full.match(/['"]([^'"]+)['"]/);
+    if (specMatch) out.push({ specifier: specMatch[1], full, index: start });
+    re.lastIndex = end;
+  }
+  return out;
+}
+
+/** Replaces each import statement with spaces so offsets/newlines are preserved. */
+function blankStatements(source: string, imports: StaticImport[]): string {
+  let result = source;
+  for (let i = imports.length - 1; i >= 0; i--) {
+    const imp = imports[i];
+    const blank = imp.full.replace(/[^\n]/g, " ");
+    result = result.slice(0, imp.index) + blank + result.slice(imp.index + imp.full.length);
+  }
+  return result;
+}
+
+/**
+ * Replaces comments and string/template-literal contents with spaces while
+ * preserving offsets and newlines, so declaration scanning never trips on them.
+ */
+function maskNonCode(source: string): string {
+  const out = source.split("");
+  let i = 0;
+  while (i < source.length) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (ch === "/" && next === "/") {
+      while (i < source.length && source[i] !== "\n") out[i++] = " ";
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      out[i++] = " ";
+      out[i++] = " ";
+      while (i < source.length && !(source[i] === "*" && source[i + 1] === "/")) {
+        if (source[i] !== "\n") out[i] = " ";
+        i++;
+      }
+      if (i < source.length) {
+        out[i++] = " ";
+        out[i++] = " ";
+      }
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      const quote = ch;
+      out[i++] = " ";
+      while (i < source.length) {
+        if (source[i] === "\\") {
+          out[i++] = " ";
+          if (i < source.length) out[i++] = " ";
+          continue;
+        }
+        if (source[i] === quote) {
+          out[i++] = " ";
+          break;
+        }
+        if (source[i] !== "\n") out[i] = " ";
+        i++;
+      }
+      continue;
+    }
+    i++;
+  }
+  return out.join("");
+}
+
+/** Returns the bracket depth at each character index of a masked source. */
+function depthMap(masked: string): number[] {
+  const depths = new Array<number>(masked.length).fill(0);
+  let depth = 0;
+  for (let i = 0; i < masked.length; i++) {
+    const ch = masked[i];
+    if (ch === "}" || ch === ")" || ch === "]") depth = Math.max(0, depth - 1);
+    depths[i] = depth;
+    if (ch === "{" || ch === "(" || ch === "[") depth++;
+  }
+  return depths;
+}
+
+/** Splits a string on `sep` occurring at bracket depth 0. */
+function splitTopLevel(source: string, sep: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === "{" || ch === "(" || ch === "[") depth++;
+    else if (ch === "}" || ch === ")" || ch === "]") depth--;
+    else if (ch === sep && depth === 0) {
+      parts.push(source.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(source.slice(start));
+  return parts;
+}
+
+/** Index of `token` at bracket depth 0, or -1. */
+function topLevelIndexOf(source: string, token: string): number {
+  let depth = 0;
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === "{" || ch === "(" || ch === "[") depth++;
+    else if (ch === "}" || ch === ")" || ch === "]") depth--;
+    else if (ch === token && depth === 0) return i;
+  }
+  return -1;
+}
+
+/** Extracts the identifiers bound by a single binding pattern (name, object or array). */
+function extractPatternNames(pattern: string): string[] {
+  const names: string[] = [];
+  const trimmed = pattern.trim();
+  if (!trimmed) return names;
+  const eq = topLevelIndexOf(trimmed, "=");
+  const base = (eq !== -1 ? trimmed.slice(0, eq) : trimmed).trim();
+  if (!base) return names;
+  if (base.startsWith("...")) return extractPatternNames(base.slice(3));
+  if (base.startsWith("{") || base.startsWith("[")) {
+    const last = base[base.length - 1];
+    const inner =
+      last === "}" || last === "]" ? base.slice(1, -1) : base.slice(1);
+    for (const part of splitTopLevel(inner, ",")) {
+      const p = part.trim();
+      if (!p) continue;
+      const colon = topLevelIndexOf(p, ":");
+      if (colon !== -1) {
+        names.push(...extractPatternNames(p.slice(colon + 1)));
+        continue;
+      }
+      names.push(...extractPatternNames(p));
+    }
+    return names;
+  }
+  if (/^[A-Za-z_$][\w$]*$/.test(base)) names.push(base);
+  return names;
+}
+
+/**
+ * Collects the identifiers bound by top-level declarations in a script.
+ * Tolerant, comment/string/bracket-aware scan; not a full JavaScript parser.
+ */
+export function collectTopLevelNames(source: string): string[] {
+  const masked = maskNonCode(source);
+  const depths = depthMap(masked);
+  const names: string[] = [];
+  const seen = new Set<string>();
+  const add = (name: string) => {
+    if (name && !seen.has(name)) {
+      seen.add(name);
+      names.push(name);
+    }
+  };
+  const keyword = /\b(const|let|var|function|class)\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = keyword.exec(masked))) {
+    const index = match.index;
+    if (depths[index] !== 0) continue;
+    const prev = masked[index - 1];
+    if (prev === "." || /[\w$]/.test(prev ?? "")) continue;
+    const kind = match[1];
+    const after = index + match[0].length;
+    if (kind === "function" || kind === "class") {
+      const nameMatch = masked.slice(after).match(/^\s*\*?\s*([A-Za-z_$][\w$]*)/);
+      if (nameMatch) add(nameMatch[1]);
+      continue;
+    }
+    const end = findStatementEnd(masked, after);
+    const declaration = masked.slice(after, end);
+    for (const part of splitTopLevel(declaration, ",")) {
+      for (const name of extractPatternNames(part)) add(name);
+    }
+  }
+  return names;
+}
+
+/**
+ * Wraps a component's `<script setup>` body into an executable module.
+ * The generated default export injects the element context, runs the authored
+ * body, and returns its top-level declarations (bindings and hook functions).
+ * Component import statements are blanked so the data: URL module never tries
+ * to fetch a `.vue` file as JavaScript.
+ */
+export function prepareSetup(source: string): { imports: string[]; module: string } {
+  const parsed = parseStaticImports(source);
+  const componentImports = parsed.filter((p) => isComponentSpecifier(p.specifier));
+  // Every static import is removed from the body: component imports are handled
+  // by the loader, while plain imports are hoisted to the module top level.
+  const body = blankStatements(source, parsed);
+  const declared = collectTopLevelNames(body);
+  const hoisted = parsed
+    .filter((p) => !isComponentSpecifier(p.specifier))
+    .map((p) => p.full.trim());
+
+  const context: Record<string, any> = {};
+  for (const key of AdvectSettings.setup.context) context[key] = null;
+  const prelude = getScriptVars(context, "$$$context", declared);
+
+  const module = [
+    ...hoisted,
+    "export default function ($$$context) {",
+    prelude,
+    body,
+    `return { ${declared.join(", ")} };`,
+    "}",
+  ].join("\n");
+
+  return {
+    imports: componentImports.map((p) => p.specifier),
+    module,
+  };
+}
+
+/** Matches a single CSS `@import` rule up to its terminating semicolon. */
+const AT_IMPORT_RE = /@import[^;]*;/g;
+
+/**
+ * `@import` rules are not reliably supported inside constructable/adopted
+ * stylesheets, so they are split out and rendered as a real <style> node
+ * inside the component root (which also keeps relative url() working).
+ */
+function splitImports(css: string): { imports: string; rules: string } {
+  const imports: string[] = [];
+  const rules = css.replace(AT_IMPORT_RE, (rule) => {
+    imports.push(rule);
+    return "";
+  });
+  return { imports: imports.join("\n"), rules };
+}
+
+/** Resolves a specifier against a base URL, falling back to the raw specifier on failure. */
+export function resolveUrl(specifier: string, baseUrl: string): string {
+  try {
+    const base =
+      baseUrl ||
+      (typeof document !== "undefined" && document.baseURI) ||
+      (typeof location !== "undefined" ? location.href : "");
+    if (!base) return specifier;
+    return new URL(specifier, base).href;
+  } catch {
+    return specifier;
+  }
+}
+
+/** Parses a Document into component settings from its single `<template advect="...">`. */
+export const cweSettingsFromDoc = (
+  doc: Document,
+  baseUrl = ""
+): CustomElementSettings[] => {
+  if (!doc) return [];
+  const settings: CustomElementSettings[] = [];
+  const templates = Array.from(
+    doc.querySelectorAll(`template[${AdvectSettings.attributes.template}]`)
+  ) as HTMLTemplateElement[];
+
+  if (templates.length > 1) {
+    console.error(
+      `[advect] only a single component per file is allowed, found ${templates.length}`
+    );
+    return [];
+  }
+
+  for (const template of templates) {
+    const content = template.content.cloneNode(true) as DocumentFragment;
+    const setting = getDefaultElementSettings();
+    setting.sourceUrl = baseUrl;
+    setting.tagName =
+      template.getAttribute(AdvectSettings.attributes.template) ?? "";
+    if (template.hasAttribute("root")) {
+      setting.root = template.getAttribute("root") as
+        | "light"
+        | "shadow"
+        | "none";
+    }
+    if (template.hasAttribute("shadow")) {
+      setting.shadow = template.getAttribute("shadow") as "open" | "closed";
+    }
+
+    // <datalist> declares watched attributes and is not part of the layout.
+    const datalist = content.querySelector(AdvectSettings.tags.settings);
+    if (datalist) {
+      Array.from(datalist.children)
+        .map((child) => {
+          if (child.nodeName == "OPTION") {
+            return {
+              name: child.getAttribute("name"),
+              type: child.getAttribute("type"),
+            };
+          }
+        })
+        .filter((v) => v?.name)
+        .forEach((v) => {
+          setting.watched[v?.name ?? ""] = {
+            type: (v?.type ?? "string") as any,
+          };
+        });
+      datalist.remove();
+    }
+
+    // The template content itself is the layout now; <layout> is no longer used.
+    setting.layout = content;
+
+    // The setup script and styles are top-level siblings of the template,
+    // never descendants of it.
+    const setupScript = Array.from(
+      doc.querySelectorAll("script[setup]")
+    ).find((script) => !template.contains(script) && !script.hasAttribute("src"));
+
+    if (setupScript) {
+      const prepared = prepareSetup(setupScript.textContent ?? "");
+      setting.module = prepared.module;
+      setting.imports = prepared.imports;
+    }
+
+    const styleElements = Array.from(doc.querySelectorAll("style")).filter(
+      (style) => !template.contains(style)
+    );
+    const { imports: atImports, rules } = splitImports(
+      styleElements.map((style) => style.textContent ?? "").join("\n")
+    );
+    setting.style = rules;
+    if (atImports && setting.layout) {
+      const ownerDoc = template.ownerDocument ?? doc;
+      const styleNode = ownerDoc.createElement("style");
+      styleNode.textContent = atImports;
+      setting.layout.appendChild(styleNode);
+    }
+
+    settings.push(setting);
+  }
+  return settings;
+};
+
+/** Parses an HTML string into component settings via `DOMParser`. */
+export const cweSettingsFromString = (htmlString: string, baseUrl = "") => {
+  try {
+    const docParser = new DOMParser();
+    const doc = docParser.parseFromString(htmlString, "text/html");
+    return cweSettingsFromDoc(doc, baseUrl);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
+
+/**
+ * Fetches and parses one or more component files. Already loaded urls are
+ * skipped so circular component imports terminate.
+ */
+const cweFromUrls = async (
+  urls: string | string[],
+  baseUrl = ""
+): Promise<CustomElementSettings[]> => {
+  const list: string[] = Array.isArray(urls) ? urls : [urls];
+  const resolved = list.map((url) => resolveUrl(url, baseUrl));
+  const toLoad = resolved.filter((url) => !loaded.has(url));
+  toLoad.forEach((url) => loaded.add(url));
+
+  const results = await Promise.all(
+    toLoad.map(async (url) => {
+      try {
+        const text = await fetch(url).then((r) => r.text());
+        return cweSettingsFromString(text, url);
+      } catch (e) {
+        console.error(`[advect] failed to load component ${url}`, e);
+        return [];
+      }
+    })
+  );
+
+  return results.flat();
+};
+
+/** Resolves, loads and (optionally) registers the component imports of each settings entry. */
+async function loadImportedComponents(
+  settingsList: CustomElementSettings[],
+  register: boolean
+) {
+  const imports: string[] = [];
+  for (const settings of settingsList) {
+    for (const specifier of settings.imports) {
+      imports.push(resolveUrl(specifier, settings.sourceUrl));
+    }
+  }
+  if (imports.length === 0) return;
+  const children = await cweFromUrls(imports);
+  if (children.length > 0) {
+    await createCustomElementClasses(children, register);
+  }
+}
+
+/** Builds custom element classes for the settings and registers them when `register` is true. */
+export const createCustomElementClasses = async (
+  buildSettings: CustomElementSettings[],
+  register = true
+): Promise<any[]> => {
   const buildClasses: any[] = [];
-  // todo try here
-  for (let settings of buildSettings) {
+
+  await loadImportedComponents(buildSettings, register);
+
+  for (const settings of buildSettings) {
+    components.set(settings.tagName, settings);
+    if (customElements.get(settings.tagName)) {
+      console.warn(`Already registered ${settings.tagName}`);
+      continue;
+    }
+
+    const module: any = await toModule(settings.module, []);
+    const stylesheet = new CSSStyleSheet();
+    stylesheet.replace(decodePropertySyntax(settings.style));
+
     // for some reason ts thinks settings is used before being declared so let's add a pointer
     const $settings = settings;
-    toModule(settings.module, []).then((module:any) => {
-      const moduleClassName = toUpperCamelCase(settings.tagName)
-      const moduleClass = module[moduleClassName];
-      
-      const newClass = class extends (moduleClass || AdvectElement) {
-        static observedAttributes = Object.keys($settings.watched_attrs);
-        static settings = $settings;
-      };
-      if (register && $settings.tagName.length > 3 && $settings.tagName.indexOf('-')){
-        customElements.define($settings.tagName, newClass as any);
+    const newClass = class extends AdvectElement {
+      static observedAttributes = Object.keys($settings.watched);
+      static $settings = $settings;
+      static $stylesheet = stylesheet;
+      static $advectVMProvider: AvectVMProvider = module?.default;
+      connectedCallback(): void {
+        super.connectedCallback();
       }
-      buildClasses.push(newClass);
-    });
+    };
+    if (
+      register &&
+      $settings.tagName.length >= 3 &&
+      $settings.tagName.indexOf("-") !== -1 &&
+      customElements.get($settings.tagName) === undefined
+    ) {
+      customElements.define($settings.tagName, newClass as any);
+    }
+    buildClasses.push(newClass);
   }
 
   return buildClasses;
-}
-
-/**
- * 
- * @param template 
- * @returns 
- */
-  const build = async (template: string) => {
-    const buildMsg = await messagePromise("build", { template }) as MessageEvent<{result: CustomElementSettings[], id:string, action:ActionKey}>;
-    const buildSettings = buildMsg.data.result;
-    return createCustomElementClasses(buildSettings)
-  };
-
-  /**
-   * Loads Elements that are inlined in the document
-   * @param _ the DOMContentLoaded Event
-   */
-  const onContent = (_: Event|null) => {
-    document.querySelectorAll("template[id][adv]").forEach((template) => build(template.outerHTML));
-
-    let templateScriptUrls:string[] = []
-    document.querySelectorAll('script[type="text/adv"][src]').forEach( e =>{
-      if (e.hasAttribute('src')){
-        templateScriptUrls.push( e.getAttribute('src') ?? '')
-      }
-    })
-    load(templateScriptUrls)
-
-    document.removeEventListener("DOMContentLoaded", onContent);
-  };
-
-  if (document.readyState !== 'loading') {
-    onContent(null)
-  }else{
-    document.addEventListener("DOMContentLoaded", onContent);
-  }
-
-  return {
-    render,
-    build,
-    load
-  };
 };
 
-/**
- * Base class for AdvectElement and AdvectView
- */
-export class AdvectBase extends HTMLElement {
-  createStore = zustand.createStore
-  anyAttrChanged (_:string, __:string){}
-  /**
-   * Helper for getting and setting attributes on this element
-   * when setting will call this.anyAttrChanged
-   */
-  attr = new Proxy(
-    {},
-    {
-      get: (_, name) => {
-        if (this.isConnected) {
-          return this.getAttribute(name as string);
-        }
-        return null;
-      },
-      set: (_, name, value) => {
-        if (this.isConnected) {
-          this.setAttribute(name as string, value);
-          this.anyAttrChanged(name as string, value);
-          return true;
-        }
-        return false;
-      },
+/** Entry point that scans the page for inline components and `<script type="advect">` imports. */
+const onContent = (_: Event | null) => {
+  const baseUrl =
+    typeof document !== "undefined" ? document.baseURI || "" : "";
+
+  // A component defined inline in the page itself
+  const inlineSettings = cweSettingsFromDoc(document, baseUrl);
+  if (inlineSettings.length > 0) {
+    void createCustomElementClasses(inlineSettings);
+  }
+
+  // Entry point(s): <script type="advect">import "./root.vue";</script>
+  const entryImports: string[] = [];
+  Array.from(
+    document.querySelectorAll(
+      `script[type="${AdvectSettings.attributes.scriptType}"]`
+    )
+  ).forEach((script) => {
+    for (const parsed of parseStaticImports(script.textContent ?? "")) {
+      entryImports.push(parsed.specifier);
     }
-  );
-  /**
-   * Object for accessing a components dataset variables.
-   * When setting will call this.anyAttrChanged
-   */
-  data = new Proxy(
-    {},
-    {
-      get: (_, name) => {
-        if (this.isConnected) {
-          return this.dataset[name as string]
-        }
-        return null
-      },
-      set: (_, name, value) => {
-        if (this.isConnected) {
-        this.dataset[name as string] =value;
-        this.anyAttrChanged("data-" + (name as string), value);
-          return true;
-        }
-        return false;
-      },
-    }
-  );
+  });
 
-  /**
-   * Element iternals
-   */
-  #internals?: ElementInternals;
-  /**
-   * Getter for internals
-   */
-  get internals() {
-    return this.#internals;
-  }
-
-  constructor() {
-    super();
-  }
-  /**
-   *  Function to call when the component is adopted (ie moved between html documents)
-   */
-  onAdopt = () => {};
-  /**
-   *  Custom web element connected callbacked
-   */
-  adoptedCallback() {
-    this?.onAdopt();
-  }
-
-  onAttributeChange = (_: string, __: string, ___: string) => {};
-  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    this?.onAttributeChange(name, oldValue, newValue);
-  }
-
-  /**
-   *  Function to call when the component is connected
-   */
-  onConnect = () => {};
-  /**
-   * Custom web element connect callback
-   */
-  connectedCallback() {
-    this.#internals = this.attachInternals();
-    this.dispatchEvent(new CustomEvent("connect"));
-  }
-
-  override addEventListener(
-    type: unknown,
-    listener: unknown,
-    options?: unknown
-  ): void {
-    super.addEventListener(type as any, listener as any, options as any);
-    if (type == "connect" && this.isConnected) {
-      // @ts-ignore
-      listener(new Event("connect", {}));
-    }
-  }
-  /**
-   * Function to call when this component is disconnected
-   */
-  onDisconnect = () => {};
-  /**
-   * Custom Web Element disconnect function
-   */
-  disconnectedCallback() {
-    this?.onDisconnect();
-  }
-
-
-  onMutation = (_: MutationRecord[]) => {};
-  onIntersect = (_: IntersectionObserverEntry[]) => {};
-}
-
-// custom elements my not be defined or ready when you access them
-// the same is not true for regular dom elements
-// so lets wrap all of them 
-export function refHandle(el:HTMLElement):Promise<HTMLElement|null>{
-  return new Promise((resolve, reject) =>{
-    if (!el.isConnected) {
-      resolve(null)
-      return;
-    }
-    const isCustom = el.tagName.indexOf('-') != -1;
-    if (!isCustom){
-        resolve( el )
-        return;
-    }
-    const isDefined = el.matches(':defined');
-    if (!isDefined){
-      customElements.whenDefined(el.tagName).then( _ => {
-          resolve( el )
-      }).catch( e => {
-        reject(e);
-      })
-    }
-    resolve( el )
-  })
-  
-}
-
-/**
- * Base class for custom web elements
- */
-export class AdvectElement extends AdvectBase {
-  /**
-   * The original markup for the custom web element
-   */
-  get html() {
-    return this.$settings.template;
-  }
-  /**
-   * The original list of refs in the component
-   */
-  get refs_list() {
-    return this.$settings.refs;
-  }
-
-    /**
-   * All "[ref]"s on the object of refs in the component
-   */
-    get all_refs() {
-      //
-      const refs  = [
-      // @ts-ignore
-        ...this.querySelectorAll('[ref]'), 
-      // @ts-ignore
-        ...this?.shadowRoot?.querySelectorAll('[ref]') 
-      ]; 
-      return refs;
-    }
-  /**
-   * References
-   */
-  refs = new Proxy({},
-    {
-      get: (_, key) => {
-        const ref = this.querySelector(`[ref="${key as string}"]`) ||
-        this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
-        if (ref) return ref;
-        return null;
-        
-      },
-    }
-  );
-/**
- * Refs of custom web elements returns a promise to the ref
- */
-  fuzzyRefs = new Proxy({},
-    {
-      get: (_, key) => {
-        const ref = this.querySelector(`[ref="${key as string}"]`) ||
-        this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
-        if (ref) return refHandle(ref as HTMLElement);
-        return null;
-        
-      },
-    }
-  );
-
-  /**
-   * 
-   */
-  get $settings() {
-    // @ts-ignore
-    return this.constructor.settings as CustomElementSettings;
-  }
-
-  typed = new Proxy(
-    {},
-    {
-      get: (_, name) => {
-        if (this.isConnected) {
-          try{
-
-          let val:any | null = this.getAttribute(name as string)
-          const type = this.$settings.watched_attrs[name as string].type
-          if (!type) return val;
-
-          const handler = AttrTypes[type] ?? AttrTypes.string;
-          if ( type =="callback"){
-            // @ts-ignore
-            return handler.parse(val, this);
-          }
-        }
-        catch(e){
-          console.warn(e);
-        }
-
-            // @ts-ignore
-          return handler.parse(val);
-
-        }
-        return null;
-      },
-      set: (_, name, value:string) => {
-        if (this.isConnected) {
-          const att = this.$settings.watched_attrs[name as string];
-          if (!att) return false;
-          
-          this.setAttribute(name as string, value);
-          this.anyAttrChanged(name as string, value);
-          return true;
-        }
-        return false;
-      },
-    }
-  );
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.#setupInitialDom()
-   // this.createIntersectObserver()
-   // this.createMutationObserver();
-    this.#hookRefs();
-    this?.onConnect();
-  }
-  
-  #setupInitialDom(){
-    switch (this.$settings?.root) {
-      // this component doesnt have initial markup
-      case "none":
-        break;
-      case "shadow":
-          this.attachShadow( {mode: this.$settings.shadow })
-          if(this.shadowRoot) this.shadowRoot.innerHTML = `<div style="display:contents;" part="root">` + this.html + `</div>`;
-        break;
-      default:
-      case "light":
-        this.innerHTML = this.html;
-        break;
-    }
-  }
-
-  hookRef(ref:Element){
-    {
-
-      this.mutationObserver?.observe(ref, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-      });
-
-      Object.defineProperty(ref, "binder", {
-        value: this,
-        writable: false
-      })
-
-      const event_attrs = ref
-        .getAttributeNames()
-        .filter((name) => name.startsWith("on"));
-      // todo maybe make this a setting, I could see this causing unnecessary rendering
-
-      event_attrs.forEach((name) => {
-        const attr_val = ref.getAttribute(name) ?? "";
-
-        if (name.toLowerCase() === "onmutate") {
-          ref.addEventListener("adv:mutation", (_event) => {
-            try {
-              new AsyncFunction(
-                "$self",
-                "event",
-                "$this",
-                "refs",
-                "data",
-                attr_val
-              )(this, _event, ref, this.refs, this.data);
-            } catch (e) {
-              console.error(e, attr_val, this);
-            }
-          });
-        } else {
-          try {
-            // @ts-expect-error assigning event handlers by name nothing to see here
-            ref[name] = (_event) => {
-              new AsyncFunction(
-                "$self",
-                "event",
-                "$this",
-                "refs",
-                "data",
-                attr_val
-              )(this, _event, ref, this.refs, this.data);
-            };
-          } catch (e) {
-            console.error(e, attr_val, this);
-          }
-        }
-      });
-      if (ref.matches('[onload]') && !onloadElements.find( ole => ole === ref.tagName.toLocaleLowerCase())){
-        ref.dispatchEvent(new Event("load", {
-          bubbles:false,
-        }))
-      }
-
-    }
-  }
-
-  #hookRefsShadow(){
-    this.shadowRoot?.querySelectorAll("[ref]")
-      .forEach((ref) => { this.hookRef(ref)});
-  }
-  #hookRefsLight(){
-    // refs
-    this?.querySelectorAll("[ref]").forEach((ref) => {
-      this.hookRef(ref)
+  if (entryImports.length > 0) {
+    cweFromUrls(entryImports, baseUrl).then((s) => {
+      void createCustomElementClasses(s, true);
     });
-     // refs
   }
-  #hookRefsSelf(){
-    // light dom event handlers just 'this' element
-    this.getAttributeNames()
-      .filter((name) => name.startsWith("on"))
-      .forEach((name) => {
-        const attr_val = this.getAttribute(name) ?? "";
-        if (name.toLowerCase() === "onmutate") {
-          this.onMutation = (_event) =>
-            new AsyncFunction("$self", "event", attr_val)(
-              this,
-              _event,
-            );
-          return;
-        }
-        // @ts-expect-error assigning event handlers by name nothing to see here
-        this[name] = (_event) =>
-          new AsyncFunction("$self", "event", attr_val)(
-            this,
-            _event,
-          );
-      });
-  }
-  #hookRefs(): void {
-    //const is_view = this.nodeName.toLocaleLowerCase() === 'adv-view';
-    this.#hookRefsSelf();
-    this.#hookRefsLight();
-    this.#hookRefsShadow();
-  }
-  /**
-   * Mutation observer
-   */
-  #mut_obs?: MutationObserver;
-  get mutationObserver() {
-    return this.#mut_obs;
-  }
-  createMutationObserver() {
-    if (this.$settings.mutation) {
-      this.#mut_obs = new MutationObserver((records, _) => {
-        this?.onMutation(records);
-      });
-      this.#mut_obs.observe(this, {
-        ...this.$settings.mutation,
-      });
-      if (this.shadowRoot) {
-        this.#mut_obs.observe(this.shadowRoot, {
-          ...this.$settings.mutation,
-        });
-      }
-    }
-  }
-/**
- * Intersecton Observer
- */
-  #intersect_obs?: IntersectionObserver;
-  get interectObserver() {
-    return this.#intersect_obs;
-  }
-  createIntersectObserver() {
-    if (this.$settings.intersection) {
-        let root = undefined;
-        if (this.$settings?.intersection?.root){
-            root = this.querySelector(this.$settings?.intersection?.root)
-        }
-      this.#intersect_obs = new IntersectionObserver((entries, _) => {
-        this.onIntersect(entries);
-      }, {
-        ...this.$settings.intersection,
-        root
-      });
-    }
-  }
+
+  document.removeEventListener("DOMContentLoaded", onContent);
+};
+
+if (document.readyState !== "loading") {
+  onContent(null);
+} else {
+  document.addEventListener("DOMContentLoaded", onContent);
 }
-
-class AdvectViewbase extends AdvectBase{
-
-  override anyAttrChanged(_: string, __: string): void {
-    this.render();
-  }
-  #eta = new Eta({
-    useWith: true,
-    tags: ['{{','}}'],
-    parse: {
-      /** Which prefix to use for evaluation. Default `""`, does not support `"-"` or `"_"` */
-      exec: ">",
-      /** Which prefix to use for interpolation. Default `"="`, does not support `"-"` or `"_"` */
-      interpolate: "",
-      /** Which prefix to use for raw interpolation. Default `"~"`, does not support `"-"` or `"_"` */
-      raw: "~"
-    }
-  })
-  #store:StoreApi<any> = zustand.createStore(($s, $g) => ({}))
-  get store(){
-    return this.#store;
-  }
-  get state(){
-    return this.#store?.getState()
-  }
-  viewTransition = true;
-
-
-
-  override connectedCallback(): void {
-    super.connectedCallback()
-    this.#store.subscribe((state, prevState) => {
-      this.render();
-    })
-    requestAnimationFrame(()=>{
-      this.render();
-    })
-  }
-  get eta(){ return this.#eta; }
-
-  render(){}
-
-  onRender?:() => void = () =>{}
-  afterRender(){
-    if (this.onRender) {
-      this.onRender();
-    }
-  } 
-}
-
-/**
- * A component for interacting with the ETA templating library
- */
-export class AdvectView extends AdvectViewbase {
-    /**
-   * References
-   */
-    refs = new Proxy({},
-      {
-        get: (_, key) => {
-          const ref =  this.querySelector(`[ref="${key as string}"]`); 
-          if (ref) return ref;
-          return null;
-          
-        },
-      }
-    );
-  /**
-   * Refs of custom web elements returns a promise to the ref
-   */
-    fuzzyRefs = new Proxy({},
-      {
-        get: (_, key) => {
-          const ref = this?.querySelector(`[ref="${key as string}"]`); 
-          if (ref) return refHandle(ref as HTMLElement);
-          return null;
-          
-        },
-      }
-    );
-
-    get all_refs() {
-      //
-      const refs  = [
-      // @ts-ignore
-        ...this?.querySelectorAll('[ref]') 
-      ]; 
-      return refs;
-    }  
-  override render(){
-    const template = this.querySelector('template');
-    const output = this.querySelector('[output]');
-    const clean = cleanTemplate(template?.innerHTML ?? '', this.eta.config)
-    let etaRendered = "";
-
-    try{
-      etaRendered = convertTables(this.eta.renderString(clean, { $self:this }))
-    }
-    catch(e){
-      console.log(e)
-    }
-      if (this.viewTransition){
-        document.startViewTransition(()=>{
-          if (output) output.innerHTML = etaRendered;
-        }).finished.then(()=>{
-          this.afterRender();
-        })
-      }else{
-        if (output) {
-          output.innerHTML = etaRendered;
-          requestAnimationFrame(() =>{
-            this.afterRender();
-      
-          })
-        }
-      }
-  }
-}
-
-export class AdvectShadowView extends AdvectViewbase {
-    /**
-   * References
-   */
-    refs = new Proxy({},
-      {
-        get: (_, key) => {
-          const ref =  this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
-          if (ref) return ref;
-          return null;
-          
-        },
-      }
-    );
-  /**
-   * Refs of custom web elements returns a promise to the ref
-   */
-    fuzzyRefs = new Proxy({},
-      {
-        get: (_, key) => {
-          const ref = this?.shadowRoot?.querySelector(`[ref="${key as string}"]`); 
-          if (ref) return refHandle(ref as HTMLElement);
-          return null;
-          
-        },
-      }
-    );
-
-    get all_refs() {
-      //
-      const refs  = [
-      // @ts-ignore
-        ...this?.shadowRoot?.querySelectorAll('[ref]') 
-      ]; 
-      return refs;
-    }
-  override connectedCallback(): void {
-    this.attachShadow({mode:'open'});
-    super.connectedCallback()
-  }
-
-  override render(){
-    const clean = cleanTemplate(this.innerHTML, this.eta.config)
-    let etaRendered = ""
-    try{
-      etaRendered = this.eta.renderString(clean, { $self:this })
-    }
-    catch(e){
-      adv_warn(e);
-    }
-    const rendered = `<div style="display:contents;" part="root">${etaRendered}</div>`;
-
-    if (this.shadowRoot){
-      const root = this.shadowRoot;
-      if (this.viewTransition){
-        document.startViewTransition(()=>{
-          root.innerHTML = rendered;
-        }).finished.then(()=>{
-          this.afterRender();
-        })
-      }else{
-          root.innerHTML = rendered;
-          requestAnimationFrame(() =>{
-            this.afterRender();
-          })
-      }
-    }
-  }
-}
-
-
-if (!customElements.get('adv-view')){
-  customElements.define('adv-view', AdvectView);
-}
-
-if (!customElements.get('adv-shadow-view')){
-  customElements.define('adv-shadow-view', AdvectShadowView);
-}
-// This is necessary so that elements can
-(window as any).AdvectElement = AdvectElement;
-
-export const advect = await createAdvect();
+/** Public browser global exposing runtime helpers for introspection. */
+//@ts-ignore
+window.advect = {
+  getAllComponents,
+  createCustomElementClasses,
+  cweSettingsFromString,
+  cweFromUrls,
+  parseStaticImports,
+  isComponentSpecifier,
+};
